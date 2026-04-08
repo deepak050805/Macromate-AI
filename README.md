@@ -1,44 +1,56 @@
-Macromate-AI
-AI-powered fitness calculator that predicts calories and macros for fat loss, maintenance, and weight gain.
-🧠 How I Combined Fitness Knowledge with AI
+## 🧠 Combining Fitness Knowledge with Data-Driven Logic
 
-This project is not just a basic calculator — it is built using real-world fitness logic combined with data-driven thinking.
+This project started as a simple idea — building a calorie calculator — but I wanted it to reflect how people actually approach fitness in real life.
 
-🔬 Fitness Logic
+Instead of relying on generic formulas, I used a more practical method commonly followed in gyms and by coaches.
 
-Instead of using generic formulas, I implemented a practical and widely used gym-based approach:
+---
+
+## 🔬 Fitness Approach
+
+For calorie estimation, I used a straightforward and widely used rule:
 
 - Maintenance Calories = Bodyweight × 2.2 × 15  
-- Fat Loss = Maintenance - 10%  
-- Weight Gain = Maintenance + 10%  
 
-This reflects how real athletes and coaches estimate calorie needs.
+From there, adjustments are made based on the goal:
 
-🧮 Macro Distribution
+- Fat Loss → 10% calorie deficit  
+- Weight Gain → 10% calorie surplus  
 
-Macros are calculated based on performance and muscle retention:
+This approach is simple, effective, and aligns closely with real-world fitness practices.
 
-- Protein = 2g per kg bodyweight (for muscle preservation)
-- Fats = 0.8g per kg (for hormonal balance)
-- Carbs = Remaining calories (for energy and training performance)
+---
 
-🤖 AI Thinking
+## 🧮 Macro Planning
 
-While not using a heavy ML model, the system follows AI-style logic:
+The macro breakdown is designed to support both performance and recovery:
 
-- Input → Processing → Output pipeline  
-- Decision-based adjustments (goal-based logic)  
-- Personalized recommendations  
+- Protein → 2g per kg (to support muscle maintenance)
+- Fats → 0.8g per kg (for overall health and hormones)
+- Carbs → Remaining calories (primary energy source)
 
-This mimics how intelligent systems adapt outputs based on user input.
+---
 
-💡 Why This Matters
+## 🤖 System Thinking
 
-Most fitness apps use static formulas.  
-This project focuses on:
+While this project doesn’t use a heavy machine learning model, it follows a structured logic similar to intelligent systems:
 
-- Real-world usability  
-- Simplicity with accuracy  
-- Human-centric design  
+- Takes user input (weight, goal)
+- Processes it through defined rules
+- Generates a personalized output
 
-It bridges the gap between **fitness science and intelligent systems**.
+This makes the system adaptive rather than static.
+
+---
+
+## 💡 Why I Built This
+
+Many fitness tools online either feel too generic or overly complex.
+
+With MacroMate, the goal was to keep things:
+
+- Simple to use  
+- Based on practical knowledge  
+- Focused on real-world application  
+
+It’s a small project, but it reflects how I like to combine domain knowledge with logical problem-solving.
