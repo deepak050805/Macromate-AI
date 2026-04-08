@@ -112,7 +112,6 @@ st.markdown(
     "<p style='text-align:center; color:gray;'>MacroMate AI • Designed for real fitness tracking</p>",
     unsafe_allow_html=True
 )
-=======
 import streamlit as st
 
 # ---------------- PAGE CONFIG ----------------
