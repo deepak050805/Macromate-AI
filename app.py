@@ -147,5 +147,3 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-# ---------------- DISCLAIMER ----------------
-st.caption("This tool provides estimated values based on standard fitness formulas.")
