@@ -1,0 +1,21 @@
+<h2>Dashboard</h2>
+
+<button onclick="getProgress()">Load Progress</button>
+
+<ul id="list"></ul>
+
+<script>
+async function getProgress() {
+    const res = await fetch("http://127.0.0.1:5000/api/tracker/get");
+    const data = await res.json();
+
+    const list = document.getElementById("list");
+    list.innerHTML = "";
+
+    data.forEach(item => {
+        const li = document.createElement("li");
+        li.innerText = JSON.stringify(item);
+        list.appendChild(li);
+    });
+}
+</script>

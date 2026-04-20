@@ -1,8 +1,0 @@
-
-streamlit
-scikit-learn
-numpy
-scikit-learn
-numpy
-pandas
-matplotlib

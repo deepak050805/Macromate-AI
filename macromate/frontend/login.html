@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MacroMate — Sign In</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+
+:root {
+  --bg:        #0e0f11;
+  --surface:   #16181c;
+  --surface2:  #1e2026;
+  --border:    rgba(255,255,255,0.08);
+  --border-hi: rgba(212,174,97,0.5);
+  --gold:      #d4ae61;
+  --gold-dim:  rgba(212,174,97,0.12);
+  --gold-glow: rgba(212,174,97,0.18);
+  --text:      #e8eaed;
+  --text-2:    rgba(232,234,237,0.5);
+  --text-3:    rgba(232,234,237,0.25);
+  --red:       #e05c5c;
+  --green:     #5caf82;
+  --radius:    6px;
+  --mono:      'DM Mono', monospace;
+}
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+.panel-brand {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 48px;
+  border-right: 1px solid var(--border);
+  overflow: hidden;
+}
+.brand-grid {
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+  background-size: 40px 40px;
+  mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 40%, transparent 100%);
+}
+.brand-glow {
+  position: absolute;
+  width: 500px; height: 500px;
+  top: -100px; left: -100px;
+  background: radial-gradient(circle, rgba(212,174,97,0.06) 0%, transparent 65%);
+  pointer-events: none;
+}
+.brand-top { position: relative; z-index: 1; }
+.wordmark {
+  font-family: 'Syne', sans-serif;
+  font-size: 15px; font-weight: 800;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--gold); display: flex; align-items: center; gap: 10px;
+}
+.wordmark-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--gold); display: inline-block; flex-shrink: 0;
+}
+.brand-mid { position: relative; z-index: 1; }
+.brand-headline {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(32px, 4vw, 52px); font-weight: 800;
+  line-height: 1.05; letter-spacing: -0.02em;
+  color: var(--text); margin-bottom: 20px;
+}
+.brand-headline em { font-style: normal; color: var(--gold); }
+.brand-sub { font-size: 14px; font-weight: 300; color: var(--text-2); line-height: 1.6; max-width: 280px; }
+.brand-stats { display: flex; gap: 32px; margin-top: 36px; }
+.stat { display: flex; flex-direction: column; gap: 4px; }
+.stat-val { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; color: var(--text); }
+.stat-lbl { font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-3); }
+.brand-bottom { position: relative; z-index: 1; }
+.brand-tag { font-family: var(--mono); font-size: 11px; color: var(--text-3); letter-spacing: 0.06em; }
+
+.panel-form {
+  display: flex; flex-direction: column;
+  justify-content: center; padding: 48px 56px; overflow-y: auto;
+}
+.form-header { margin-bottom: 36px; }
+.form-eyebrow {
+  font-family: var(--mono); font-size: 10px;
+  letter-spacing: 0.15em; text-transform: uppercase;
+  color: var(--gold); margin-bottom: 10px;
+  display: flex; align-items: center; gap: 8px;
+}
+.form-eyebrow::before { content: ''; display: inline-block; width: 20px; height: 1px; background: var(--gold); }
+.form-title { font-family: 'Syne', sans-serif; font-size: 26px; font-weight: 800; letter-spacing: -0.02em; color: var(--text); margin-bottom: 6px; }
+.form-desc { font-size: 13px; font-weight: 300; color: var(--text-2); line-height: 1.5; }
+
+.fieldset-label {
+  font-family: var(--mono); font-size: 9px;
+  letter-spacing: 0.15em; text-transform: uppercase;
+  color: var(--text-3); margin-bottom: 10px; margin-top: 24px;
+}
+.field { margin-bottom: 8px; }
+.input-wrap { position: relative; display: flex; align-items: center; }
+.input-icon { position: absolute; left: 14px; pointer-events: none; display: flex; align-items: center; }
+.input-icon svg { width: 14px; height: 14px; stroke: var(--text-3); fill: none; stroke-width: 1.7; transition: stroke 0.2s; }
+.input-wrap:focus-within .input-icon svg { stroke: var(--gold); }
+
+input[type="email"],
+input[type="password"],
+input[type="text"],
+input[type="number"] {
+  width: 100%; height: 46px; padding: 0 14px 0 42px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); color: var(--text);
+  font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 400;
+  outline: none; transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+}
+input::placeholder { color: var(--text-3); font-size: 13px; }
+input:focus { border-color: var(--gold); background: var(--surface2); box-shadow: 0 0 0 3px var(--gold-dim); }
+input:disabled { opacity: 0.3; cursor: not-allowed; }
+
+.btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 18px; }
+button {
+  font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 700;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  border: none; border-radius: var(--radius); cursor: pointer;
+  padding: 13px 18px; position: relative; overflow: hidden;
+  transition: transform 0.15s, box-shadow 0.2s, opacity 0.15s;
+}
+button:active:not(:disabled) { transform: scale(0.97) !important; }
+button:disabled { opacity: 0.25; cursor: not-allowed !important; transform: none !important; }
+.btn-primary { background: var(--gold); color: #0e0f11; box-shadow: 0 2px 12px rgba(212,174,97,0.2); }
+.btn-primary:hover:not(:disabled) { box-shadow: 0 4px 24px rgba(212,174,97,0.35); transform: translateY(-1px); }
+.btn-secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+.btn-secondary:hover:not(:disabled) { border-color: rgba(255,255,255,0.18); background: rgba(255,255,255,0.05); transform: translateY(-1px); }
+
+#msg { font-size: 12px; font-weight: 400; color: var(--text-2); margin-top: 14px; min-height: 18px; line-height: 1.5; }
+#msg.err { color: var(--red); }
+#msg.ok  { color: var(--green); }
+
+.spinner {
+  display: inline-block; width: 10px; height: 10px;
+  border: 2px solid rgba(255,255,255,0.15); border-top-color: currentColor;
+  border-radius: 50%; animation: spin 0.65s linear infinite;
+  flex-shrink: 0; vertical-align: middle; margin-right: 6px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.form-footer { margin-top: 28px; font-size: 11px; font-weight: 300; color: var(--text-3); display: flex; align-items: center; gap: 6px; }
+.form-footer::before { content: ''; display: block; width: 16px; height: 1px; background: var(--border); }
+
+@media (max-width: 700px) {
+  body { grid-template-columns: 1fr; }
+  .panel-brand { display: none; }
+  .panel-form { padding: 40px 28px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── Left: Brand Panel ── -->
+<div class="panel-brand">
+  <div class="brand-grid"></div>
+  <div class="brand-glow"></div>
+  <div class="brand-top">
+    <div class="wordmark"><span class="wordmark-dot"></span>MacroMate</div>
+  </div>
+  <div class="brand-mid">
+    <h1 class="brand-headline">Fuel your<br>body with<br><em>precision.</em></h1>
+    <p class="brand-sub">Track macros, set goals, and build the physique you're working towards — data-driven, not guesswork.</p>
+    <div class="brand-stats">
+      <div class="stat"><span class="stat-val">3</span><span class="stat-lbl">Goal modes</span></div>
+      <div class="stat"><span class="stat-val">~2 min</span><span class="stat-lbl">To set up</span></div>
+      <div class="stat"><span class="stat-val">Free</span><span class="stat-lbl">Always</span></div>
+    </div>
+  </div>
+  <div class="brand-bottom"><p class="brand-tag">v1.0 · Nutrition Intelligence</p></div>
+</div>
+
+<!-- ── Right: Auth Panel ── -->
+<div class="panel-form">
+  <div id="auth">
+
+    <div class="form-header">
+      <div class="form-eyebrow">Get started</div>
+      <h2 class="form-title">Create your account</h2>
+      <p class="form-desc">Sign up to receive a verification code, then log in.</p>
+    </div>
+
+    <div class="fieldset-label">Your credentials</div>
+
+    <!--
+      FIX: <form> tag replaced with a plain <div>.
+      A <form> element — even with action="javascript:void(0)" — can still
+      trigger a real navigation in some browsers when the password manager
+      auto-fills and fires a synthetic submit. A <div> has no submit semantics
+      at all, so this attack surface is completely removed.
+    -->
+    <div id="credFields">
+      <div class="field">
+        <div class="input-wrap">
+          <span class="input-icon">
+            <svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2,7 12,13 22,7"/></svg>
+          </span>
+          <input id="email" type="email" placeholder="Email address"
+                 autocomplete="off" autocorrect="off" spellcheck="false">
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="input-wrap">
+          <span class="input-icon">
+            <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          </span>
+          <input id="password" type="password" placeholder="Password"
+                 autocomplete="new-password">
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button type="button" class="btn-primary"   id="signupBtn" onclick="signup()">Sign Up</button>
+        <button type="button" class="btn-secondary" id="loginBtn"  onclick="login()">Log In</button>
+      </div>
+    </div>
+
+    <p id="msg"></p>
+    <div class="form-footer">New? Sign up first, then verify your email before logging in.</div>
+  </div>
+
+  <!-- ── Dashboard (shown after login) ── -->
+  <div id="app" style="display:none;">
+    <div class="form-header">
+      <div class="form-eyebrow">Macro calculator</div>
+      <h2 class="form-title">What's your goal?</h2>
+      <p class="form-desc">Enter your bodyweight and training goal to get your daily targets.</p>
+    </div>
+    <div class="fieldset-label">Body metrics</div>
+    <div class="field">
+      <div class="input-wrap">
+        <span class="input-icon">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="7"/><line x1="12" y1="1" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="23"/></svg>
+        </span>
+        <input id="weight" type="number" placeholder="Body weight (kg)">
+      </div>
+    </div>
+    <div class="fieldset-label">Training goal</div>
+    <div class="field">
+      <div class="input-wrap">
+        <span class="input-icon">
+          <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        </span>
+        <select id="goal" style="width:100%;height:46px;padding:0 14px 0 42px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;appearance:none;cursor:pointer;transition:border-color 0.2s,box-shadow 0.2s;">
+          <option value="fat_loss">Fat Loss</option>
+          <option value="maintain">Maintain Weight</option>
+          <option value="gain">Muscle Gain</option>
+        </select>
+      </div>
+    </div>
+    <button type="button" class="btn-primary" style="width:100%;margin-top:12px;padding:14px;" onclick="calculate()">Calculate Macros</button>
+    <div id="result"></div>
+    <div style="height:1px;background:var(--border);margin:28px 0 16px;"></div>
+    <button type="button" onclick="logout()" style="width:100%;padding:12px;background:transparent;color:rgba(224,92,92,0.5);border:1px solid rgba(224,92,92,0.15);border-radius:var(--radius);font-family:'Syne',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;transition:color 0.2s,border-color 0.2s,background 0.2s;">
+      Sign Out
+    </button>
+  </div>
+</div>
+
+<script>
+// ── FIX 1: Global submit guard (safety net — no <form> exists, but just in case) ──
+document.addEventListener("submit", function(e) {
+  e.preventDefault();
+  e.stopImmediatePropagation();
+}, true);
+
+// ── FIX 2: Enter key — no stopPropagation(), just sensible field navigation ──
+// The old version used stopPropagation() in capture phase which was swallowing
+// events before onclick handlers could fire. Now Enter simply moves focus or
+// calls signup() — it never propagates a submit.
+window.addEventListener("DOMContentLoaded", function() {
+  document.getElementById("email").addEventListener("keydown", function(e) {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      document.getElementById("password").focus();
+    }
+  });
+  document.getElementById("password").addEventListener("keydown", function(e) {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      signup();
+    }
+  });
+});
+
+// ── Boot ───────────────────────────────────────────────────────────────────
+window.onload = function() {
+  // If OTP flow is in progress, stay on login — never show the dashboard.
+  // "pendingEmail" means signup succeeded but email is not yet verified.
+  if (localStorage.getItem("pendingEmail")) {
+    localStorage.removeItem("email"); // ensure no leftover session state
+    return;
+  }
+  // Normal returning user — show dashboard directly.
+  if (localStorage.getItem("email")) {
+    showApp();
+    return;
+  }
+  const sel = document.getElementById("goal");
+  if (sel) {
+    sel.addEventListener("focus", function() {
+      sel.style.borderColor = "var(--gold)";
+      sel.style.boxShadow   = "0 0 0 3px var(--gold-dim)";
+    });
+    sel.addEventListener("blur", function() {
+      sel.style.borderColor = "var(--border)";
+      sel.style.boxShadow   = "none";
+    });
+  }
+};
+
+function showApp() {
+  document.getElementById("auth").style.display = "none";
+  document.getElementById("app").style.display  = "block";
+}
+
+function setMsg(text, type) {
+  const el = document.getElementById("msg");
+  el.className = type || "";
+  el.innerText = text;
+}
+
+// ── SIGNUP ─────────────────────────────────────────────────────────────────
+async function signup() {
+  const emailVal    = document.getElementById("email").value.trim();
+  const passwordVal = document.getElementById("password").value;
+
+  if (!emailVal || !passwordVal) {
+    setMsg("Please enter your email and password.", "err");
+    return;
+  }
+
+  const btn = document.getElementById("signupBtn");
+  btn.disabled  = true;
+  btn.innerHTML = '<span class="spinner"></span>Sending code\u2026';
+
+  try {
+    const res  = await fetch("http://127.0.0.1:5000/api/auth/signup", {
+      method:  "POST",
+      headers: { "Content-Type": "application/json" },
+      body:    JSON.stringify({ email: emailVal, password: passwordVal })
+    });
+    const data = await res.json();
+
+    if (data.message === "OTP sent") {
+      // Clear any existing login session so window.onload on this page
+      // (or any back-navigation) does not auto-show the dashboard.
+      localStorage.removeItem("email");
+      localStorage.setItem("pendingEmail", emailVal);
+      console.log("Redirecting to OTP page...");
+      window.location.href = "./otp.html";
+      return;
+    }
+
+    // API returned an error message
+    setMsg(data.message || "Signup failed. Please try again.", "err");
+
+  } catch (err) {
+    // Network error or Flask not running
+    setMsg("Could not reach the server. Is Flask running?", "err");
+  }
+
+  // Only reached on failure — re-enable button
+  btn.disabled    = false;
+  btn.textContent = "Sign Up";
+}
+
+// ── LOGIN ──────────────────────────────────────────────────────────────────
+async function login() {
+  const emailVal    = document.getElementById("email").value.trim();
+  const passwordVal = document.getElementById("password").value;
+
+  if (!emailVal || !passwordVal) {
+    setMsg("Enter email and password.", "err");
+    return;
+  }
+
+  const btn = document.getElementById("loginBtn");
+  btn.disabled  = true;
+  btn.innerHTML = '<span class="spinner"></span>Logging in\u2026';
+
+  try {
+    const res  = await fetch("http://127.0.0.1:5000/api/auth/login", {
+      method:  "POST",
+      headers: { "Content-Type": "application/json" },
+      body:    JSON.stringify({ email: emailVal, password: passwordVal })
+    });
+    const data = await res.json();
+
+    if (data.message === "Login successful") {
+      localStorage.setItem("email", data.email);
+      showApp();
+      return;
+    }
+
+    setMsg(data.message || "Invalid credentials.", "err");
+
+  } catch (err) {
+    setMsg("Server error during login.", "err");
+  }
+
+  btn.disabled    = false;
+  btn.textContent = "Log In";
+}
+
+// ── CALCULATE ──────────────────────────────────────────────────────────────
+async function calculate() {
+  const weight = document.getElementById("weight").value;
+  const goal   = document.getElementById("goal").value;
+  if (!weight) return;
+
+  try {
+    const res  = await fetch("http://127.0.0.1:5000/api/macros/calculate", {
+      method:  "POST",
+      headers: { "Content-Type": "application/json" },
+      body:    JSON.stringify({ weight, goal })
+    });
+    const data = await res.json();
+    document.getElementById("result").innerHTML = `
+      <div style="margin-top:18px;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;">
+        <div style="background:var(--surface2);padding:16px 18px;border-bottom:1px solid var(--border);display:flex;align-items:baseline;gap:8px;">
+          <span style="font-family:'Syne',sans-serif;font-size:36px;font-weight:800;color:var(--gold);letter-spacing:-0.02em;line-height:1;">${data.calories}</span>
+          <span style="font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-3);">kcal / day</span>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);">
+          ${[["Protein", data.protein], ["Carbs", data.carbs], ["Fats", data.fats]].map(([lbl, val], i) => `
+            <div style="padding:14px 12px;text-align:center;${i < 2 ? "border-right:1px solid var(--border);" : ""}">
+              <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:var(--text);line-height:1;margin-bottom:4px;">${val}g</div>
+              <div style="font-family:var(--mono);font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--text-3);">${lbl}</div>
+            </div>
+          `).join("")}
+        </div>
+      </div>`;
+  } catch (err) {
+    console.error("[MacroMate] calculate error:", err);
+  }
+}
+
+// ── LOGOUT ─────────────────────────────────────────────────────────────────
+function logout() {
+  localStorage.removeItem("email");
+  location.reload();
+}
+</script>
+</body>
+</html>

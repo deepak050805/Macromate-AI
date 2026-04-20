@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>MacroMate</title>
+
+    <style>
+        body {
+            font-family: Arial;
+            background: linear-gradient(135deg, #0f172a, #020617);
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .card {
+            background: rgba(255,255,255,0.05);
+            padding: 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            text-align: center;
+            width: 300px;
+        }
+
+        input, select {
+            width: 90%;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border: none;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            background: #22c55e;
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #16a34a;
+        }
+
+        #result {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="card">
+    <h2>MacroMate</h2>
+
+    <input type="number" id="weight" placeholder="Enter weight">
+
+    <select id="goal">
+        <option value="fat_loss">Fat Loss</option>
+        <option value="maintain">Maintain</option>
+        <option value="gain">Gain</option>
+    </select>
+
+    <button onclick="calculate()">Calculate</button>
+
+    <div id="result"></div>
+</div>
+
+<script>
+async function calculate() {
+    const weight = document.getElementById("weight").value;
+    const goal = document.getElementById("goal").value;
+
+    const res = await fetch("http://127.0.0.1:5000/api/macros/calculate", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({weight, goal})
+    });
+
+    const data = await res.json();
+
+    document.getElementById("result").innerHTML = `
+        <h3>Calories: ${data.calories}</h3>
+        <p>Protein: ${data.protein}g</p>
+        <p>Carbs: ${data.carbs}g</p>
+        <p>Fats: ${data.fats}g</p>
+    `;
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MacroMate — Verify Email</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+
+:root {
+  --bg:        #0e0f11;
+  --surface:   #16181c;
+  --surface2:  #1e2026;
+  --border:    rgba(255,255,255,0.08);
+  --border-hi: rgba(212,174,97,0.5);
+  --gold:      #d4ae61;
+  --gold-dim:  rgba(212,174,97,0.12);
+  --gold-glow: rgba(212,174,97,0.18);
+  --text:      #e8eaed;
+  --text-2:    rgba(232,234,237,0.5);
+  --text-3:    rgba(232,234,237,0.25);
+  --red:       #e05c5c;
+  --green:     #5caf82;
+  --radius:    6px;
+  --mono:      'DM Mono', monospace;
+}
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+/* ── Brand Panel (identical to login.html) ── */
+.panel-brand {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 48px;
+  border-right: 1px solid var(--border);
+  overflow: hidden;
+}
+.brand-grid {
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+  background-size: 40px 40px;
+  mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 40%, transparent 100%);
+}
+.brand-glow {
+  position: absolute;
+  width: 500px; height: 500px;
+  top: -100px; left: -100px;
+  background: radial-gradient(circle, rgba(212,174,97,0.06) 0%, transparent 65%);
+  pointer-events: none;
+}
+.brand-top { position: relative; z-index: 1; }
+.wordmark {
+  font-family: 'Syne', sans-serif;
+  font-size: 15px; font-weight: 800;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--gold); display: flex; align-items: center; gap: 10px;
+}
+.wordmark-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--gold); display: inline-block; flex-shrink: 0;
+}
+.brand-mid { position: relative; z-index: 1; }
+.brand-headline {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(32px, 4vw, 52px); font-weight: 800;
+  line-height: 1.05; letter-spacing: -0.02em;
+  color: var(--text); margin-bottom: 20px;
+}
+.brand-headline em { font-style: normal; color: var(--gold); }
+.brand-sub { font-size: 14px; font-weight: 300; color: var(--text-2); line-height: 1.6; max-width: 280px; }
+.brand-steps { display: flex; flex-direction: column; gap: 14px; margin-top: 32px; }
+.step {
+  display: flex; align-items: flex-start; gap: 14px;
+  padding: 14px 16px;
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+}
+.step-num {
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em;
+  color: var(--text-3); text-transform: uppercase; padding-top: 2px;
+  flex-shrink: 0; min-width: 22px;
+}
+.step-num.active { color: var(--gold); }
+.step-body { display: flex; flex-direction: column; gap: 2px; }
+.step-title { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; color: var(--text); }
+.step-title.done { color: var(--green); text-decoration: line-through; opacity: 0.6; }
+.step-title.active { color: var(--gold); }
+.step-desc { font-size: 12px; font-weight: 300; color: var(--text-3); }
+.brand-bottom { position: relative; z-index: 1; }
+.brand-tag { font-family: var(--mono); font-size: 11px; color: var(--text-3); letter-spacing: 0.06em; }
+
+/* ── Form Panel ── */
+.panel-form {
+  display: flex; flex-direction: column;
+  justify-content: center; padding: 48px 56px; overflow-y: auto;
+}
+.form-header { margin-bottom: 36px; }
+.form-eyebrow {
+  font-family: var(--mono); font-size: 10px;
+  letter-spacing: 0.15em; text-transform: uppercase;
+  color: var(--gold); margin-bottom: 10px;
+  display: flex; align-items: center; gap: 8px;
+}
+.form-eyebrow::before { content: ''; display: inline-block; width: 20px; height: 1px; background: var(--gold); }
+.form-title { font-family: 'Syne', sans-serif; font-size: 26px; font-weight: 800; letter-spacing: -0.02em; color: var(--text); margin-bottom: 6px; }
+.form-desc { font-size: 13px; font-weight: 300; color: var(--text-2); line-height: 1.5; }
+.form-desc strong { font-weight: 500; color: var(--text); }
+
+.fieldset-label {
+  font-family: var(--mono); font-size: 9px;
+  letter-spacing: 0.15em; text-transform: uppercase;
+  color: var(--text-3); margin-bottom: 12px; margin-top: 24px;
+}
+
+/* ── OTP Boxes ── */
+.otp-boxes {
+  display: grid; grid-template-columns: repeat(6, 1fr);
+  gap: 8px; margin-bottom: 20px; cursor: text;
+}
+.otp-box {
+  height: 58px; background: var(--surface2); border: 1px solid var(--border);
+  border-radius: var(--radius); display: grid; place-items: center;
+  font-family: var(--mono); font-size: 24px; font-weight: 500; color: var(--text);
+  position: relative; overflow: hidden;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s; user-select: none;
+}
+.otp-box.active {
+  border-color: var(--gold); background: var(--bg);
+  box-shadow: 0 0 0 3px var(--gold-dim);
+}
+.otp-box.active::after {
+  content: ''; width: 1.5px; height: 22px; background: var(--gold);
+  animation: blink 1s step-end infinite; position: absolute;
+}
+.otp-box.filled { border-color: rgba(212,174,97,0.3); color: var(--gold); }
+.otp-box.good {
+  border-color: rgba(92,175,130,0.4);
+  background: rgba(92,175,130,0.08); color: var(--green);
+}
+.otp-box.err-state { border-color: rgba(224,92,92,0.5); background: rgba(224,92,92,0.07); }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+.otp-hidden {
+  position: absolute; opacity: 0;
+  width: 1px; height: 1px; pointer-events: none; left: 0; top: 0;
+}
+
+/* ── Buttons ── */
+button {
+  font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 700;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  border: none; border-radius: var(--radius); cursor: pointer;
+  padding: 14px 18px; position: relative; overflow: hidden;
+  transition: transform 0.15s, box-shadow 0.2s, opacity 0.15s;
+  width: 100%;
+}
+button:active:not(:disabled) { transform: scale(0.97) !important; }
+button:disabled { opacity: 0.25; cursor: not-allowed !important; transform: none !important; }
+.btn-primary { background: var(--gold); color: #0e0f11; box-shadow: 0 2px 12px rgba(212,174,97,0.2); }
+.btn-primary:hover:not(:disabled) { box-shadow: 0 4px 24px rgba(212,174,97,0.35); transform: translateY(-1px); }
+.btn-ghost {
+  background: transparent; color: var(--text-3);
+  border: 1px solid var(--border); margin-top: 10px; font-size: 11px;
+}
+.btn-ghost:hover:not(:disabled) { border-color: rgba(255,255,255,0.18); color: var(--text-2); }
+
+/* ── Status messages ── */
+#msg { font-size: 12px; font-weight: 400; color: var(--text-2); margin-top: 16px; min-height: 18px; line-height: 1.5; }
+#msg.err { color: var(--red); }
+#msg.ok  { color: var(--green); }
+
+.success-banner {
+  display: none; margin-top: 20px; padding: 16px 18px;
+  background: rgba(92,175,130,0.08); border: 1px solid rgba(92,175,130,0.3);
+  border-radius: var(--radius); animation: slideUp 0.3s ease both;
+}
+.success-banner.visible { display: flex; align-items: center; gap: 12px; }
+.success-banner svg { width: 16px; height: 16px; stroke: var(--green); fill: none; stroke-width: 2.5; flex-shrink: 0; }
+.success-text { font-size: 13px; font-weight: 500; color: var(--green); line-height: 1.4; }
+.success-text span { display: block; font-size: 11px; font-weight: 300; color: rgba(92,175,130,0.7); margin-top: 2px; }
+
+.spinner {
+  display: inline-block; width: 10px; height: 10px;
+  border: 2px solid rgba(255,255,255,0.15); border-top-color: currentColor;
+  border-radius: 50%; animation: spin 0.65s linear infinite;
+  flex-shrink: 0; vertical-align: middle; margin-right: 6px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.timer-row {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-top: 6px; margin-bottom: 2px;
+}
+.timer-label { font-family: var(--mono); font-size: 10px; color: var(--text-3); letter-spacing: 0.08em; }
+#timerDisplay { font-family: var(--mono); font-size: 10px; color: var(--text-3); }
+#timerDisplay.warning { color: var(--red); }
+
+.form-footer {
+  margin-top: 28px; font-size: 11px; font-weight: 300; color: var(--text-3);
+  display: flex; align-items: center; gap: 6px;
+}
+.form-footer::before { content: ''; display: block; width: 16px; height: 1px; background: var(--border); }
+.form-footer a { color: var(--text-2); text-decoration: none; border-bottom: 1px solid var(--border); padding-bottom: 1px; transition: color 0.2s; }
+.form-footer a:hover { color: var(--gold); border-color: var(--gold); }
+
+@media (max-width: 700px) {
+  body { grid-template-columns: 1fr; }
+  .panel-brand { display: none; }
+  .panel-form { padding: 40px 28px; }
+}
+</style>
+</head>
+<body>
+
+<!-- Left: Brand Panel -->
+<div class="panel-brand">
+  <div class="brand-grid"></div>
+  <div class="brand-glow"></div>
+
+  <div class="brand-top">
+    <div class="wordmark"><span class="wordmark-dot"></span>MacroMate</div>
+  </div>
+
+  <div class="brand-mid">
+    <h1 class="brand-headline">One step<br>from your<br><em>goals.</em></h1>
+    <p class="brand-sub">Verify your email to activate your account and start tracking your nutrition.</p>
+
+    <div class="brand-steps">
+      <div class="step">
+        <span class="step-num">01</span>
+        <div class="step-body">
+          <span class="step-title done">Create account</span>
+          <span class="step-desc">Email &amp; password saved</span>
+        </div>
+      </div>
+      <div class="step" style="border-color: rgba(212,174,97,0.2); background: rgba(212,174,97,0.04);">
+        <span class="step-num active">02</span>
+        <div class="step-body">
+          <span class="step-title active">Verify email</span>
+          <span class="step-desc">Enter the 6-digit code</span>
+        </div>
+      </div>
+      <div class="step" style="opacity:0.4;">
+        <span class="step-num">03</span>
+        <div class="step-body">
+          <span class="step-title">Log in &amp; track</span>
+          <span class="step-desc">Access your dashboard</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="brand-bottom">
+    <p class="brand-tag">v1.0 · Nutrition Intelligence</p>
+  </div>
+</div>
+
+<!-- Right: OTP Panel -->
+<div class="panel-form">
+
+  <div class="form-header">
+    <div class="form-eyebrow">Step 2 of 3</div>
+    <h2 class="form-title">Verify your email</h2>
+    <p class="form-desc" id="headerDesc">
+      We sent a 6-digit code to <strong id="emailDisplay">your inbox</strong>. Enter it below.
+    </p>
+  </div>
+
+  <div class="fieldset-label">Verification code</div>
+
+  <div class="otp-boxes" id="otpBoxes">
+    <div class="otp-box" id="b0"></div>
+    <div class="otp-box" id="b1"></div>
+    <div class="otp-box" id="b2"></div>
+    <div class="otp-box" id="b3"></div>
+    <div class="otp-box" id="b4"></div>
+    <div class="otp-box" id="b5"></div>
+  </div>
+
+  <!-- Hidden real input -->
+  <input id="otpInput" class="otp-hidden" type="text" maxlength="6"
+         inputmode="numeric" autocomplete="one-time-code"
+         oninput="onOtpInput()" onkeydown="onOtpKey(event)">
+
+  <div class="timer-row">
+    <span class="timer-label">Code expires in</span>
+    <span id="timerDisplay">5:00</span>
+  </div>
+
+  <button type="button" class="btn-primary" id="verifyBtn" onclick="verifyOtp()">
+    Verify &amp; Activate Account
+  </button>
+
+  <button type="button" class="btn-ghost" id="resendBtn" onclick="resendOtp()">
+    Resend Code
+  </button>
+
+  <!-- Success state -->
+  <div class="success-banner" id="successBanner">
+    <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+    <div class="success-text">
+      Email verified — account activated!
+      <span>Redirecting you to login…</span>
+    </div>
+  </div>
+
+  <p id="msg"></p>
+
+  <div class="form-footer">
+    Wrong account? <a href="login.html">Go back</a>
+  </div>
+</div>
+
+<script>
+// ── State ──────────────────────────────────────────────────────────────────
+let email       = "";
+let timerInterval = null;
+let expiresAt   = Date.now() + 5 * 60 * 1000; // 5 min from page load
+let verified    = false;
+
+// ── Boot ───────────────────────────────────────────────────────────────────
+window.onload = () => {
+  email = localStorage.getItem("pendingEmail") || "";
+
+  if (!email) {
+    // No email in storage — redirect back to login
+    window.location.href = "login.html";
+    return;
+  }
+
+  // Show email in header
+  document.getElementById("emailDisplay").textContent = email;
+
+  setupOtpBoxes();
+  startTimer();
+
+  // Auto-focus OTP input
+  setTimeout(() => {
+    document.getElementById("otpInput").style.pointerEvents = "auto";
+    document.getElementById("otpInput").focus();
+  }, 100);
+};
+
+// ── Timer ──────────────────────────────────────────────────────────────────
+function startTimer() {
+  clearInterval(timerInterval);
+  expiresAt = Date.now() + 5 * 60 * 1000;
+
+  timerInterval = setInterval(() => {
+    const remaining = Math.max(0, expiresAt - Date.now());
+    const mins = Math.floor(remaining / 60000);
+    const secs = Math.floor((remaining % 60000) / 1000);
+    const display = document.getElementById("timerDisplay");
+    display.textContent = `${mins}:${secs.toString().padStart(2, "0")}`;
+    display.className   = remaining < 60000 ? "warning" : "";
+
+    if (remaining === 0) {
+      clearInterval(timerInterval);
+      setMsg("Code expired. Click Resend to get a new one.", "err");
+      document.getElementById("verifyBtn").disabled = true;
+    }
+  }, 500);
+}
+
+// ── OTP Boxes ──────────────────────────────────────────────────────────────
+function setupOtpBoxes() {
+  const boxes  = document.getElementById("otpBoxes");
+  const hidden = document.getElementById("otpInput");
+  boxes.addEventListener("click", () => {
+    hidden.style.pointerEvents = "auto";
+    hidden.focus();
+  });
+  hidden.addEventListener("focus", renderBoxes);
+  hidden.addEventListener("blur",  renderBoxes);
+}
+
+function renderBoxes(state) {
+  const val     = document.getElementById("otpInput").value;
+  const focused = document.activeElement === document.getElementById("otpInput");
+
+  for (let i = 0; i < 6; i++) {
+    const box = document.getElementById("b" + i);
+    box.className   = "otp-box";
+    box.textContent = val[i] || "";
+
+    if (state === "error") {
+      box.classList.add("err-state");
+    } else if (verified) {
+      box.classList.add("good");
+    } else if (val[i]) {
+      box.classList.add("filled");
+      if (i === val.length - 1 && focused) box.classList.add("active");
+    } else if (i === val.length && focused) {
+      box.classList.add("active");
+    }
+  }
+}
+
+function onOtpInput() {
+  const el = document.getElementById("otpInput");
+  el.value = el.value.replace(/\D/g, "").slice(0, 6);
+  renderBoxes();
+}
+
+function onOtpKey(e) {
+  if (e.key === "Enter") { e.preventDefault(); verifyOtp(); }
+}
+
+// ── Helpers ────────────────────────────────────────────────────────────────
+function setMsg(text, type) {
+  const el = document.getElementById("msg");
+  el.className = type || "";
+  el.innerText = text;
+}
+
+// ── VERIFY OTP ─────────────────────────────────────────────────────────────
+async function verifyOtp() {
+  const code = document.getElementById("otpInput").value.trim();
+
+  if (code.length < 6) {
+    setMsg("Enter the full 6-digit code.", "err");
+    return;
+  }
+
+  const btn = document.getElementById("verifyBtn");
+  btn.disabled  = true;
+  btn.innerHTML = '<span class="spinner"></span>Verifying…';
+
+  try {
+    const res  = await fetch("http://127.0.0.1:5000/api/auth/verify-otp", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, otp: code })
+    });
+    const data = await res.json();
+
+    if (data.message === "OTP verified") {
+      // Mark verified, clear pending state
+      verified = true;
+      clearInterval(timerInterval);
+      renderBoxes();
+
+      localStorage.removeItem("pendingEmail");
+
+      document.getElementById("successBanner").classList.add("visible");
+      document.getElementById("verifyBtn").style.display  = "none";
+      document.getElementById("resendBtn").style.display  = "none";
+      setMsg("", "");
+
+      // Redirect to login after short delay
+      setTimeout(() => {
+        window.location.href = "login.html";
+      }, 2000);
+      return;
+    }
+
+    // Wrong OTP
+    renderBoxes("error");
+    setMsg(data.message || "Invalid code. Please try again.", "err");
+    btn.disabled    = false;
+    btn.textContent = "Verify & Activate Account";
+
+  } catch (err) {
+    console.error("[MacroMate] verify-otp error:", err);
+    setMsg("Could not reach the server. Is Flask running?", "err");
+    btn.disabled    = false;
+    btn.textContent = "Verify & Activate Account";
+  }
+}
+
+// ── RESEND OTP ─────────────────────────────────────────────────────────────
+async function resendOtp() {
+  const btn = document.getElementById("resendBtn");
+  btn.disabled  = true;
+  btn.innerHTML = '<span class="spinner"></span>Sending…';
+
+  // Clear OTP input
+  document.getElementById("otpInput").value = "";
+  renderBoxes();
+
+  try {
+    const res  = await fetch("http://127.0.0.1:5000/api/auth/send-otp", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email })
+    });
+    const data = await res.json();
+
+    if (res.ok) {
+      setMsg("New code sent! Check your inbox.", "ok");
+      document.getElementById("verifyBtn").disabled = false;
+      document.getElementById("verifyBtn").textContent = "Verify & Activate Account";
+      startTimer();
+    } else {
+      setMsg(data.message || "Failed to resend.", "err");
+    }
+
+  } catch (err) {
+    setMsg("Could not reach the server.", "err");
+  }
+
+  // Cooldown on resend button (30s)
+  setTimeout(() => {
+    btn.disabled    = false;
+    btn.textContent = "Resend Code";
+  }, 30000);
+
+  btn.textContent = "Resend Code (wait 30s)";
+}
+</script>
+</body>
+</html>
