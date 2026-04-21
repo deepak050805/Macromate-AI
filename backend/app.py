@@ -1,12 +1,12 @@
 import os
 from flask import Flask, render_template
 from flask_cors import CORS
-from models import init_db
-from routes.macros import macros_bp
-from routes.auth import auth_bp
-from routes.tracker import tracker_bp
+from backend.models import init_db
+from backend.routes.macros import macros_bp
+from backend.routes.auth import auth_bp
+from backend.routes.tracker import tracker_bp
 
-app = Flask(__name__, template_folder="templates")
+app = Flask(__name__, template_folder="backend/templates")
 CORS(app)
 
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "secret123")
