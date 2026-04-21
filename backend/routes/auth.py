@@ -268,11 +268,3 @@ def all_users():
         ]
     })
     
-@auth_bp.route("/make-admin")
-def make_admin():
-    conn = connect()
-    c = conn.cursor()
-    c.execute("UPDATE users SET role='admin' WHERE email='deepaktakshak4@gmail.com'")
-    conn.commit()
-    conn.close()
-    return "You are now admin" 
