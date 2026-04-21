@@ -275,6 +275,8 @@ button:disabled { opacity: 0.25; cursor: not-allowed !important; transform: none
 </div>
 
 <script>
+const API = window.location.origin; // works locally and on Render
+
 // ── FIX 1: Global submit guard (safety net — no <form> exists, but just in case) ──
 document.addEventListener("submit", function(e) {
   e.preventDefault();
@@ -358,7 +360,7 @@ async function signup() {
   btn.innerHTML = '<span class="spinner"></span>Sending code\u2026';
 
   try {
-    const res  = await fetch("http://127.0.0.1:5000/api/auth/signup", {
+    const res  = await fetch(`${API}/api/auth/signup`, {
       method:  "POST",
       headers: { "Content-Type": "application/json" },
       body:    JSON.stringify({ email: emailVal, password: passwordVal })
@@ -379,8 +381,8 @@ async function signup() {
       localStorage.removeItem("email");
       localStorage.setItem("pendingEmail", emailVal);
       setTimeout(() => {
-        console.log("[MacroMate] Redirecting to otp.html...");
-        window.location.replace("otp.html");
+        console.log("[MacroMate] Redirecting to /otp...");
+        window.location.replace("/otp");
       }, 100);
       return;
     }
@@ -410,7 +412,7 @@ async function login() {
   btn.innerHTML = '<span class="spinner"></span>Logging in\u2026';
 
   try {
-    const res  = await fetch("http://127.0.0.1:5000/api/auth/login", {
+    const res  = await fetch(`${API}/api/auth/login`, {
       method:  "POST",
       headers: { "Content-Type": "application/json" },
       body:    JSON.stringify({ email: emailVal, password: passwordVal })
@@ -440,7 +442,7 @@ async function calculate() {
   if (!weight) return;
 
   try {
-    const res  = await fetch("http://127.0.0.1:5000/api/macros/calculate", {
+    const res  = await fetch(`${API}/api/macros/calculate`, {
       method:  "POST",
       headers: { "Content-Type": "application/json" },
       body:    JSON.stringify({ weight, goal })
