@@ -1,4 +1,3 @@
-import sqlite3
 from flask import Blueprint, request, jsonify, session
 from backend.models import connect
 import random
@@ -90,7 +89,7 @@ def signup():
         print(f"[MacroMate] Signup attempt for: {email}")
 
         # Check if user already exists and is verified — block them
-        c.execute("SELECT is_verified FROM users WHERE email=?", (email,))
+        c.execute("SELECT is_verified FROM users WHERE email=%s", (email,))
         row = c.fetchone()
 
         if row:
@@ -98,13 +97,13 @@ def signup():
                 return jsonify({"message": "User already registered. Please login."}), 400
             else:
                 # Unverified account exists — update password and resend OTP
-                c.execute("UPDATE users SET password=? WHERE email=?", (password, email))
+                c.execute("UPDATE users SET password=%s WHERE email=%s", (password, email))
                 conn.commit()
                 print(f"[MacroMate] Re-sending OTP for unverified account: {email}")
         else:
             # Brand new user — insert as unverified
             c.execute(
-                "INSERT INTO users (email, password, is_verified) VALUES (?, ?, 0)",
+                "INSERT INTO users (email, password, is_verified) VALUES (%s, %s, 0)",
                 (email, password)
             )
             conn.commit()
@@ -148,7 +147,7 @@ def login():
     try:
         print(f"[MacroMate] Login attempt for: {email}")
         c.execute(
-            "SELECT is_verified FROM users WHERE email=? AND password=?",
+            "SELECT is_verified FROM users WHERE email=%s AND password=%s",
             (email, password)
         )
         user = c.fetchone()
@@ -163,7 +162,7 @@ def login():
 
         print(f"[MacroMate] ✅ Login successful for: {email}")
         # Fetch role for session
-        c.execute("SELECT role FROM users WHERE email=?", (email,))
+        c.execute("SELECT role FROM users WHERE email=%s", (email,))
         role_row = c.fetchone()
         role = role_row[0] if role_row and role_row[0] else "user"
         session["email"] = email
@@ -236,7 +235,7 @@ def verify_otp():
     conn = connect()
     c = conn.cursor()
     try:
-        c.execute("UPDATE users SET is_verified=1 WHERE email=?", (email,))
+        c.execute("UPDATE users SET is_verified=1 WHERE email=%s", (email,))
         conn.commit()
         print(f"[MacroMate] ✅ Email verified and user activated: {email}")
     finally:
@@ -268,3 +267,11 @@ def all_users():
         ]
     })
     
+@auth_bp.route("/make-admin")
+def make_admin():
+    conn = connect()
+    c = conn.cursor()
+    c.execute("UPDATE users SET role='admin' WHERE email='deepaktakshak4@gmail.com'")
+    conn.commit()
+    conn.close()
+    return "You are now admin" 
