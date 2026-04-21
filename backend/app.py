@@ -6,7 +6,8 @@ from backend.routes.macros import macros_bp
 from backend.routes.auth import auth_bp
 from backend.routes.tracker import tracker_bp
 
-app = Flask(__name__, template_folder="backend/templates")
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+app = Flask(__name__, template_folder=os.path.join(BASE_DIR, "templates"))
 CORS(app)
 
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "secret123")
