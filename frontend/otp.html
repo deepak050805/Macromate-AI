@@ -337,14 +337,41 @@ let verified    = false;
 
 // ── Boot ───────────────────────────────────────────────────────────────────
 window.onload = () => {
-  email = localStorage.getItem("pendingEmail") || "";
+  // Retry reading pendingEmail up to 5 times, 200ms apart (~1s total).
+  // Guards against browsers where localStorage isn't immediately readable
+  // after a same-tab redirect from login.html.
+  let attempts = 0;
+  const MAX_ATTEMPTS = 5;
+  const RETRY_MS = 200;
 
-  if (!email) {
-    // No email in storage — redirect back to login
-    window.location.href = "login.html";
-    return;
+  function tryInit() {
+    attempts++;
+    email = (localStorage.getItem("pendingEmail") || "").trim();
+    console.log(`[MacroMate] OTP page — attempt ${attempts}/${MAX_ATTEMPTS} — pendingEmail: "${email || "(not found)"}"`);
+
+    if (email) {
+      // Found — proceed normally
+      initOtpPage();
+      return;
+    }
+
+    if (attempts < MAX_ATTEMPTS) {
+      // Not found yet — retry after delay
+      setTimeout(tryInit, RETRY_MS);
+    } else {
+      // All retries exhausted — session is truly missing
+      console.warn("[MacroMate] pendingEmail not found after all retries — redirecting to login");
+      setMsg("Session expired. Please sign up again.", "err");
+      setTimeout(() => {
+        window.location.replace("login.html");
+      }, 1500);
+    }
   }
 
+  tryInit();
+};
+
+function initOtpPage() {
   // Show email in header
   document.getElementById("emailDisplay").textContent = email;
 
@@ -356,7 +383,7 @@ window.onload = () => {
     document.getElementById("otpInput").style.pointerEvents = "auto";
     document.getElementById("otpInput").focus();
   }, 100);
-};
+}
 
 // ── Timer ──────────────────────────────────────────────────────────────────
 function startTimer() {
@@ -466,7 +493,7 @@ async function verifyOtp() {
 
       // Redirect to login after short delay
       setTimeout(() => {
-        window.location.href = "login.html";
+        window.location.replace("login.html");
       }, 2000);
       return;
     }

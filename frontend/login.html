@@ -348,6 +348,12 @@ async function signup() {
   }
 
   const btn = document.getElementById("signupBtn");
+
+  function resetBtn() {
+    btn.disabled    = false;
+    btn.textContent = "Sign Up";
+  }
+
   btn.disabled  = true;
   btn.innerHTML = '<span class="spinner"></span>Sending code\u2026';
 
@@ -358,28 +364,35 @@ async function signup() {
       body:    JSON.stringify({ email: emailVal, password: passwordVal })
     });
     const data = await res.json();
+    const msg  = (data.message || "").toLowerCase();
 
-    if (data.message === "OTP sent") {
-      // Clear any existing login session so window.onload on this page
-      // (or any back-navigation) does not auto-show the dashboard.
-      localStorage.removeItem("email");
-      localStorage.setItem("pendingEmail", emailVal);
-      console.log("Redirecting to OTP page...");
-      window.location.href = "./otp.html";
+    // Non-2xx: backend rejected — show error, reset button
+    if (!res.ok) {
+      setMsg(data.message || "Signup failed. Please try again.", "err");
+      resetBtn();
       return;
     }
 
-    // API returned an error message
-    setMsg(data.message || "Signup failed. Please try again.", "err");
+    // OTP sent — save state and navigate (button stays disabled; page is leaving)
+    if (msg.includes("otp")) {
+      console.log("[MacroMate] OTP sent — saving pendingEmail:", emailVal);
+      localStorage.removeItem("email");
+      localStorage.setItem("pendingEmail", emailVal);
+      setTimeout(() => {
+        console.log("[MacroMate] Redirecting to otp.html...");
+        window.location.replace("otp.html");
+      }, 100);
+      return;
+    }
+
+    // 2xx but no OTP keyword — unexpected backend response
+    setMsg(data.message || "Unexpected response. Please try again.", "err");
+    resetBtn();
 
   } catch (err) {
-    // Network error or Flask not running
     setMsg("Could not reach the server. Is Flask running?", "err");
+    resetBtn();
   }
-
-  // Only reached on failure — re-enable button
-  btn.disabled    = false;
-  btn.textContent = "Sign Up";
 }
 
 // ── LOGIN ──────────────────────────────────────────────────────────────────
