@@ -33,6 +33,10 @@ def otp():
 def dashboard():
     return render_template("dashboard.html")
 
+@app.route("/admin")
+def admin():
+    return render_template("admin.html")
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     debug = os.environ.get("FLASK_ENV") != "production"

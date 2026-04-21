@@ -242,13 +242,13 @@ def verify_otp():
 def all_users():
     conn = connect()
     c = conn.cursor()
+    try:
+        c.execute("SELECT id, email, is_verified FROM users")
+        users = c.fetchall()
+    finally:
+        conn.close()
 
-    c.execute("SELECT id, email, is_verified FROM users")
-    users = c.fetchall()
-
-    conn.close()
-
-    return {
+    return jsonify({
         "users": [
             {
                 "id": u[0],
@@ -257,4 +257,4 @@ def all_users():
             }
             for u in users
         ]
-    }
+    })

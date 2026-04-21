@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MacroMate — Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+
+:root {
+  --bg:        #0e0f11;
+  --surface:   #16181c;
+  --surface2:  #1e2026;
+  --border:    rgba(255,255,255,0.08);
+  --gold:      #d4ae61;
+  --gold-dim:  rgba(212,174,97,0.12);
+  --text:      #e8eaed;
+  --text-2:    rgba(232,234,237,0.5);
+  --text-3:    rgba(232,234,237,0.25);
+  --red:       #e05c5c;
+  --red-dim:   rgba(224,92,92,0.1);
+  --green:     #5caf82;
+  --green-dim: rgba(92,175,130,0.1);
+  --radius:    6px;
+  --mono:      'DM Mono', monospace;
+}
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Top Bar ── */
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 40px;
+  border-bottom: 1px solid var(--border);
+  position: relative;
+}
+.topbar::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(212,174,97,0.03) 0%, transparent 60%);
+  pointer-events: none;
+}
+.wordmark {
+  font-family: 'Syne', sans-serif;
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gold);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  position: relative;
+  z-index: 1;
+}
+.wordmark-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--gold);
+  flex-shrink: 0;
+}
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  position: relative;
+  z-index: 1;
+}
+.admin-badge {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gold);
+  background: var(--gold-dim);
+  border: 1px solid rgba(212,174,97,0.2);
+  border-radius: 4px;
+  padding: 4px 10px;
+}
+.nav-link {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.nav-link:hover { color: var(--text-2); }
+
+/* ── Main Content ── */
+.main {
+  flex: 1;
+  padding: 40px;
+  max-width: 1100px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+/* ── Page Header ── */
+.page-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 32px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+.page-header-left {}
+.page-eyebrow {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.page-eyebrow::before {
+  content: '';
+  display: inline-block;
+  width: 20px;
+  height: 1px;
+  background: var(--gold);
+}
+.page-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+.page-subtitle {
+  font-size: 13px;
+  font-weight: 300;
+  color: var(--text-2);
+  margin-top: 4px;
+}
+
+/* ── Stats Row ── */
+.stats-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+}
+.stat-card {
+  flex: 1;
+  min-width: 140px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+}
+.stat-card-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  margin-bottom: 6px;
+}
+.stat-card-value {
+  font-family: 'Syne', sans-serif;
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--text);
+  line-height: 1;
+}
+.stat-card-value.green { color: var(--green); }
+.stat-card-value.red   { color: var(--red); }
+.stat-card-value.gold  { color: var(--gold); }
+
+/* ── Table Container ── */
+.table-container {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.table-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.table-toolbar-left {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+#userCount {
+  color: var(--text-2);
+}
+
+/* ── Refresh Button ── */
+.btn-refresh {
+  font-family: 'Syne', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  background: var(--surface2);
+  color: var(--text-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 8px 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  transition: border-color 0.2s, color 0.2s, transform 0.15s;
+}
+.btn-refresh:hover:not(:disabled) {
+  border-color: rgba(255,255,255,0.18);
+  color: var(--text);
+  transform: translateY(-1px);
+}
+.btn-refresh:active:not(:disabled) { transform: scale(0.97); }
+.btn-refresh:disabled { opacity: 0.3; cursor: not-allowed; }
+.btn-refresh svg {
+  width: 12px;
+  height: 12px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2;
+  transition: transform 0.4s ease;
+}
+.btn-refresh.spinning svg { animation: spin 0.7s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Table ── */
+.user-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.user-table thead tr {
+  border-bottom: 1px solid var(--border);
+}
+.user-table th {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  text-align: left;
+  padding: 12px 20px;
+  font-weight: 400;
+}
+.user-table th:last-child { text-align: center; }
+.user-table tbody tr {
+  border-bottom: 1px solid var(--border);
+  transition: background 0.15s;
+}
+.user-table tbody tr:last-child { border-bottom: none; }
+.user-table tbody tr:hover { background: var(--surface2); }
+.user-table td {
+  padding: 14px 20px;
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--text);
+}
+.cell-id {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-3);
+  width: 60px;
+}
+.cell-email {
+  font-weight: 400;
+  color: var(--text);
+}
+.cell-status { text-align: center; }
+
+/* ── Status Badge ── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-weight: 500;
+  padding: 4px 10px;
+  border-radius: 4px;
+}
+.badge-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.badge.verified {
+  color: var(--green);
+  background: var(--green-dim);
+  border: 1px solid rgba(92,175,130,0.25);
+}
+.badge.verified .badge-dot { background: var(--green); }
+.badge.unverified {
+  color: var(--red);
+  background: var(--red-dim);
+  border: 1px solid rgba(224,92,92,0.25);
+}
+.badge.unverified .badge-dot { background: var(--red); }
+
+/* ── States ── */
+.state-cell {
+  padding: 52px 20px;
+  text-align: center;
+}
+.state-icon {
+  width: 36px;
+  height: 36px;
+  margin: 0 auto 12px;
+  opacity: 0.2;
+}
+.state-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-2);
+  margin-bottom: 4px;
+}
+.state-desc {
+  font-size: 12px;
+  font-weight: 300;
+  color: var(--text-3);
+}
+
+/* ── Spinner for loading ── */
+.spinner-inline {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255,255,255,0.08);
+  border-top-color: var(--gold);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  margin: 0 auto 12px;
+}
+
+/* ── Footer ── */
+.footer {
+  padding: 20px 40px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.footer-tag {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text-3);
+  letter-spacing: 0.06em;
+}
+#lastRefreshed {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text-3);
+}
+
+@media (max-width: 600px) {
+  .topbar { padding: 16px 20px; }
+  .main { padding: 24px 20px; }
+  .footer { padding: 16px 20px; }
+  .page-title { font-size: 22px; }
+  .stats-row { gap: 8px; }
+  .stat-card { min-width: 100px; padding: 14px 16px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── Top Bar ── -->
+<header class="topbar">
+  <div class="wordmark">
+    <span class="wordmark-dot"></span>MacroMate
+  </div>
+  <div class="topbar-right">
+    <span class="admin-badge">Admin</span>
+    <a href="/" class="nav-link">← Back to App</a>
+  </div>
+</header>
+
+<!-- ── Main ── -->
+<main class="main">
+
+  <div class="page-header">
+    <div class="page-header-left">
+      <div class="page-eyebrow">User Management</div>
+      <h1 class="page-title">All Users</h1>
+      <p class="page-subtitle">View registered accounts and their verification status.</p>
+    </div>
+  </div>
+
+  <!-- Stats Row -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-card-label">Total Users</div>
+      <div class="stat-card-value gold" id="statTotal">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card-label">Verified</div>
+      <div class="stat-card-value green" id="statVerified">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card-label">Unverified</div>
+      <div class="stat-card-value red" id="statUnverified">—</div>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="table-container">
+    <div class="table-toolbar">
+      <div class="table-toolbar-left">
+        Users &nbsp;<span id="userCount"></span>
+      </div>
+      <button class="btn-refresh" id="refreshBtn" onclick="loadUsers()">
+        <svg viewBox="0 0 24 24">
+          <polyline points="23 4 23 10 17 10"/>
+          <polyline points="1 20 1 14 7 14"/>
+          <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+        </svg>
+        Refresh
+      </button>
+    </div>
+
+    <table class="user-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Email</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="userTableBody">
+        <!-- populated by JS -->
+      </tbody>
+    </table>
+  </div>
+
+</main>
+
+<!-- ── Footer ── -->
+<footer class="footer">
+  <span class="footer-tag">v1.0 · MacroMate Admin</span>
+  <span id="lastRefreshed"></span>
+</footer>
+
+<script>
+const API = window.location.origin;
+
+// ── Helpers ───────────────────────────────────────────────────────────────
+function formatTime(date) {
+  return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+}
+
+function setStats(users) {
+  const total      = users.length;
+  const verified   = users.filter(u => u.verified === true || u.verified === 1).length;
+  const unverified = total - verified;
+  document.getElementById("statTotal").textContent      = total;
+  document.getElementById("statVerified").textContent   = verified;
+  document.getElementById("statUnverified").textContent = unverified;
+  document.getElementById("userCount").textContent      = total > 0 ? `(${total})` : "";
+}
+
+function renderLoading() {
+  document.getElementById("userTableBody").innerHTML = `
+    <tr>
+      <td colspan="3" class="state-cell">
+        <div class="spinner-inline"></div>
+        <div class="state-title">Loading users…</div>
+        <div class="state-desc">Fetching from /api/auth/all-users</div>
+      </td>
+    </tr>`;
+}
+
+function renderEmpty() {
+  document.getElementById("userTableBody").innerHTML = `
+    <tr>
+      <td colspan="3" class="state-cell">
+        <svg class="state-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+        </svg>
+        <div class="state-title">No users found</div>
+        <div class="state-desc">No accounts have been registered yet.</div>
+      </td>
+    </tr>`;
+  setStats([]);
+}
+
+function renderError(message) {
+  document.getElementById("userTableBody").innerHTML = `
+    <tr>
+      <td colspan="3" class="state-cell">
+        <svg class="state-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+        <div class="state-title">Failed to load</div>
+        <div class="state-desc">${message}</div>
+      </td>
+    </tr>`;
+  setStats([]);
+}
+
+function renderUsers(users) {
+  if (!users || users.length === 0) { renderEmpty(); return; }
+
+  const rows = users.map(user => {
+    const isVerified = user.verified === true || user.verified === 1;
+    const badge = isVerified
+      ? `<span class="badge verified"><span class="badge-dot"></span>Verified</span>`
+      : `<span class="badge unverified"><span class="badge-dot"></span>Not Verified</span>`;
+
+    return `
+      <tr>
+        <td class="cell-id">${user.id ?? "—"}</td>
+        <td class="cell-email">${user.email ?? "—"}</td>
+        <td class="cell-status">${badge}</td>
+      </tr>`;
+  }).join("");
+
+  document.getElementById("userTableBody").innerHTML = rows;
+  setStats(users);
+}
+
+// ── Load Users ────────────────────────────────────────────────────────────
+async function loadUsers() {
+  const btn = document.getElementById("refreshBtn");
+  btn.disabled = true;
+  btn.classList.add("spinning");
+
+  renderLoading();
+
+  try {
+    const res = await fetch(`${API}/api/auth/all-users`);
+
+// 👇 SAFETY CHECK
+const contentType = res.headers.get("content-type");
+
+if (!contentType || !contentType.includes("application/json")) {
+  const text = await res.text();
+  console.error("Non-JSON response:", text);
+  renderError("Server returned HTML instead of JSON");
+  return;
+}
+
+const data = await res.json();
+
+    if (!res.ok) {
+      renderError(data.message || `Server returned ${res.status}`);
+      return;
+    }
+
+    // Accept either array directly or { users: [...] }
+    const users = Array.isArray(data) ? data : (data.users ?? []);
+    renderUsers(users);
+
+    document.getElementById("lastRefreshed").textContent =
+      "Last refreshed: " + formatTime(new Date());
+
+  } catch (err) {
+    renderError("Could not reach the server. Is Flask running?");
+    console.error("[MacroMate Admin] fetch error:", err);
+  } finally {
+    btn.disabled = false;
+    btn.classList.remove("spinning");
+  }
+}
+
+// ── Boot ──────────────────────────────────────────────────────────────────
+window.onload = loadUsers;
+</script>
+</body>
+</html>
