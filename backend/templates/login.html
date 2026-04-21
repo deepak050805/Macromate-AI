@@ -421,10 +421,17 @@ async function login() {
     const data = await res.json();
 
     if (data.message === "Login successful") {
-      localStorage.setItem("email", data.email);
-      showApp();
-      return;
-    }
+  localStorage.setItem("email", data.email);
+
+  // 🔥 NEW (ONLY ADDITION)
+  if (data.role === "admin") {
+    window.location.href = "/admin";
+  } else {
+    showApp();
+  }
+
+  return;
+}
 
     setMsg(data.message || "Invalid credentials.", "err");
 
