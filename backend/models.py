@@ -26,6 +26,13 @@ def init_db():
     except sqlite3.OperationalError:
         pass  # Column already present — nothing to do
 
+    # Safe migration: add role column for role-based access control.
+    try:
+        c.execute("ALTER TABLE users ADD COLUMN role TEXT DEFAULT 'user'")
+        print("[MacroMate] Migration: added role column to users table")
+    except sqlite3.OperationalError:
+        pass  # Column already present — nothing to do
+
     c.execute("""
     CREATE TABLE IF NOT EXISTS progress (
         id INTEGER PRIMARY KEY AUTOINCREMENT,

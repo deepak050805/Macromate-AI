@@ -1,5 +1,5 @@
 import os
-from flask import Flask, render_template
+from flask import Flask, render_template, session, redirect, url_for, abort
 from flask_cors import CORS
 from backend.models import init_db
 from backend.routes.macros import macros_bp
@@ -35,6 +35,8 @@ def dashboard():
 
 @app.route("/admin")
 def admin():
+    if session.get("role") != "admin":
+        abort(403)
     return render_template("admin.html")
 
 if __name__ == "__main__":

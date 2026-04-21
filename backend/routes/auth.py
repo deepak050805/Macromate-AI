@@ -1,5 +1,5 @@
 import sqlite3
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, session
 from backend.models import connect
 import random
 import time
@@ -162,7 +162,13 @@ def login():
             return jsonify({"message": "Email not verified. Please complete OTP verification."}), 403
 
         print(f"[MacroMate] ✅ Login successful for: {email}")
-        return jsonify({"message": "Login successful", "email": email})
+        # Fetch role for session
+        c.execute("SELECT role FROM users WHERE email=?", (email,))
+        role_row = c.fetchone()
+        role = role_row[0] if role_row and role_row[0] else "user"
+        session["email"] = email
+        session["role"]  = role
+        return jsonify({"message": "Login successful", "email": email, "role": role})
 
     finally:
         conn.close()
@@ -240,6 +246,9 @@ def verify_otp():
 
 @auth_bp.route("/all-users", methods=["GET"])
 def all_users():
+    if session.get("role") != "admin":
+        return jsonify({"message": "Unauthorized"}), 403
+
     conn = connect()
     c = conn.cursor()
     try:
@@ -258,3 +267,12 @@ def all_users():
             for u in users
         ]
     })
+    
+@auth_bp.route("/make-admin")
+def make_admin():
+    conn = connect()
+    c = conn.cursor()
+    c.execute("UPDATE users SET role='admin' WHERE email='deepaktakshak4@gmail.com'")
+    conn.commit()
+    conn.close()
+    return "You are now admin" 
