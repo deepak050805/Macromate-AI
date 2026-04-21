@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from models import connect
+from backend.models import connect
 
 tracker_bp = Blueprint("tracker", __name__)
 

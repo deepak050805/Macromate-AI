@@ -1,6 +1,6 @@
 import sqlite3
 from flask import Blueprint, request, jsonify
-from models import connect
+from backend.models import connect
 import random
 import time
 import smtplib
@@ -95,7 +95,7 @@ def signup():
 
         if row:
             if row[0] == 1:
-                return jsonify({"message": "User already exists"}), 400
+                return jsonify({"message": "User already registered. Please login."}), 400
             else:
                 # Unverified account exists — update password and resend OTP
                 c.execute("UPDATE users SET password=? WHERE email=?", (password, email))
