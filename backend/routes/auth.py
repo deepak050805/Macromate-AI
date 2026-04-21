@@ -237,3 +237,24 @@ def verify_otp():
         conn.close()
 
     return jsonify({"message": "OTP verified", "email": email})
+
+@auth_bp.route("/all-users", methods=["GET"])
+def all_users():
+    conn = connect()
+    c = conn.cursor()
+
+    c.execute("SELECT id, email, is_verified FROM users")
+    users = c.fetchall()
+
+    conn.close()
+
+    return {
+        "users": [
+            {
+                "id": u[0],
+                "email": u[1],
+                "verified": bool(u[2])
+            }
+            for u in users
+        ]
+    }
