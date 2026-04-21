@@ -324,11 +324,12 @@ button:disabled { opacity: 0.25; cursor: not-allowed !important; transform: none
   <p id="msg"></p>
 
   <div class="form-footer">
-    Wrong account? <a href="login.html">Go back</a>
-  </div>
+  Wrong account? <a href="/">Go back</a>
+</div>
 </div>
 
 <script>
+const API = window.location.origin;
 // ── State ──────────────────────────────────────────────────────────────────
 let email       = "";
 let timerInterval = null;
@@ -363,7 +364,7 @@ window.onload = () => {
       console.warn("[MacroMate] pendingEmail not found after all retries — redirecting to login");
       setMsg("Session expired. Please sign up again.", "err");
       setTimeout(() => {
-        window.location.replace("login.html");
+        window.location.replace("/");
       }, 1500);
     }
   }
@@ -471,7 +472,7 @@ async function verifyOtp() {
   btn.innerHTML = '<span class="spinner"></span>Verifying…';
 
   try {
-    const res  = await fetch("http://127.0.0.1:5000/api/auth/verify-otp", {
+    const res  = await fetch(`${API}/api/auth/verify-otp`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, otp: code })
@@ -493,7 +494,7 @@ async function verifyOtp() {
 
       // Redirect to login after short delay
       setTimeout(() => {
-        window.location.replace("login.html");
+        window.location.replace("/");
       }, 2000);
       return;
     }
@@ -523,7 +524,7 @@ async function resendOtp() {
   renderBoxes();
 
   try {
-    const res  = await fetch("http://127.0.0.1:5000/api/auth/send-otp", {
+    const res  = await fetch(`${API}/api/auth/send-otp`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email })
@@ -551,6 +552,8 @@ async function resendOtp() {
 
   btn.textContent = "Resend Code (wait 30s)";
 }
+
 </script>
+
 </body>
 </html>

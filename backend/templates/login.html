@@ -275,7 +275,8 @@ button:disabled { opacity: 0.25; cursor: not-allowed !important; transform: none
 </div>
 
 <script>
-const API = window.location.origin; // works locally and on Render
+const API = window.location.origin;
+
 
 // ── FIX 1: Global submit guard (safety net — no <form> exists, but just in case) ──
 document.addEventListener("submit", function(e) {
