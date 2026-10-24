@@ -97,6 +97,21 @@ manually from the Actions tab. The workflow uses isolated test databases and no
 application secrets. Repository owners configure required checks and review rules
 separately; adding the workflow does not enable branch protection.
 
+Run vulnerability checks separately from the offline quality gate:
+
+```powershell
+.\.venv\Scripts\python scripts/audit.py
+```
+
+This requires network access. PyPA `pip-audit` resolves `requirements-dev.txt`,
+including the runtime requirements and transitive dependencies, and checks known
+advisories. `npm run audit:check` audits the committed lockfile, including development
+tools, and fails on low-or-higher severity findings. Neither command applies fixes
+or suppresses advisories. CI runs these audits on PRs, main pushes and a weekly
+schedule. A service outage fails the check; it is not a clean audit. Requirement
+ranges are resolved at audit time, so deployed environments still need their own
+dependency inventory and audit after installation.
+
 ## Architecture
 
 ```text
@@ -117,6 +132,7 @@ backend/app.py        compatibility entry point for backend.app:app
 migrations/           Alembic baseline and forward security migration
 tests/                isolated unit, integration and security tests
 scripts/check.py      repeatable local quality gate
+scripts/audit.py      network-backed Python and npm vulnerability checks
 docs/                 migration, architecture roadmap and validation notes
 ```
 
@@ -179,7 +195,7 @@ Readiness does not verify SMTP, Redis, or the installed schema revision.
 - Administrator access requires a verified account whose database role is `admin`.
   No public route can promote an account. Grant that role only through an audited
   operator procedure.
-- Dockerfile/Compose, dependency auditing and a production rollout are
+- Dockerfile/Compose and a production rollout are
   still outstanding from the broader engineering roadmap. This checkout is not
   claimed to be production-ready.
 

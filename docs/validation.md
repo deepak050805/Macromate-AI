@@ -78,13 +78,16 @@ gate for pull requests targeting `main`, pushes to `main`, and manual runs. It u
 Python 3.12 and Node 24 on Linux, read-only repository permissions, pinned action
 commits, and isolated SQLite tests without production secrets. Its actual run
 results are available in the repository's Actions tab and individual PR checks.
-This automates the local quality gate; PostgreSQL service testing and dependency
-auditing remain separate roadmap items.
+The separate `Dependency audit` job runs `scripts/audit.py` to audit resolved Python
+runtime/development requirements and the committed npm lockfile. Audits also run
+weekly and fail on detected advisories or audit-service errors. They check known
+vulnerabilities, not all security risks or an already deployed environment.
+PostgreSQL service testing remains a separate roadmap item.
 
 ## Outstanding work
 
 The broader production roadmap remains incomplete: Docker/Compose packaging,
-PostgreSQL CI, Python dependency auditing, Redis operational testing, live mail delivery,
+PostgreSQL CI, Redis operational testing, live mail delivery,
 backup/restore rehearsal, and a production rollout have not been verified here.
 Gunicorn has not been started on this Windows host. Production startup requires
 real infrastructure and secrets; do not deploy with example placeholders.
