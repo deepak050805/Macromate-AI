@@ -121,9 +121,25 @@ goal complete until GitHub actually displays that award.
 - Verified merged state, ancestry and exact remote-main tree. Profile recheck:
   eight public merged candidates, no displayed Pull Shark, qualifying count unknown.
 
-Latest verified mission snapshot: **2 PRs opened, 2 merged**. Conditional remaining
-estimate: **1,016 if all eight public candidates count**; actual qualifying progress
-is unavailable. Empty-schema readiness was reproduced and is the next reliability fix.
+### 3. Schema-aware readiness — merged
+
+- [MacroMate PR #8](https://github.com/deepak050805/Macromate-AI/pull/8), branch
+  `fix/schema-readiness` → `main`.
+- Head: `f098a9f997247b37d6ea8f35e6ad8780d44aa417`.
+- Merge: `f2304c062f016e1418f7d5e6950906b1a67df33d`.
+- Readiness now rejects missing model tables/columns using bounded zero-row queries,
+  without reading records or changing schema. Five new cases failed before the fix;
+  all six passed afterward. Full local gate: 133 tests plus lint/format passed.
+- [PR CI](https://github.com/deepak050805/Macromate-AI/actions/runs/40108145488)
+  and [main CI](https://github.com/deepak050805/Macromate-AI/actions/runs/40108278990)
+  passed. Seven real PostgreSQL cases also passed locally and in CI, including
+  readiness before/after migration. The local container was removed.
+- Verified merged state, ancestry and exact remote-main tree. Profile recheck:
+  nine public merged candidates; Pull Shark still not displayed, qualifying count unknown.
+
+Latest verified mission snapshot: **3 PRs opened, 3 merged**. Conditional remaining
+estimate: **1,015 if all nine public candidates count**; actual qualifying progress
+is unavailable. Client malformed-response feedback is the next independent fix.
 
 ## Operating boundaries
 

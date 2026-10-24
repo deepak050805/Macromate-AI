@@ -14,8 +14,22 @@ export async function api(path, { method = "GET", body } = {}) {
       signal: controller.signal,
       ...(body === undefined ? {} : { body: JSON.stringify(body) }),
     });
-    const data = await response.json();
-    if (!response.ok) throw new Error(data.message || "The request could not be completed.");
+    let data;
+    try {
+      data = await response.json();
+    } catch (error) {
+      if (error instanceof SyntaxError)
+        throw new Error("The server returned an unreadable response. Try again.", { cause: error });
+      throw error;
+    }
+    if (data === null || typeof data !== "object" || Array.isArray(data))
+      throw new Error("The server returned an unreadable response. Try again.");
+    if (!response.ok)
+      throw new Error(
+        typeof data.message === "string" && data.message
+          ? data.message
+          : "The request could not be completed.",
+      );
     return data;
   } catch (error) {
     if (error.name === "AbortError")
