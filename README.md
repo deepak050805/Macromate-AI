@@ -101,6 +101,10 @@ migrations, constraint checks, persisted OTP and owned progress tests. See
 and disposable database requirements, and [validation notes](docs/validation.md)
 for earlier verification records.
 
+A separate Redis 8 job verifies rate limits across independent application
+processes, namespace isolation and safe storage-failure responses. See
+[Redis test setup](docs/redis-testing.md) for its explicit local command and limits.
+
 `npm run test:frontend` uses Node's built-in runner for the shared API client's
 request and error behavior. Fetch and the minimal DOM are mocked; the tests cover
 CSRF/credentials, valid JSON, malformed upstream responses, network failures and
@@ -177,6 +181,8 @@ Production requires PostgreSQL, strong secrets, TLS SMTP, trusted hosts and shar
 Redis rate-limit storage. Session cookies are HTTP-only, SameSite=Lax, and secure
 in production, with an eight-hour lifetime. Password resets revoke earlier account
 sessions. All browser mutations, including JSON requests, require a CSRF token.
+Redis storage errors fail closed with a generic HTTP 503; requests do not fall
+back to a per-process limit or bypass rate limiting during an outage.
 
 Run Gunicorn on Linux with a separately configured HTTPS ingress:
 
