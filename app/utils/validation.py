@@ -60,6 +60,12 @@ def record_date(value):
 
 
 def page_number(value):
-    if not isinstance(value, str) or not value.isdecimal() or not 1 <= int(value) <= 10000:
+    if not isinstance(value, str) or not value.isdecimal():
         raise ValidationError("Page must be between 1 and 10000")
-    return int(value)
+    try:
+        page = int(value)
+    except ValueError:
+        raise ValidationError("Page must be between 1 and 10000") from None
+    if not 1 <= page <= 10000:
+        raise ValidationError("Page must be between 1 and 10000")
+    return page
