@@ -1,4 +1,5 @@
 """Environment configuration; production startup fails closed."""
+
 import os
 import secrets
 from datetime import timedelta
@@ -18,7 +19,7 @@ def configuration(overrides=None):
         "SESSION_COOKIE_SAMESITE": "Lax",
         "PERMANENT_SESSION_LIFETIME": timedelta(hours=8),
         "MAX_CONTENT_LENGTH": 16384,
-        "WTF_CSRF_TIME_LIMIT": timedelta(hours=8),
+        "WTF_CSRF_TIME_LIMIT": 8 * 60 * 60,
         "RATELIMIT_STORAGE_URI": os.getenv("RATELIMIT_STORAGE_URI", "memory://"),
         "RATELIMIT_HEADERS_ENABLED": True,
         "MAIL_SERVER": os.getenv("MAIL_SERVER", "smtp.gmail.com"),
@@ -31,7 +32,9 @@ def configuration(overrides=None):
         "OTP_COOLDOWN_SECONDS": int(os.getenv("OTP_COOLDOWN_SECONDS", "60")),
         "OTP_MAX_ATTEMPTS": 5,
         "LOG_LEVEL": os.getenv("LOG_LEVEL", "INFO"),
-        "TRUSTED_HOSTS": os.getenv("TRUSTED_HOSTS", "").split(",") if os.getenv("TRUSTED_HOSTS") else None,
+        "TRUSTED_HOSTS": os.getenv("TRUSTED_HOSTS", "").split(",")
+        if os.getenv("TRUSTED_HOSTS")
+        else None,
     }
     values.update(overrides or {})
     uri = values["SQLALCHEMY_DATABASE_URI"]
@@ -40,9 +43,17 @@ def configuration(overrides=None):
     if not uri:
         raise ValueError("DATABASE_URL must be configured")
     if production:
-        required = ("SECRET_KEY", "MAIL_USERNAME", "MAIL_PASSWORD", "MAIL_DEFAULT_SENDER", "TRUSTED_HOSTS")
+        required = (
+            "SECRET_KEY",
+            "MAIL_USERNAME",
+            "MAIL_PASSWORD",
+            "MAIL_DEFAULT_SENDER",
+            "TRUSTED_HOSTS",
+        )
         if any(not values.get(key) for key in required):
-            raise ValueError("Production requires SECRET_KEY, mail credentials, sender and TRUSTED_HOSTS")
+            raise ValueError(
+                "Production requires SECRET_KEY, mail credentials, sender and TRUSTED_HOSTS"
+            )
         if len(values["SECRET_KEY"]) < 32 or not values["SESSION_COOKIE_SECURE"]:
             raise ValueError("Production requires a strong secret and secure cookies")
         if not values["SQLALCHEMY_DATABASE_URI"].startswith("postgresql://"):

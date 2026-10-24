@@ -1,2 +1,22 @@
 {% extends "base.html" %}
-{% block content %}<h1>Nutrition with a clear direction.</h1><p>Estimate daily targets and record your progress.</p><a href="/calculator">Calculate your macros</a>{% endblock %}
+{% block content %}
+<section class="hero" aria-labelledby="hero-title">
+  <div>
+    <p class="eyebrow">Less guesswork. More direction.</p>
+    <h1 id="hero-title">Make room for<br>steady progress.</h1>
+    <p class="hero-copy">A simple starting point for your nutrition. Find your daily calorie and macro targets, then keep track of the habits that move you forward.</p>
+    <div class="actions"><a class="button" href="/calculator">Find my targets <span aria-hidden="true">↗</span></a><a href="/signup">Create a free account</a></div>
+    <p class="hero-note">No account needed to use the calculator.</p>
+  </div>
+  <aside class="card soft" aria-label="How MacroMate works">
+    <p class="eyebrow">Your next three steps</p>
+    <h2>A plan you can understand.</h2>
+    <ol><li><p><strong>Set your direction.</strong><br>Choose fat loss, maintenance, or weight gain.</p></li><li><p><strong>Know your numbers.</strong><br>Get a formula-based daily calorie and macro estimate.</p></li><li><p><strong>Keep a record.</strong><br>Log weight and calories as your routine develops.</p></li></ol>
+  </aside>
+</section>
+<section class="grid" aria-label="Features">
+  <article class="card"><p class="eyebrow">01 / Plan</p><h2>Clear daily targets</h2><p class="muted">Calories, protein, carbohydrates, and fats, with the units and formulas explained.</p></article>
+  <article class="card"><p class="eyebrow">02 / Record</p><h2>Your progress, in one place</h2><p class="muted">A straightforward history of your entries. Edit or delete records whenever you need to.</p></article>
+  <article class="card"><p class="eyebrow">03 / Adjust</p><h2>A starting point, not a rule</h2><p class="muted">Use estimates thoughtfully. Individual needs vary, and professional guidance can help.</p></article>
+</section>
+{% endblock %}

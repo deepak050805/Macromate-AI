@@ -1,5 +1,37 @@
 <!doctype html>
 <html lang="en">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="csrf-token" content="{{ csrf_token() }}"><title>{% block title %}MacroMate{% endblock %}</title></head>
-<body><a href="#main">Skip to content</a><header><a href="/">MacroMate</a><nav aria-label="Main"><a href="/calculator">Calculator</a><a href="/login">Log in</a></nav></header><main id="main">{% block content %}{% endblock %}</main><footer>Formula-based nutrition estimates. Not medical advice.</footer></body>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="description" content="Estimate your daily nutrition targets and keep a simple record of your progress with MacroMate.">
+    <title>{% block title %}MacroMate · A clearer path to your goals{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+    <script type="module" src="{{ url_for('static', filename='js/common.js') }}"></script>
+    {% block scripts %}{% endblock %}
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header">
+      <div class="header-inner">
+        <a class="wordmark" href="/" aria-label="MacroMate home">macro<span>mate.</span></a>
+        <nav aria-label="Main navigation">
+          <a href="/calculator"{% if request.path == '/calculator' %} aria-current="page"{% endif %}>Calculator</a>
+          {% if viewer %}
+          <a href="/dashboard"{% if request.path == '/dashboard' %} aria-current="page"{% endif %}>Dashboard</a>
+          <a href="/tracking"{% if request.path == '/tracking' %} aria-current="page"{% endif %}>Progress</a>
+          {% if viewer.role == 'admin' %}<a href="/admin">Admin</a>{% endif %}
+          <button id="logout" class="secondary" type="button">Log out</button>
+          {% else %}
+          <a href="/login">Log in</a><a class="button" href="/signup">Get started</a>
+          {% endif %}
+        </nav>
+      </div>
+    </header>
+    <main id="main" tabindex="-1">
+      <p id="global-status" class="status" role="status" aria-live="polite"></p>
+      {% block content %}{% endblock %}
+    </main>
+    <footer class="site-footer">MacroMate AI uses formulas, not AI or machine learning. Nutrition targets are estimates, not medical advice.</footer>
+  </body>
 </html>
