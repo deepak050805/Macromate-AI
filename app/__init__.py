@@ -1,7 +1,7 @@
 """Flask factory: no database mutation or external connection on import."""
 
 from dotenv import load_dotenv
-from flask import Flask
+from flask import Flask, request
 
 from app.config import configuration
 from app.errors import register_errors
@@ -27,7 +27,8 @@ def create_app(config=None):
 
     @app.context_processor
     def identity_context():
-        return {"viewer": current_user()}
+        viewer = None if request.environ.get("macromate.error_response") else current_user()
+        return {"viewer": viewer}
 
     register_errors(app)
     register_headers(app)

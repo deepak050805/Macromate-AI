@@ -89,6 +89,12 @@ uses a unique schema per case, and fails if its test configuration is absent.
 The default SQLite suite remains independent of external services. Local setup and
 coverage limits are documented in [PostgreSQL testing](postgresql-testing.md).
 
+Database-outage regression tests verify that error templates do not query the
+account database for navigation. Simulated lookup failures return a generic HTML
+503, existing 404/405 pages retain their status, API errors roll back pending
+changes without exposing driver diagnostics, and normal authenticated rendering
+resumes on the next request. Authorization on application routes remains enforced.
+
 ## Outstanding work
 
 The broader production roadmap remains incomplete: Docker/Compose packaging,
