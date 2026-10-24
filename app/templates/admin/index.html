@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+{% block title %}Administration · MacroMate{% endblock %}
+{% block scripts %}<script type="module" src="{{ url_for('static',filename='js/admin.js') }}"></script>{% endblock %}
+{% block content %}
+<header class="page-heading"><p class="eyebrow">Administration</p><h1>Account overview.</h1><p class="muted">Review registered accounts and email verification status. Access is restricted to administrators.</p></header>
+<section class="card" aria-labelledby="users-title"><h2 id="users-title">Registered accounts</h2><p id="admin-status" class="status" role="status" aria-live="polite">Loading accounts…</p><div class="table-scroll"><table><caption>Account verification directory</caption><thead><tr><th scope="col">ID</th><th scope="col">Email address</th><th scope="col">Verification</th></tr></thead><tbody id="users-rows"></tbody></table></div><div id="admin-pagination" class="pagination" hidden><button type="button" class="secondary" id="admin-previous">Previous</button><span id="admin-page"></span><button type="button" class="secondary" id="admin-next">Next</button></div></section>
+{% endblock %}
