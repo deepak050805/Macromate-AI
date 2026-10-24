@@ -1,4 +1,4 @@
-from flask import jsonify, render_template, request
+from flask import jsonify, make_response, render_template, request
 from flask_wtf.csrf import CSRFError
 from sqlalchemy.exc import SQLAlchemyError
 from werkzeug.exceptions import HTTPException
@@ -46,9 +46,17 @@ def register_errors(app):
             404: "Page or record not found",
             429: "Too many attempts. Try again later.",
         }
-        return response(
-            messages.get(error.code, error.name), error.code, error.name.lower().replace(" ", "_")
+        result = make_response(
+            response(
+                messages.get(error.code, error.name),
+                error.code,
+                error.name.lower().replace(" ", "_"),
+            )
         )
+        for name, value in error.get_response().headers:
+            if name.lower() not in {"content-type", "content-length"}:
+                result.headers.add(name, value)
+        return result
 
     @app.errorhandler(Exception)
     def unexpected(error):
