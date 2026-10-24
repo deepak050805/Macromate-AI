@@ -180,8 +180,11 @@ gunicorn --bind 0.0.0.0:8000 'app:create_app()'
 Gunicorn is not a Windows development server. Do not deploy Flask's debug server.
 The app does not trust forwarded proxy headers automatically. Configure a trusted
 proxy and worker count for your deployment. `/health/live` checks process liveness;
-`/health/ready` checks database connectivity, without disclosing connection details.
-Readiness does not verify SMTP, Redis, or the installed schema revision.
+`/health/ready` checks that the required user, progress and OTP tables and model
+columns can be queried, without reading their data or disclosing connection details.
+An empty or outdated schema returns 503; health checks never create or migrate it.
+Readiness does not verify SMTP, Redis, write permissions, constraints or the installed
+Alembic revision. Apply and verify migrations separately before deployment.
 
 ## Security, operations and limitations
 

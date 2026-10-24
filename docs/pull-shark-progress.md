@@ -104,8 +104,26 @@ goal complete until GitHub actually displays that award.
   Confirmed qualifying count unavailable. Conditional estimate: 1,017 more if all
   seven candidates count. No achievement credit is asserted.
 
-Latest verified mission snapshot: **1 PR opened, 1 merged**. Registration credential
-ownership has been reproduced and is the next independent security fix.
+### 2. Registration credential ownership — merged
+
+- [MacroMate PR #7](https://github.com/deepak050805/Macromate-AI/pull/7), branch
+  `fix/registration-credential-ownership` → `main`.
+- Head: `f2f4bdd836e738f55982514db93793920266d0e6`.
+- Merge: `6069864d94c00ca545be23cfc57189f58b8a156d`.
+- Verified the pre-registration credential problem, then required the email owner
+  to set the final password with the verification code. Updated UI, API contract
+  and PostgreSQL flow together. Five new cases failed before the fix; all six
+  passed after it. Local gate: 127 tests plus all lint/format checks passed.
+- [PR CI](https://github.com/deepak050805/Macromate-AI/actions/runs/40107822617)
+  and [main CI](https://github.com/deepak050805/Macromate-AI/actions/runs/40107914617)
+  passed, including audits and seven PostgreSQL cases. The local PostgreSQL suite
+  also passed and its disposable container was removed.
+- Verified merged state, ancestry and exact remote-main tree. Profile recheck:
+  eight public merged candidates, no displayed Pull Shark, qualifying count unknown.
+
+Latest verified mission snapshot: **2 PRs opened, 2 merged**. Conditional remaining
+estimate: **1,016 if all eight public candidates count**; actual qualifying progress
+is unavailable. Empty-schema readiness was reproduced and is the next reliability fix.
 
 ## Operating boundaries
 
