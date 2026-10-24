@@ -1,40 +1,54 @@
-# Implementation roadmap
+# Engineering roadmap
 
-Baseline: `25d5582417294a49757cf8fa9444492778d9199e`, branch `dev`.
-The initial working tree was clean. No remote writes are authorized.
+This roadmap describes the current application and prioritizes independent,
+testable improvements. Each change uses a feature branch, validated commit and
+pull request targeting `main`. Commit or PR counts are not acceptance criteria.
 
-Verified defects: hardcoded SMTP credential, plaintext password persistence,
-OTP disclosure in logs and worker-local storage, unauthenticated progress writes
-and reads, PostgreSQL queries with SQLite placeholders, missing connection cleanup,
-default application secrets, import-time schema changes, unvalidated calculator
-inputs, duplicated inline UI assets, and no test or migration framework.
-A database binary is tracked; local database contents must never be printed.
+## Delivered foundation
 
-Implementation sequence:
+- Flask application factory, feature routes, services, ORM repositories and models.
+- Hashed passwords, persistent keyed OTP challenges, recovery, session revocation,
+  CSRF, rate limiting, owner-scoped tracking and administrator authorization.
+- Fresh and legacy migrations that retain undated historical progress records.
+- Shared responsive templates and local JavaScript for authentication, calculator,
+  progress history, dashboard and administration.
+- Local quality gate for Python tests, Ruff, ESLint and Prettier.
+- Pagination conversion regression fix, verified in merged
+  [PR #1](https://github.com/deepak050805/Macromate-AI/pull/1).
+- GitHub Actions quality workflow for PRs to `main`, pushes to `main`, and manual
+  runs. It executes the same local gate on Python 3.12 and Node 24, with pinned
+  actions, read-only repository permissions and no application secrets.
 
-1. Remove credentials and isolate local artifacts; constrain dependencies.
-2. Establish app factory, feature routes, services, repositories and models.
-3. Harden authentication, OTP delivery, sessions, CSRF and authorization.
-4. Add non-destructive migrations, safe legacy-account recovery and tracking CRUD.
-5. Preserve validated nutrition formulas with consistent energy totals.
-6. Redesign shared layouts and individual pages with accessible vanilla assets.
-7. Add regression coverage, lint/format tooling, containers and CI.
-8. Document setup, operations, migration and limitations; audit the final history.
+## Prioritized outstanding work
 
-Each coherent change receives its own verified Conventional Commit. Target:
-exactly 100 commits after the baseline. Record actual progress using
-`git log --reverse --oneline 25d5582417294a49757cf8fa9444492778d9199e..HEAD`.
-Do not manufacture commits or claim unrun checks passed.
+1. **Dependency auditing:** run supported Python and npm audits, resolve actionable
+   vulnerabilities, and add repeatable CI checks without blanket suppressions.
+2. **PostgreSQL CI:** commit isolated integration coverage for fresh and legacy
+   migrations, cross-app OTP persistence, and owned progress CRUD on PostgreSQL 17.
+   Existing SQLite tests and the earlier manual PostgreSQL rehearsal do not replace
+   a hosted database integration job.
+3. **Redis and reliability:** verify shared rate-limit behavior and service-failure
+   handling; add evidence-based rollback and safe error regression tests.
+4. **Accessibility:** automate relevant keyboard, form feedback and responsive
+   interaction checks, building on the recorded browser smoke tests.
+5. **Packaging:** inspect deployment needs, then validate a non-root container,
+   startup command, health checks and local service composition.
+6. **Operations:** rehearse encrypted backup/restore, verify real mail delivery,
+   configure deployment infrastructure, and validate a production rollout.
 
-Credential response: rotate the previously committed SMTP app password with the
-provider immediately. Old history is preserved, so revocation is mandatory.
-No existing data will be deleted and no migrations run against a live database.
+Each item must have a concrete problem, acceptance criteria and actual validation
+before it is considered delivered. A successful quality workflow does not establish
+production readiness or enforce branch protection by itself. Required checks and
+independent-review policies are repository settings managed by the owner.
 
-## Updated follow-up scope
+## Owner or infrastructure dependencies
 
-The user approved continuing on `main` and then requested exactly seven additional
-meaningful commits after `ce71112d2161a73693167592f0604c8bd2716d1b`. The follow-up
-covers session correctness, the shared UI, authentication pages, calculator,
-progress/dashboard, administration, and repeatable local validation/documentation.
-The original 100-commit production roadmap is not claimed complete. Container
-packaging, hosted CI and production rollout remain outstanding.
+- Revoke and rotate the SMTP app password previously exposed in Git history.
+  Removing it from current source did not revoke it. Do not print old credentials.
+- Production secrets, SMTP access, database/Redis hosting, backups and rollout
+  require separately authorized infrastructure work.
+- Do not migrate live data or execute destructive downgrades as part of CI.
+
+Historical local verification and its limits are recorded in
+[validation notes](validation.md); safe schema adoption is described in the
+[migration guide](migrations.md).

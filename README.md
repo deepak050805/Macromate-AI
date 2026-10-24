@@ -91,6 +91,12 @@ There is no frontend build step or TypeScript dependency. Python tests use isola
 SQLite databases; PostgreSQL verification is recorded in
 [validation notes](docs/validation.md).
 
+GitHub Actions runs the same quality gate on pull requests targeting `main` and
+pushes to `main`, using Python 3.12 and Node 24 on Linux. It can also be started
+manually from the Actions tab. The workflow uses isolated test databases and no
+application secrets. Repository owners configure required checks and review rules
+separately; adding the workflow does not enable branch protection.
+
 ## Architecture
 
 ```text
@@ -173,7 +179,7 @@ Readiness does not verify SMTP, Redis, or the installed schema revision.
 - Administrator access requires a verified account whose database role is `admin`.
   No public route can promote an account. Grant that role only through an audited
   operator procedure.
-- Dockerfile/Compose, hosted CI, dependency auditing and a production rollout are
+- Dockerfile/Compose, dependency auditing and a production rollout are
   still outstanding from the broader engineering roadmap. This checkout is not
   claimed to be production-ready.
 
