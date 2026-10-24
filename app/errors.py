@@ -12,6 +12,8 @@ def register_errors(app):
     def response(message, status, code):
         if request.path.startswith("/api/"):
             return jsonify(message=message, error=code), status
+        # Error navigation must render even when account lookups are unavailable.
+        request.environ["macromate.error_response"] = True
         return render_template("errors/error.html", message=message, status=status), status
 
     @app.errorhandler(ValidationError)

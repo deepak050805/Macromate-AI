@@ -24,6 +24,10 @@ pull request targeting `main`. Commit or PR counts are not acceptance criteria.
 - Separate PostgreSQL 17 integration suite and hosted service job for fresh and
   legacy migrations, duplicate-email rejection, database constraints, cross-app
   OTP persistence, progress ownership and CRUD. Tests use unique disposable schemas.
+- Database-independent error-page navigation: account lookup failures return safe
+  HTML 503 responses without repeating the failed query, while HTTP error status,
+  API rollback, safe logging and next-request identity recovery have regression
+  coverage.
 
 ## Prioritized outstanding work
 
