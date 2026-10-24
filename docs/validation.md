@@ -61,6 +61,10 @@ a cross-browser matrix, or a performance benchmark.
 
 ## Intentional compatibility changes
 
+- Email verification now requires a valid password together with the email code.
+  The mailbox owner sets the final credential after proving ownership, preventing
+  activation of an earlier registrant's password. API clients of
+  `/api/auth/verify-otp` must include `password`; the browser form is updated.
 - `/` is the landing page; the login page is `/login`.
 - Signup, resend and reset-request APIs return generic 202 responses.
 - Tracking mutations require authentication and an explicit date. Supplied email

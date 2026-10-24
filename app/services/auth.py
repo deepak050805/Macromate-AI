@@ -55,11 +55,10 @@ def request_code(data, purpose):
 
 def confirm(data, purpose):
     user = by_email(email_value(data.get("email")), lock=True)
-    password = password_value(data.get("password")) if purpose == "reset" else None
+    password = password_value(data.get("password"))
     consume(user, purpose, data.get("otp"))
     user.is_verified = 1
-    if password:
-        user.password = hash_password(password)
-        user.auth_version += 1
-        session.clear()
+    user.password = hash_password(password)
+    user.auth_version += 1
+    session.clear()
     db.session.commit()
