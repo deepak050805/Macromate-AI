@@ -71,10 +71,20 @@ a cross-browser matrix, or a performance benchmark.
 - Calculator results retain two decimal places rather than truncating each macro
   independently. Unsupported goals and invalid weights now return validation errors.
 
+## Hosted quality checks
+
+The `Quality` GitHub Actions workflow now runs the existing `scripts/check.py`
+gate for pull requests targeting `main`, pushes to `main`, and manual runs. It uses
+Python 3.12 and Node 24 on Linux, read-only repository permissions, pinned action
+commits, and isolated SQLite tests without production secrets. Its actual run
+results are available in the repository's Actions tab and individual PR checks.
+This automates the local quality gate; PostgreSQL service testing and dependency
+auditing remain separate roadmap items.
+
 ## Outstanding work
 
 The broader production roadmap remains incomplete: Docker/Compose packaging,
-hosted CI, Python dependency auditing, Redis operational testing, live mail delivery,
+PostgreSQL CI, Python dependency auditing, Redis operational testing, live mail delivery,
 backup/restore rehearsal, and a production rollout have not been verified here.
 Gunicorn has not been started on this Windows host. Production startup requires
 real infrastructure and secrets; do not deploy with example placeholders.
