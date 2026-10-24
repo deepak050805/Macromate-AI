@@ -13,7 +13,11 @@ async function load() {
     pages = data.pages;
     const rows = data.users.map((user) => {
       const row = document.createElement("tr");
-      for (const value of [user.id, user.email, user.verified ? "Verified" : "Pending verification"]) {
+      for (const value of [
+        user.id,
+        user.email,
+        user.verified ? "Verified" : "Pending verification",
+      ]) {
         const cell = document.createElement("td");
         cell.textContent = value;
         row.append(cell);
@@ -23,7 +27,12 @@ async function load() {
     document.querySelector("#users-rows").replaceChildren(...rows);
     document.querySelector("#admin-pagination").hidden = pages <= 1;
     document.querySelector("#admin-page").textContent = `Page ${data.page} of ${data.pages}`;
-    status(feedback, data.total ? `${data.total} registered accounts. Showing ${data.users.length} on this page.` : "No accounts registered yet.");
+    status(
+      feedback,
+      data.total
+        ? `${data.total} registered accounts. Showing ${data.users.length} on this page.`
+        : "No accounts registered yet.",
+    );
   } catch (error) {
     status(feedback, error.message, true);
   } finally {
@@ -31,6 +40,16 @@ async function load() {
     next.disabled = page >= pages;
   }
 }
-previous.addEventListener("click", () => { if (page > 1) { page -= 1; load(); } });
-next.addEventListener("click", () => { if (page < pages) { page += 1; load(); } });
+previous.addEventListener("click", () => {
+  if (page > 1) {
+    page -= 1;
+    load();
+  }
+});
+next.addEventListener("click", () => {
+  if (page < pages) {
+    page += 1;
+    load();
+  }
+});
 load();

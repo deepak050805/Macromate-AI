@@ -2,7 +2,9 @@ import hashlib
 import hmac
 import secrets
 import time
+
 from flask import current_app
+
 from app.extensions import db
 from app.models import Otp
 from app.services.mail import send_code
@@ -34,8 +36,13 @@ def issue(user, purpose):
 
 def consume(user, purpose, code):
     challenge = db.session.get(Otp, user.id) if user else None
-    valid = (isinstance(code, str) and len(code) == 6 and code.isascii() and code.isdecimal())
-    if not challenge or challenge.purpose != purpose or challenge.expires_at <= time.time() or challenge.attempts >= current_app.config["OTP_MAX_ATTEMPTS"]:
+    valid = isinstance(code, str) and len(code) == 6 and code.isascii() and code.isdecimal()
+    if (
+        not challenge
+        or challenge.purpose != purpose
+        or challenge.expires_at <= time.time()
+        or challenge.attempts >= current_app.config["OTP_MAX_ATTEMPTS"]
+    ):
         raise ValidationError("Code is invalid or expired; request a new code")
     challenge.attempts += 1
     if not valid or not hmac.compare_digest(challenge.digest, digest(user.id, purpose, code)):

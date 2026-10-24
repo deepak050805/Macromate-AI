@@ -1,4 +1,5 @@
 from flask import Blueprint, jsonify
+
 from app.services.nutrition import calculate
 from app.utils.validation import payload
 

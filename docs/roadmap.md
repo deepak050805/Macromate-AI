@@ -11,6 +11,7 @@ inputs, duplicated inline UI assets, and no test or migration framework.
 A database binary is tracked; local database contents must never be printed.
 
 Implementation sequence:
+
 1. Remove credentials and isolate local artifacts; constrain dependencies.
 2. Establish app factory, feature routes, services, repositories and models.
 3. Harden authentication, OTP delivery, sessions, CSRF and authorization.
@@ -28,3 +29,12 @@ Do not manufacture commits or claim unrun checks passed.
 Credential response: rotate the previously committed SMTP app password with the
 provider immediately. Old history is preserved, so revocation is mandatory.
 No existing data will be deleted and no migrations run against a live database.
+
+## Updated follow-up scope
+
+The user approved continuing on `main` and then requested exactly seven additional
+meaningful commits after `ce71112d2161a73693167592f0604c8bd2716d1b`. The follow-up
+covers session correctness, the shared UI, authentication pages, calculator,
+progress/dashboard, administration, and repeatable local validation/documentation.
+The original 100-commit production roadmap is not claimed complete. Container
+packaging, hosted CI and production rollout remain outstanding.

@@ -1,0 +1,5 @@
+.venv/
+.task-work/
+node_modules/
+coverage/
+package-lock.json

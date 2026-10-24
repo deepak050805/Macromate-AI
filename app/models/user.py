@@ -1,4 +1,5 @@
 """User schema retains legacy column names for a safe migration."""
+
 from app.extensions import db
 
 

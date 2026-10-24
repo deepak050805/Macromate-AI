@@ -16,5 +16,9 @@ class Progress(db.Model):
     created_at = db.Column(db.DateTime(timezone=True), server_default=db.func.now())
 
     def as_dict(self):
-        return {"id": self.id, "weight": self.weight, "calories": self.calories,
-                "date": self.record_date.isoformat() if self.record_date else None}
+        return {
+            "id": self.id,
+            "weight": self.weight,
+            "calories": self.calories,
+            "date": self.record_date.isoformat() if self.record_date else None,
+        }

@@ -1,4 +1,5 @@
 from flask import Blueprint, abort, jsonify, request
+
 from app.repositories.progress import history
 from app.security import authenticated, current_user
 from app.services import tracking
@@ -18,7 +19,12 @@ def add():
 @authenticated
 def get_history():
     records = history(current_user().email, page_number(request.args.get("page", "1")))
-    return jsonify(records=[record.as_dict() for record in records.items], page=records.page, pages=records.pages, total=records.total)
+    return jsonify(
+        records=[record.as_dict() for record in records.items],
+        page=records.page,
+        pages=records.pages,
+        total=records.total,
+    )
 
 
 @bp.get("/get/<path:email>")

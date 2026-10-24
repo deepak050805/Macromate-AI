@@ -1,0 +1,19 @@
+{
+  "name": "macromate-ai",
+  "private": true,
+  "version": "0.1.0",
+  "engines": {
+    "node": ">=24 <25"
+  },
+  "scripts": {
+    "lint": "eslint app/static/js",
+    "format": "prettier --write app/static/js app/static/css package.json eslint.config.mjs .prettierrc.json README.md docs",
+    "format:check": "prettier --check app/static/js app/static/css package.json eslint.config.mjs .prettierrc.json README.md docs"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.13.0",
+    "globals": "^17.13.0",
+    "prettier": "^3.9.10"
+  }
+}

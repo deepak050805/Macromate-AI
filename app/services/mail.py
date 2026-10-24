@@ -1,6 +1,7 @@
 import smtplib
 import ssl
 from email.message import EmailMessage
+
 from flask import current_app
 
 
@@ -17,7 +18,9 @@ def send_code(email, code):
     message["From"] = sender
     message["To"] = email
     message["Subject"] = "Your MacroMate verification code"
-    message.set_content(f"Your code is {code}. It expires in {config['OTP_EXPIRY_SECONDS']} seconds. If you did not request it, ignore this email.")
+    message.set_content(
+        f"Your code is {code}. It expires in {config['OTP_EXPIRY_SECONDS']} seconds. If you did not request it, ignore this email."
+    )
     try:
         with smtplib.SMTP(config["MAIL_SERVER"], config["MAIL_PORT"], timeout=10) as server:
             if config["MAIL_USE_TLS"]:

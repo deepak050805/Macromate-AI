@@ -1,4 +1,5 @@
 """Preserve the original weight-based energy and macro formulas."""
+
 from app.utils.validation import ValidationError, number
 
 

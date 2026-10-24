@@ -1,4 +1,5 @@
 from flask import Blueprint, abort, jsonify, session
+
 from app.extensions import limiter
 from app.services import auth
 from app.utils.validation import payload

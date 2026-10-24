@@ -97,15 +97,28 @@ async function loadHistory() {
     next.disabled = page >= lastPage;
   }
 }
-previous.addEventListener("click", () => { if (page > 1) { page -= 1; loadHistory(); } });
-next.addEventListener("click", () => { if (page < lastPage) { page += 1; loadHistory(); } });
+previous.addEventListener("click", () => {
+  if (page > 1) {
+    page -= 1;
+    loadHistory();
+  }
+});
+next.addEventListener("click", () => {
+  if (page < lastPage) {
+    page += 1;
+    loadHistory();
+  }
+});
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
   busy(form, true);
   status(feedback, "Saving…");
   const editing = recordId.value;
   try {
-    await api(editing ? `/api/tracker/${editing}` : "/api/tracker/add", { method: editing ? "PUT" : "POST", body: Object.fromEntries(new FormData(form)) });
+    await api(editing ? `/api/tracker/${editing}` : "/api/tracker/add", {
+      method: editing ? "PUT" : "POST",
+      body: Object.fromEntries(new FormData(form)),
+    });
     resetForm();
     page = 1;
     status(feedback, editing ? "Entry updated." : "Entry saved.");

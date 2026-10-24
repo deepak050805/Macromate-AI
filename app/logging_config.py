@@ -5,7 +5,9 @@ import sys
 
 class EventFormatter(logging.Formatter):
     def format(self, record):
-        return json.dumps({"level": record.levelname, "logger": record.name, "event": record.getMessage()})
+        return json.dumps(
+            {"level": record.levelname, "logger": record.name, "event": record.getMessage()}
+        )
 
 
 def configure_logging(app):

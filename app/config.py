@@ -39,7 +39,10 @@ def configuration(overrides=None):
     values.update(overrides or {})
     uri = values["SQLALCHEMY_DATABASE_URI"]
     if uri.startswith("postgres://"):
-        values["SQLALCHEMY_DATABASE_URI"] = uri.replace("postgres://", "postgresql://", 1)
+        uri = uri.replace("postgres://", "postgresql://", 1)
+    if uri.startswith("postgresql://"):
+        uri = uri.replace("postgresql://", "postgresql+psycopg2://", 1)
+    values["SQLALCHEMY_DATABASE_URI"] = uri
     if not uri:
         raise ValueError("DATABASE_URL must be configured")
     if production:
@@ -56,7 +59,7 @@ def configuration(overrides=None):
             )
         if len(values["SECRET_KEY"]) < 32 or not values["SESSION_COOKIE_SECURE"]:
             raise ValueError("Production requires a strong secret and secure cookies")
-        if not values["SQLALCHEMY_DATABASE_URI"].startswith("postgresql://"):
+        if not values["SQLALCHEMY_DATABASE_URI"].startswith("postgresql+psycopg2://"):
             raise ValueError("Production requires PostgreSQL")
         if not values["RATELIMIT_STORAGE_URI"].startswith(("redis://", "rediss://")):
             raise ValueError("Production requires shared Redis rate-limit storage")

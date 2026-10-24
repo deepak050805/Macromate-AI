@@ -2,6 +2,7 @@ from flask import jsonify, render_template, request
 from flask_wtf.csrf import CSRFError
 from sqlalchemy.exc import SQLAlchemyError
 from werkzeug.exceptions import HTTPException
+
 from app.extensions import db
 from app.services.mail import DeliveryError
 from app.utils.validation import ValidationError
@@ -25,7 +26,9 @@ def register_errors(app):
     @app.errorhandler(DeliveryError)
     def mail_error(error):
         db.session.rollback()
-        return response("Email delivery is temporarily unavailable. Try again later.", 503, "mail_unavailable")
+        return response(
+            "Email delivery is temporarily unavailable. Try again later.", 503, "mail_unavailable"
+        )
 
     @app.errorhandler(SQLAlchemyError)
     def database_error(error):
@@ -35,8 +38,15 @@ def register_errors(app):
 
     @app.errorhandler(HTTPException)
     def http_error(error):
-        messages = {401: "Please log in to continue", 403: "Access denied", 404: "Page or record not found", 429: "Too many attempts. Try again later."}
-        return response(messages.get(error.code, error.name), error.code, error.name.lower().replace(" ", "_"))
+        messages = {
+            401: "Please log in to continue",
+            403: "Access denied",
+            404: "Page or record not found",
+            429: "Too many attempts. Try again later.",
+        }
+        return response(
+            messages.get(error.code, error.name), error.code, error.name.lower().replace(" ", "_")
+        )
 
     @app.errorhandler(Exception)
     def unexpected(error):

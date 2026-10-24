@@ -1,6 +1,7 @@
 import math
 import re
 from datetime import date, datetime, timezone
+
 from flask import request
 
 
@@ -49,7 +50,11 @@ def record_date(value):
         result = date.fromisoformat(value)
     except ValueError:
         raise ValidationError("Date must use YYYY-MM-DD") from None
-    if result.isoformat() != value or result > datetime.now(timezone.utc).date() or result.year < 2000:
+    if (
+        result.isoformat() != value
+        or result > datetime.now(timezone.utc).date()
+        or result.year < 2000
+    ):
         raise ValidationError("Date must be between 2000-01-01 and today (UTC)")
     return result
 

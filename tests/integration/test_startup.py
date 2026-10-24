@@ -5,9 +5,13 @@ def test_public_startup(client):
 
 
 def test_factory_does_not_create_schema():
+    from sqlalchemy import inspect
+
     from app import create_app
     from app.extensions import db
-    from sqlalchemy import inspect
-    app = create_app({"TESTING": True, "SQLALCHEMY_DATABASE_URI": "sqlite://", "RATELIMIT_ENABLED": False})
+
+    app = create_app(
+        {"TESTING": True, "SQLALCHEMY_DATABASE_URI": "sqlite://", "RATELIMIT_ENABLED": False}
+    )
     with app.app_context():
         assert inspect(db.engine).get_table_names() == []

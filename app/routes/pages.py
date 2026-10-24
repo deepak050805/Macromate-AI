@@ -1,4 +1,5 @@
 from flask import Blueprint, redirect, render_template, url_for
+
 from app.security import administrator, authenticated, current_user
 
 bp = Blueprint("pages", __name__)

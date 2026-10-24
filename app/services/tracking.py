@@ -9,7 +9,11 @@ def values(data):
     calories = number(data.get("calories"), "Calories", 0, 20000)
     if not calories.is_integer():
         raise ValidationError("Calories must be a whole number")
-    return {"weight": weight, "calories": int(calories), "record_date": record_date(data.get("date"))}
+    return {
+        "weight": weight,
+        "calories": int(calories),
+        "record_date": record_date(data.get("date")),
+    }
 
 
 def save(email, data, record_id=None):

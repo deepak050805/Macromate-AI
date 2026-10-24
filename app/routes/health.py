@@ -1,6 +1,7 @@
 from flask import Blueprint, jsonify
 from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
+
 from app.extensions import db, limiter
 
 bp = Blueprint("health", __name__)

@@ -8,15 +8,20 @@ export async function api(path, { method = "GET", body } = {}) {
       headers["X-CSRFToken"] = document.querySelector('meta[name="csrf-token"]').content;
     }
     const response = await fetch(path, {
-      method, headers, credentials: "same-origin", signal: controller.signal,
+      method,
+      headers,
+      credentials: "same-origin",
+      signal: controller.signal,
       ...(body === undefined ? {} : { body: JSON.stringify(body) }),
     });
     const data = await response.json();
     if (!response.ok) throw new Error(data.message || "The request could not be completed.");
     return data;
   } catch (error) {
-    if (error.name === "AbortError") throw new Error("The request timed out. Try again.");
-    if (error instanceof TypeError) throw new Error("Connection failed. Check your connection and try again.");
+    if (error.name === "AbortError")
+      throw new Error("The request timed out. Try again.", { cause: error });
+    if (error instanceof TypeError)
+      throw new Error("Connection failed. Check your connection and try again.", { cause: error });
     throw error;
   } finally {
     clearTimeout(timer);
@@ -34,13 +39,14 @@ export function busy(form, active) {
 }
 
 const logout = document.querySelector("#logout");
-if (logout) logout.addEventListener("click", async () => {
-  logout.disabled = true;
-  try {
-    await api("/api/auth/logout", { method: "POST", body: {} });
-    window.location.assign("/login");
-  } catch (error) {
-    status(document.querySelector("#global-status"), error.message, true);
-    logout.disabled = false;
-  }
-});
+if (logout)
+  logout.addEventListener("click", async () => {
+    logout.disabled = true;
+    try {
+      await api("/api/auth/logout", { method: "POST", body: {} });
+      window.location.assign("/login");
+    } catch (error) {
+      status(document.querySelector("#global-status"), error.message, true);
+      logout.disabled = false;
+    }
+  });
