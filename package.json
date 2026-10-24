@@ -1,15 +1,17 @@
 {
   "name": "macromate-ai",
   "private": true,
+  "type": "module",
   "version": "0.1.0",
   "engines": {
     "node": ">=24 <25"
   },
   "scripts": {
     "audit:check": "npm audit --package-lock-only --audit-level=low",
-    "lint": "eslint app/static/js",
-    "format": "prettier --write app/static/js app/static/css package.json eslint.config.mjs .prettierrc.json README.md docs",
-    "format:check": "prettier --check app/static/js app/static/css package.json eslint.config.mjs .prettierrc.json README.md docs"
+    "test:frontend": "node --test \"tests/frontend/*.test.mjs\"",
+    "lint": "eslint app/static/js tests/frontend",
+    "format": "prettier --write app/static/js app/static/css tests/frontend package.json eslint.config.mjs .prettierrc.json README.md docs",
+    "format:check": "prettier --check app/static/js app/static/css tests/frontend package.json eslint.config.mjs .prettierrc.json README.md docs"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

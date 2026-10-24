@@ -14,6 +14,7 @@ def main():
         [sys.executable, "-m", "ruff", "check", "."],
         [sys.executable, "-m", "ruff", "format", "--check", "."],
         [sys.executable, "-m", "pytest"],
+        [NPM, "run", "test:frontend"],
         [NPM, "run", "lint"],
         [NPM, "run", "format:check"],
     ]

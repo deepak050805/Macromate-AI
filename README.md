@@ -78,6 +78,7 @@ needed to run tests.
 
 ```powershell
 npm ci
+npm run test:frontend
 npm run lint
 npm run format:check
 .\.venv\Scripts\python -m ruff check .
@@ -99,6 +100,12 @@ migrations, constraint checks, persisted OTP and owned progress tests. See
 [PostgreSQL test setup](docs/postgresql-testing.md) for the explicit local command
 and disposable database requirements, and [validation notes](docs/validation.md)
 for earlier verification records.
+
+`npm run test:frontend` uses Node's built-in runner for the shared API client's
+request and error behavior. Fetch and the minimal DOM are mocked; the tests cover
+CSRF/credentials, valid JSON, malformed upstream responses, network failures and
+aborts. They run in the complete local/CI quality gate, alongside ESLint and
+Prettier checks for the test sources. They do not replace real-browser testing.
 
 GitHub Actions runs the same quality gate on pull requests targeting `main` and
 pushes to `main`, using Python 3.12 and Node 24 on Linux. It can also be started
