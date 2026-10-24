@@ -1,5 +1,6 @@
 from flask import Blueprint, request, jsonify, session
 from backend.models import connect
+import os
 import random
 import time
 import smtplib
@@ -11,11 +12,11 @@ auth_bp = Blueprint("auth", __name__)
 # ─────────────────────────────────────────────
 # ✏️  PUT YOUR GMAIL CREDENTIALS HERE
 # ─────────────────────────────────────────────
-GMAIL_ADDRESS  = "macromate.ai@gmail.com"
-GMAIL_APP_PASS = "yvnqueibgzgsbynt"    # ← your 16-char App Password
+GMAIL_ADDRESS = os.environ.get("MAIL_USERNAME", "")
+GMAIL_APP_PASS = os.environ.get("MAIL_PASSWORD", "")
 # ─────────────────────────────────────────────
 
-if "your_gmail" in GMAIL_ADDRESS or "xxxx" in GMAIL_APP_PASS:
+if not GMAIL_ADDRESS or not GMAIL_APP_PASS:
     print("[MacroMate] ⚠️  WARNING: SMTP credentials not set. OTP emails will fail.")
 
 otp_store = {}
