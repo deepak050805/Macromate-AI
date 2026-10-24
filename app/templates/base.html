@@ -1,0 +1,5 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="csrf-token" content="{{ csrf_token() }}"><title>{% block title %}MacroMate{% endblock %}</title></head>
+<body><a href="#main">Skip to content</a><header><a href="/">MacroMate</a><nav aria-label="Main"><a href="/calculator">Calculator</a><a href="/login">Log in</a></nav></header><main id="main">{% block content %}{% endblock %}</main><footer>Formula-based nutrition estimates. Not medical advice.</footer></body>
+</html>
