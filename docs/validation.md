@@ -39,8 +39,8 @@ ephemeral credentials, and a random port bound only to loopback. Checks passed f
 
 The temporary container was stopped and removed. No existing application database
 or user data was migrated. SMTP was mocked; real provider delivery remains untested.
-These integration checks were executed with a local test harness and do not yet
-constitute a hosted PostgreSQL CI job.
+Those initial checks were executed with a local test harness. The committed suite
+and hosted PostgreSQL job described below now provide repeatable coverage.
 
 ## Browser verification
 
@@ -82,12 +82,17 @@ The separate `Dependency audit` job runs `scripts/audit.py` to audit resolved Py
 runtime/development requirements and the committed npm lockfile. Audits also run
 weekly and fail on detected advisories or audit-service errors. They check known
 vulnerabilities, not all security risks or an already deployed environment.
-PostgreSQL service testing remains a separate roadmap item.
+The `PostgreSQL 17 integration` job provisions an isolated service and explicitly
+runs `tests/postgresql`: seven cases for migrations, constraints, persisted OTPs,
+authentication and owned progress. The fixture requires a loopback test database,
+uses a unique schema per case, and fails if its test configuration is absent.
+The default SQLite suite remains independent of external services. Local setup and
+coverage limits are documented in [PostgreSQL testing](postgresql-testing.md).
 
 ## Outstanding work
 
 The broader production roadmap remains incomplete: Docker/Compose packaging,
-PostgreSQL CI, Redis operational testing, live mail delivery,
+Redis operational testing, live mail delivery,
 backup/restore rehearsal, and a production rollout have not been verified here.
 Gunicorn has not been started on this Windows host. Production startup requires
 real infrastructure and secrets; do not deploy with example placeholders.

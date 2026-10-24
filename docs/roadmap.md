@@ -21,20 +21,19 @@ pull request targeting `main`. Commit or PR counts are not acceptance criteria.
 - Repeatable Python requirement and npm lockfile audits, with CI enforcement on
   PRs, main pushes and a weekly schedule. Both include development dependencies
   and fail on advisory findings or service errors without blanket exclusions.
+- Separate PostgreSQL 17 integration suite and hosted service job for fresh and
+  legacy migrations, duplicate-email rejection, database constraints, cross-app
+  OTP persistence, progress ownership and CRUD. Tests use unique disposable schemas.
 
 ## Prioritized outstanding work
 
-1. **PostgreSQL CI:** commit isolated integration coverage for fresh and legacy
-   migrations, cross-app OTP persistence, and owned progress CRUD on PostgreSQL 17.
-   Existing SQLite tests and the earlier manual PostgreSQL rehearsal do not replace
-   a hosted database integration job.
-2. **Redis and reliability:** verify shared rate-limit behavior and service-failure
+1. **Redis and reliability:** verify shared rate-limit behavior and service-failure
    handling; add evidence-based rollback and safe error regression tests.
-3. **Accessibility:** automate relevant keyboard, form feedback and responsive
+2. **Accessibility:** automate relevant keyboard, form feedback and responsive
    interaction checks, building on the recorded browser smoke tests.
-4. **Packaging:** inspect deployment needs, then validate a non-root container,
+3. **Packaging:** inspect deployment needs, then validate a non-root container,
    startup command, health checks and local service composition.
-5. **Operations:** rehearse encrypted backup/restore, verify real mail delivery,
+4. **Operations:** rehearse encrypted backup/restore, verify real mail delivery,
    configure deployment infrastructure, and validate a production rollout.
 
 Each item must have a concrete problem, acceptance criteria and actual validation
