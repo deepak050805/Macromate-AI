@@ -18,22 +18,23 @@ pull request targeting `main`. Commit or PR counts are not acceptance criteria.
 - GitHub Actions quality workflow for PRs to `main`, pushes to `main`, and manual
   runs. It executes the same local gate on Python 3.12 and Node 24, with pinned
   actions, read-only repository permissions and no application secrets.
+- Repeatable Python requirement and npm lockfile audits, with CI enforcement on
+  PRs, main pushes and a weekly schedule. Both include development dependencies
+  and fail on advisory findings or service errors without blanket exclusions.
 
 ## Prioritized outstanding work
 
-1. **Dependency auditing:** run supported Python and npm audits, resolve actionable
-   vulnerabilities, and add repeatable CI checks without blanket suppressions.
-2. **PostgreSQL CI:** commit isolated integration coverage for fresh and legacy
+1. **PostgreSQL CI:** commit isolated integration coverage for fresh and legacy
    migrations, cross-app OTP persistence, and owned progress CRUD on PostgreSQL 17.
    Existing SQLite tests and the earlier manual PostgreSQL rehearsal do not replace
    a hosted database integration job.
-3. **Redis and reliability:** verify shared rate-limit behavior and service-failure
+2. **Redis and reliability:** verify shared rate-limit behavior and service-failure
    handling; add evidence-based rollback and safe error regression tests.
-4. **Accessibility:** automate relevant keyboard, form feedback and responsive
+3. **Accessibility:** automate relevant keyboard, form feedback and responsive
    interaction checks, building on the recorded browser smoke tests.
-5. **Packaging:** inspect deployment needs, then validate a non-root container,
+4. **Packaging:** inspect deployment needs, then validate a non-root container,
    startup command, health checks and local service composition.
-6. **Operations:** rehearse encrypted backup/restore, verify real mail delivery,
+5. **Operations:** rehearse encrypted backup/restore, verify real mail delivery,
    configure deployment infrastructure, and validate a production rollout.
 
 Each item must have a concrete problem, acceptance criteria and actual validation

@@ -6,6 +6,7 @@
     "node": ">=24 <25"
   },
   "scripts": {
+    "audit:check": "npm audit --package-lock-only --audit-level=low",
     "lint": "eslint app/static/js",
     "format": "prettier --write app/static/js app/static/css package.json eslint.config.mjs .prettierrc.json README.md docs",
     "format:check": "prettier --check app/static/js app/static/css package.json eslint.config.mjs .prettierrc.json README.md docs"

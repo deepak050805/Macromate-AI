@@ -6,6 +6,8 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+  schedule:
+    - cron: "37 6 * * 1"
 
 permissions:
   contents: read
@@ -42,3 +44,24 @@ jobs:
         run: npm ci
       - name: Run the project quality gate
         run: python scripts/check.py
+
+  dependencies:
+    name: Dependency audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements*.txt
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .node-version
+      - name: Install Python dependencies and audit tool
+        run: python -m pip install -r requirements-dev.txt
+      - name: Audit Python requirements and frontend lockfile
+        run: python scripts/audit.py
