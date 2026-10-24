@@ -1,45 +1,7 @@
-import os
-from flask import Flask, render_template, session, redirect, url_for, abort
-from flask_cors import CORS
-from backend.models import init_db
-from backend.routes.macros import macros_bp
-from backend.routes.auth import auth_bp
-from backend.routes.tracker import tracker_bp
+"""Compatibility entry point for existing backend.app:app deployments."""
+from app import create_app
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-app = Flask(__name__, template_folder=os.path.join(BASE_DIR, "templates"))
-CORS(app)
-
-app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "secret123")
-
-app.register_blueprint(macros_bp, url_prefix="/api/macros")
-app.register_blueprint(auth_bp, url_prefix="/api/auth")
-app.register_blueprint(tracker_bp, url_prefix="/api/tracker")
-
-# Initialize DB on every startup — safe to run repeatedly.
-# CREATE TABLE IF NOT EXISTS won't touch existing data.
-# ALTER TABLE is wrapped in try/except so missing columns get added safely.
-init_db()
-
-@app.route("/")
-def home():
-    return render_template("login.html")
-
-@app.route("/otp")
-def otp():
-    return render_template("otp.html")
-
-@app.route("/dashboard")
-def dashboard():
-    return render_template("dashboard.html")
-
-@app.route("/admin")
-def admin():
-    if session.get("role") != "admin":
-        abort(403)
-    return render_template("admin.html")
+app = create_app()
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    debug = os.environ.get("FLASK_ENV") != "production"
-    app.run(host="0.0.0.0", port=port, debug=debug)
+    app.run()
