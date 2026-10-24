@@ -37,7 +37,28 @@ def test_bad_password(value):
         password_value(value)
 
 
-@pytest.mark.parametrize("value", ["0", "-1", "1.2", "10001", "all"])
+@pytest.mark.parametrize(
+    "value",
+    [
+        "0",
+        "-1",
+        "1.2",
+        "10001",
+        "all",
+        None,
+        True,
+        1,
+        [],
+        pytest.param("9" * 5000, id="oversized-decimal"),
+    ],
+)
 def test_bad_page(value):
     with pytest.raises(ValidationError):
         page_number(value)
+
+
+@pytest.mark.parametrize(
+    ("value", "expected"), [("1", 1), ("10000", 10000), ("00001", 1), ("\u0661\u0662", 12)]
+)
+def test_valid_page(value, expected):
+    assert page_number(value) == expected
