@@ -1,5 +1,7 @@
 from flask import jsonify, make_response, render_template, request
 from flask_wtf.csrf import CSRFError
+from limits.errors import StorageError
+from redis.exceptions import RedisError
 from sqlalchemy.exc import SQLAlchemyError
 from werkzeug.exceptions import HTTPException
 
@@ -37,6 +39,17 @@ def register_errors(app):
         db.session.rollback()
         app.logger.error("database_request_failed")
         return response("Service temporarily unavailable", 503, "database_unavailable")
+
+    @app.errorhandler(RedisError)
+    @app.errorhandler(StorageError)
+    def rate_limit_error(error):
+        db.session.rollback()
+        app.logger.error("rate_limit_storage_failed")
+        return response(
+            "Request limiting is temporarily unavailable. Try again later.",
+            503,
+            "rate_limit_unavailable",
+        )
 
     @app.errorhandler(HTTPException)
     def http_error(error):

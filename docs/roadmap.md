@@ -28,11 +28,14 @@ pull request targeting `main`. Commit or PR counts are not acceptance criteria.
   HTML 503 responses without repeating the failed query, while HTTP error status,
   API rollback, safe logging and next-request identity recovery have regression
   coverage.
+- Separate-process Redis 8 tests verify shared login limits and namespace isolation.
+  Storage failures return safe 503 responses without bypassing limits; CI and the
+  explicit local suite cover the actual middleware path with injected errors.
 
 ## Prioritized outstanding work
 
-1. **Redis and reliability:** verify shared rate-limit behavior and service-failure
-   handling; add evidence-based rollback and safe error regression tests.
+1. **Reliability:** rehearse real network outages, timeouts and Redis failover;
+   extend transaction rollback checks where an untested failure can lose data.
 2. **Accessibility:** automate relevant keyboard, form feedback and responsive
    interaction checks, building on the recorded browser smoke tests.
 3. **Packaging:** inspect deployment needs, then validate a non-root container,
