@@ -11,6 +11,7 @@ from app.models import Progress, User
 
 def test_fresh_migration(postgres_app_factory):
     app = postgres_app_factory()
+    assert app.test_client().get("/health/ready").status_code == 503
     with app.app_context():
         upgrade()
         assert set(inspect(db.engine).get_table_names()) == {
@@ -25,6 +26,7 @@ def test_fresh_migration(postgres_app_factory):
         assert "ix_progress_email_date" in {
             index["name"] for index in inspect(db.engine).get_indexes("progress")
         }
+    assert app.test_client().get("/health/ready").status_code == 200
 
 
 def test_legacy_migration_retains_progress(postgres_app_factory):

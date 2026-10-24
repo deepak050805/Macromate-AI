@@ -1,8 +1,8 @@
 from flask import Blueprint, jsonify
-from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.extensions import db, limiter
+from app.models import Otp, Progress, User
 
 bp = Blueprint("health", __name__)
 
@@ -17,7 +17,8 @@ def live():
 @limiter.exempt
 def ready():
     try:
-        db.session.execute(text("SELECT 1"))
+        for model in (User, Progress, Otp):
+            db.session.execute(db.select(model).limit(0)).close()
         return jsonify(status="ok")
     except SQLAlchemyError:
         db.session.rollback()
