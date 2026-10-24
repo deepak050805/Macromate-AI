@@ -18,7 +18,7 @@ def test_cross_app_otp_and_owned_progress(postgres_app_factory, monkeypatch):
     # A separate application must consume the persisted challenge, not worker-local state.
     other_app = postgres_app_factory()
     owner = other_app.test_client()
-    verification = {"email": credentials["email"], "otp": sent[0]}
+    verification = {**credentials, "otp": sent[0]}
     assert owner.post("/api/auth/verify-otp", json=verification).status_code == 200
     assert owner.post("/api/auth/verify-otp", json=verification).status_code == 400
     assert owner.post("/api/auth/login", json=credentials).status_code == 200

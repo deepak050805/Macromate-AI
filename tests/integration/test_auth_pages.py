@@ -16,4 +16,6 @@ def test_password_and_code_fields(client):
     assert 'autocomplete="new-password"' in client.get("/signup").text
     assert 'minlength="12"' in client.get("/signup").text
     assert 'autocomplete="one-time-code"' in client.get("/otp").text
+    assert 'autocomplete="new-password"' in client.get("/otp").text
+    assert 'name="password"' in client.get("/otp").text
     assert client.get("/static/js/auth.js").status_code == 200

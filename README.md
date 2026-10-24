@@ -63,6 +63,12 @@ password where required. TLS defaults to enabled on port 587. Codes expire after
 `OTP_EXPIRY_SECONDS` (default 300) and resends have a server-side cooldown
 (`OTP_COOLDOWN_SECONDS`, default 60).
 
+Finish registration by submitting the code and the password you want to use.
+`POST /api/auth/verify-otp` requires `email`, `otp`, and a `password` of 12–128
+characters. The password chosen during email verification replaces any unverified
+signup credentials. The verification form includes this field; API clients must
+send it too. Invalid passwords do not consume a valid verification code.
+
 **Revoke and rotate the SMTP app password previously committed to this repository.**
 It has been removed from current source, but old history was preserved. Never reuse
 that credential. Mail transport tests use mocks; no real email credentials are
