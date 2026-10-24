@@ -12,9 +12,9 @@ class Progress(db.Model):
     email = db.Column(db.Text, db.ForeignKey("users.email"), nullable=False)
     weight = db.Column(db.Float, nullable=False)
     calories = db.Column(db.Integer, nullable=False)
-    record_date = db.Column(db.Date, nullable=False)
+    record_date = db.Column(db.Date, nullable=True)
     created_at = db.Column(db.DateTime(timezone=True), server_default=db.func.now())
 
     def as_dict(self):
         return {"id": self.id, "weight": self.weight, "calories": self.calories,
-                "date": self.record_date.isoformat()}
+                "date": self.record_date.isoformat() if self.record_date else None}
