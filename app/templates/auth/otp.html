@@ -1,0 +1,6 @@
+{% extends "base.html" %}{% from "components/forms.html" import email,code with context %}
+{% block title %}Verify your email · MacroMate{% endblock %}
+{% block scripts %}<script type="module" src="{{ url_for('static',filename='js/auth.js') }}"></script>{% endblock %}
+{% block content %}
+<div class="auth-layout"><section class="auth-aside"><p class="eyebrow">One more step</p><h1>Check your inbox.</h1><p class="muted">Enter the code sent during registration. Check your spam folder if it hasn’t arrived.</p><p class="hint">A limited number of attempts keeps your account safe. If your code expires, request a new one.</p></section><section class="card" aria-labelledby="form-title"><h2 id="form-title">Verify your email</h2><form data-auth="/api/auth/verify-otp" data-redirect="/login?notice=verified" id="verification-form">{{ email() }}{{ code() }}<button class="full" type="submit">Verify email</button><p class="status" role="status" aria-live="polite"></p></form><button class="secondary full" type="button" id="resend" data-cooldown="{{ config.OTP_COOLDOWN_SECONDS }}">Send a new code</button><p class="hint">Already verified? <a href="/login">Log in</a></p></section></div>
+{% endblock %}
