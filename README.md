@@ -87,9 +87,12 @@ Or run the complete gate after installing both dependency sets:
 
 `npm run format` formats JavaScript, CSS, tooling JSON, and documentation. Templates
 remain Jinja source and are not passed to ESLint or an incompatible HTML formatter.
-There is no frontend build step or TypeScript dependency. Python tests use isolated
-SQLite databases; PostgreSQL verification is recorded in
-[validation notes](docs/validation.md).
+There is no frontend build step or TypeScript dependency. The default Python suite
+uses isolated SQLite databases. A separate PostgreSQL 17 integration job runs real
+migrations, constraint checks, persisted OTP and owned progress tests. See
+[PostgreSQL test setup](docs/postgresql-testing.md) for the explicit local command
+and disposable database requirements, and [validation notes](docs/validation.md)
+for earlier verification records.
 
 GitHub Actions runs the same quality gate on pull requests targeting `main` and
 pushes to `main`, using Python 3.12 and Node 24 on Linux. It can also be started
