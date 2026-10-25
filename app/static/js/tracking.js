@@ -21,7 +21,10 @@ function resetForm() {
   document.querySelector("#save-entry").textContent = "Save entry";
   cancel.hidden = true;
 }
-cancel.addEventListener("click", resetForm);
+cancel.addEventListener("click", () => {
+  resetForm();
+  form.elements.weight.focus();
+});
 
 function cell(row, value) {
   const td = document.createElement("td");

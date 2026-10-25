@@ -27,3 +27,19 @@ test("verified owner signs in and records progress through CSRF-protected UI", a
   await createEntry(page, "2024-01-01");
   await expect(page.locator("#entry-status")).toHaveText("Entry saved.");
 });
+
+test("cancelling an edit returns keyboard focus to the entry form", async ({ page }) => {
+  const date = "2024-01-02";
+  await createEntry(page, date);
+  await page.getByRole("button", { name: `Edit entry for ${date}`, exact: true }).focus();
+  await page.keyboard.press("Enter");
+  const weight = page.getByLabel("Weight (kg)", { exact: true });
+  await expect(weight).toBeFocused();
+  for (let step = 0; step < 3; step += 1) await page.keyboard.press("Tab");
+  const cancel = page.getByRole("button", { name: "Cancel editing", exact: true });
+  await expect(cancel).toBeFocused();
+  await page.keyboard.press("Enter");
+  await expect(cancel).toBeHidden();
+  await expect(weight).toBeFocused();
+  await expect(weight).toHaveValue("");
+});
