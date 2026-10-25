@@ -1,5 +1,6 @@
 """Environment configuration; production startup fails closed."""
 
+import math
 import os
 import secrets
 from datetime import timedelta
@@ -7,6 +8,24 @@ from datetime import timedelta
 from redis.backoff import NoBackoff
 from redis.retry import Retry
 from sqlalchemy.engine import make_url
+
+
+def _integer_setting(value, name, minimum, maximum=None):
+    bounds = f"between {minimum} and {maximum}" if maximum is not None else f"at least {minimum}"
+    message = f"{name} must be an integer {bounds}"
+    try:
+        if isinstance(value, bool) or not isinstance(value, (int, str)):
+            raise ValueError
+        result = int(value)
+        if (
+            not math.isfinite(result)
+            or result < minimum
+            or (maximum is not None and result > maximum)
+        ):
+            raise ValueError
+    except (ValueError, OverflowError):
+        raise ValueError(message) from None
+    return result
 
 
 def configuration(overrides=None):
@@ -29,13 +48,13 @@ def configuration(overrides=None):
         "RATELIMIT_STORAGE_URI": os.getenv("RATELIMIT_STORAGE_URI", "memory://"),
         "RATELIMIT_HEADERS_ENABLED": True,
         "MAIL_SERVER": os.getenv("MAIL_SERVER", "smtp.gmail.com"),
-        "MAIL_PORT": int(os.getenv("MAIL_PORT", "587")),
+        "MAIL_PORT": os.getenv("MAIL_PORT", "587"),
         "MAIL_USE_TLS": os.getenv("MAIL_USE_TLS", "true").lower() == "true",
         "MAIL_USERNAME": os.getenv("MAIL_USERNAME", ""),
         "MAIL_PASSWORD": os.getenv("MAIL_PASSWORD", ""),
         "MAIL_DEFAULT_SENDER": os.getenv("MAIL_DEFAULT_SENDER", ""),
-        "OTP_EXPIRY_SECONDS": int(os.getenv("OTP_EXPIRY_SECONDS", "300")),
-        "OTP_COOLDOWN_SECONDS": int(os.getenv("OTP_COOLDOWN_SECONDS", "60")),
+        "OTP_EXPIRY_SECONDS": os.getenv("OTP_EXPIRY_SECONDS", "300"),
+        "OTP_COOLDOWN_SECONDS": os.getenv("OTP_COOLDOWN_SECONDS", "60"),
         "OTP_MAX_ATTEMPTS": 5,
         "LOG_LEVEL": os.getenv("LOG_LEVEL", "INFO"),
         "TRUSTED_HOSTS": os.getenv("TRUSTED_HOSTS", "").split(",")
@@ -43,6 +62,13 @@ def configuration(overrides=None):
         else None,
     }
     values.update(overrides or {})
+    for key, minimum, maximum in (
+        ("MAIL_PORT", 1, 65535),
+        ("OTP_EXPIRY_SECONDS", 1, None),
+        ("OTP_COOLDOWN_SECONDS", 0, None),
+        ("OTP_MAX_ATTEMPTS", 1, None),
+    ):
+        values[key] = _integer_setting(values[key], key, minimum, maximum)
     if values["RATELIMIT_STORAGE_URI"].startswith(("redis://", "rediss://")):
         values["RATELIMIT_STORAGE_OPTIONS"] = {
             "socket_connect_timeout": 2,
