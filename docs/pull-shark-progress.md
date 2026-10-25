@@ -1,7 +1,8 @@
 # Pull Shark progress
 
-Account: [deepak050805](https://github.com/deepak050805). Audit date:
-**24 October 2026**, Asia/Calcutta. Sole active achievement goal: **Pull Shark Gold
+Account: [deepak050805](https://github.com/deepak050805). Audit started
+**24 October 2026**; latest verification **25 October 2026**, Asia/Calcutta.
+Sole active achievement goal: **Pull Shark Gold
 (x4), working target 1,024 qualifying merged PRs**. Other achievement goals are
 outside this plan.
 
@@ -26,7 +27,7 @@ or a guaranteed processing deadline. Accordingly:
   can reflect hidden state or processing; do not promise a 24/48-hour award delay.
 
 Latest public profile check, **25 October 2026**: **Pull Shark is not displayed;
-Gold is not verified**. Twelve public authored merged candidates were found.
+Gold is not verified**. Thirteen public authored merged candidates were found.
 The authenticated APIs queried did not expose a confirmed qualifying count.
 Recheck the [profile achievement view](https://github.com/deepak050805?tab=achievements)
 after real contributions. If the discrepancy persists, the owner can inspect
@@ -75,6 +76,11 @@ progress reported by GitHub.
 These are candidates for engineering investigation, not a quota or permission to
 split one change into artificial PRs. External projects must accept the proposed
 work and contribution method; no maintainer merge is assumed.
+
+Queue items 1–5 were completed in PRs #6–#10. Pagination recovery and mail-failure
+coverage followed in #11 and #12. Next useful investigations are non-root container
+packaging, automated keyboard/accessibility checks and real service-outage rehearsals
+in a disposable local environment.
 
 ## Exclusive-mission ledger
 
@@ -190,13 +196,50 @@ goal complete until GitHub actually displays that award.
 - Verified merged state, ancestry and exact remote-main tree. Profile recheck:
   twelve public merged candidates; Pull Shark not displayed, qualifying count unknown.
 
-Latest verified mission snapshot: **6 PRs opened, 6 merged**, containing **8
-meaningful branch commits**. Conditional remaining estimate: **1,012 if all twelve
-public candidates count**; actual qualifying progress is unavailable. The next
-independent task covers previously untested SMTP failures, transaction rollback
-and successful retry behavior without sending real email.
+### 7. Mail failure and transaction recovery coverage — merged
+
+- [MacroMate PR #12](https://github.com/deepak050805/Macromate-AI/pull/12), branch
+  `test/mail-failure-rollback` → `main`.
+- Head: `6fa321568be3907d8f5a604fa243cb6f3fabc020`.
+- Merge: `959f02f27efef522990759b449f7aff80f2b7f1b`.
+- Four meaningful commits: SMTP boundary tests, SQLite transaction/retry tests,
+  PostgreSQL persistence/retry tests, and documentation. This focused coverage did
+  not warrant ten independent development steps; no padding was added.
+- Fourteen new default-suite cases and two new PostgreSQL cases passed. Full local
+  gate: 151 Python tests, 17 Node tests and all lint/format checks passed. Nine real
+  PostgreSQL cases passed locally; the disposable container was removed.
+- [PR CI](https://github.com/deepak050805/Macromate-AI/actions/runs/40161807794)
+  and [main CI](https://github.com/deepak050805/Macromate-AI/actions/runs/40161887447)
+  passed all four jobs, including dependency audits, nine PostgreSQL and three
+  Redis cases. All email transport was mocked; no real messages or production
+  records were used.
+- Verified merged state, ancestry and exact remote-main tree. Profile recheck:
+  thirteen public merged candidates; Pull Shark not displayed, qualifying count unknown.
+
+Latest verified mission snapshot: **7 PRs opened, 7 merged**, containing **12
+meaningful branch commits**. Conditional remaining estimate: **1,011 if all thirteen
+public candidates count**; actual qualifying progress is unavailable. Gold has not
+been verified. This post-merge ledger update remains local for inclusion with a
+future useful contribution; no tracker-only PR was created.
 
 ## Operating boundaries
+
+### Issue-to-PR campaign
+
+The continuous campaign now checks repository issues and recent closed issues as
+well as documented gaps. On 25 October, MacroMate AI had no existing issues or open
+PRs; the inspected crop-yield repository also had no issues. No TODO/FIXME markers
+were found in the inspected application, tests, scripts and documentation.
+
+- Issues created: **1** — [container packaging #13](https://github.com/deepak050805/Macromate-AI/issues/13),
+  currently open. Its acceptance criteria cover non-root runtime, build-context
+  exclusion, bounded health, fail-closed configuration and lifecycle CI.
+- Mission PRs opened: **7**; verified merged: **7**; closed without merging: **0**.
+- Meaningful commits in those merged PRs: **12**. Confirmed Pull Shark credits:
+  **unavailable**, not assumed zero.
+- The container feature is in progress on `feat/non-root-container`; its planned
+  four development steps do not warrant ten independent commits. Count its PR,
+  commits and issue closure only after the corresponding actions are verified.
 
 ### Meaningful commits and verified merges
 
@@ -217,13 +260,14 @@ Verified from each merge's first parent to its feature head:
 | #9         | 1                         | Yes             |
 | #10        | 1                         | Yes             |
 | #11        | 3                         | Yes             |
+| #12        | 4                         | Yes             |
 
 The first five PRs preceded the commit-count preference. PR #11 used three coherent
-steps for its narrow bug. The pending mail-reliability coverage uses four steps:
+steps for its narrow bug. PR #12 used four steps:
 SMTP boundary tests, SQLite auth/OTP rollback and retry tests, PostgreSQL persistence
 and cross-application retry tests, and validation documentation.
-Neither focused task warrants ten independent commits. Record actual final counts
-and verified merges separately; planned commits are not completed merges.
+Neither focused task warranted ten independent commits. Actual final counts and
+verified merges are recorded separately; planned commits are not completed merges.
 
 Preserve unrelated work and secrets. Use a fresh branch from the latest remote
 default branch for each independently useful change. Respect required reviews,

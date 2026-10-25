@@ -196,6 +196,9 @@ gunicorn --bind 0.0.0.0:8000 'app:create_app()'
 ```
 
 Gunicorn is not a Windows development server. Do not deploy Flask's debug server.
+A verified non-root Dockerfile and disposable lifecycle check are available in
+[the container guide](docs/containers.md). The image defaults to production
+configuration and leaves schema migrations as explicit operator actions.
 The app does not trust forwarded proxy headers automatically. Configure a trusted
 proxy and worker count for your deployment. `/health/live` checks process liveness;
 `/health/ready` checks that the required user, progress and OTP tables and model
@@ -225,9 +228,8 @@ Alembic revision. Apply and verify migrations separately before deployment.
 - Administrator access requires a verified account whose database role is `admin`.
   No public route can promote an account. Grant that role only through an audited
   operator procedure.
-- Dockerfile/Compose and a production rollout are
-  still outstanding from the broader engineering roadmap. This checkout is not
-  claimed to be production-ready.
+- Local PostgreSQL/Redis composition and a production rollout remain outstanding.
+  Container smoke checks do not establish production readiness.
 
 ## Troubleshooting
 

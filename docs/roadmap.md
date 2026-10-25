@@ -39,12 +39,16 @@ pull request targeting `main`. Commit or PR counts are not acceptance criteria.
 
 ## Prioritized outstanding work
 
+Container packaging now supplies a pinned Python runtime, non-root Gunicorn,
+bounded liveness checks and disposable CI lifecycle validation. See the
+[container guide](containers.md) for configuration, migration boundaries and limits.
+
 1. **Reliability:** rehearse real network outages, timeouts and Redis failover;
    extend transaction rollback checks where an untested failure can lose data.
 2. **Accessibility:** automate relevant keyboard, form feedback and responsive
    interaction checks, building on the recorded browser smoke tests.
-3. **Packaging:** inspect deployment needs, then validate a non-root container,
-   startup command, health checks and local service composition.
+3. **Packaging:** add and validate local PostgreSQL/Redis service composition,
+   with explicit schema initialization and no production secrets.
 4. **Operations:** rehearse encrypted backup/restore, verify real mail delivery,
    configure deployment infrastructure, and validate a production rollout.
 
