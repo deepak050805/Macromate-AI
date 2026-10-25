@@ -61,15 +61,20 @@ function rowFor(record) {
   remove.setAttribute("aria-label", `Delete entry for ${record.date || "unknown date"}`);
   remove.addEventListener("click", async () => {
     if (!window.confirm("Delete this progress entry? This cannot be undone.")) return;
+    const restoreFocus = document.activeElement === remove;
     remove.disabled = true;
     try {
       await api(`/api/tracker/${record.id}`, { method: "DELETE" });
       if (Number(recordId.value) === record.id) resetForm();
       status(feedback, "Entry deleted.");
       await loadHistory();
+      if (restoreFocus && document.activeElement === document.body) {
+        document.querySelector("#history-title").focus();
+      }
     } catch (error) {
       status(feedback, error.message, true);
       remove.disabled = false;
+      if (restoreFocus && document.activeElement === document.body) remove.focus();
     }
   });
   actions.append(edit, document.createTextNode(" "), remove);

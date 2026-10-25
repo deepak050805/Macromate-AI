@@ -43,3 +43,73 @@ test("cancelling an edit returns keyboard focus to the entry form", async ({ pag
   await expect(weight).toBeFocused();
   await expect(weight).toHaveValue("");
 });
+
+test("deleting an entry returns keyboard focus to the history heading", async ({ page }) => {
+  const date = "2024-01-03";
+  await createEntry(page, date);
+  const remove = page.getByRole("button", { name: `Delete entry for ${date}`, exact: true });
+  await remove.focus();
+  page.once("dialog", (dialog) => dialog.accept());
+  await page.keyboard.press("Enter");
+  await expect(remove).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: "Progress history", exact: true })).toBeFocused();
+});
+
+test("failed deletion returns keyboard focus to the enabled delete action", async ({ page }) => {
+  const date = "2024-01-04";
+  await createEntry(page, date);
+  await page.route("**/api/tracker/*", (route) => {
+    if (route.request().method() !== "DELETE") return route.continue();
+    return route.fulfill({
+      status: 503,
+      contentType: "application/json",
+      body: JSON.stringify({ message: "Progress is temporarily unavailable." }),
+    });
+  });
+  const remove = page.getByRole("button", { name: `Delete entry for ${date}`, exact: true });
+  await remove.focus();
+  page.once("dialog", (dialog) => dialog.accept());
+  await page.keyboard.press("Enter");
+  await expect(page.locator("#entry-status")).toHaveText("Progress is temporarily unavailable.");
+  await expect(remove).toBeEnabled();
+  await expect(remove).toBeFocused();
+});
+
+test("completed deletion preserves focus moved elsewhere during the request", async ({ page }) => {
+  const date = "2024-01-05";
+  await createEntry(page, date);
+  let release;
+  const pending = new Promise((resolve) => {
+    release = resolve;
+  });
+  await page.route("**/api/tracker/*", async (route) => {
+    if (route.request().method() === "DELETE") await pending;
+    await route.continue();
+  });
+  const remove = page.getByRole("button", { name: `Delete entry for ${date}`, exact: true });
+  await remove.focus();
+  page.once("dialog", (dialog) => dialog.accept());
+  await page.keyboard.press("Enter");
+  try {
+    await expect(remove).toBeDisabled();
+    await page.getByLabel("Weight (kg)", { exact: true }).focus();
+  } finally {
+    release();
+  }
+  await expect(remove).toHaveCount(0);
+  await expect(page.getByLabel("Weight (kg)", { exact: true })).toBeFocused();
+});
+
+test("dismissing deletion preserves the entry and focused action", async ({ page }) => {
+  const date = "2024-01-06";
+  await createEntry(page, date);
+  const remove = page.getByRole("button", { name: `Delete entry for ${date}`, exact: true });
+  await remove.focus();
+  page.once("dialog", (dialog) => dialog.dismiss());
+  await page.keyboard.press("Enter");
+  await expect(remove).toBeEnabled();
+  await expect(remove).toBeFocused();
+  await expect(
+    page.getByRole("button", { name: `Edit entry for ${date}`, exact: true }),
+  ).toBeVisible();
+});
