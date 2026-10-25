@@ -8,6 +8,7 @@ from sqlalchemy import text
 
 from app.extensions import db
 from app.models import Otp, User
+from app.services.otp import digest
 from app.services.passwords import hash_password, verify_password
 
 EMAIL = "contended@example.test"
@@ -154,3 +155,34 @@ def test_concurrent_invalid_codes_preserve_attempt_budget(
             assert db.session.get(Otp, user_id) is None
             assert user.is_verified == 1
             assert user.auth_version == INITIAL_AUTH_VERSION + 1
+
+
+def test_concurrent_resends_share_cooldown_and_one_delivery(postgres_app_factory, monkeypatch):
+    app, user_id, sent = prepare_challenge(postgres_app_factory, monkeypatch)
+    old_sent_at = time.time() - app.config["OTP_COOLDOWN_SECONDS"] - 1
+    with app.app_context():
+        challenge = db.session.get(Otp, user_id)
+        challenge.sent_at = old_sent_at
+        challenge.expires_at = time.time() - 1
+        challenge.attempts = 2
+        db.session.commit()
+    sent.clear()
+    actors = [postgres_app_factory(), postgres_app_factory()]
+    responses = contended_requests(app, actors, user_id, "/api/auth/send-otp", {"email": EMAIL})
+    assert [status for status, _ in responses] == [202, 202]
+    assert len(sent) == 1
+    assert sent[0][0] == EMAIL
+    with app.app_context():
+        challenge = db.session.get(Otp, user_id)
+        assert challenge.digest == digest(user_id, "verify", sent[0][1])
+        assert challenge.sent_at > old_sent_at
+        assert challenge.expires_at > time.time()
+        assert challenge.attempts == 0
+    result = app.test_client().post(
+        "/api/auth/verify-otp",
+        json={"email": EMAIL, "otp": sent[0][1], "password": FINAL_PASSWORD},
+    )
+    assert result.status_code == 200
+    with app.app_context():
+        assert db.session.get(Otp, user_id) is None
+        assert db.session.get(User, user_id).auth_version == INITIAL_AUTH_VERSION + 1
