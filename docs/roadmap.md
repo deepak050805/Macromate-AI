@@ -31,6 +31,11 @@ pull request targeting `main`. Commit or PR counts are not acceptance criteria.
 - Separate-process Redis 8 tests verify shared login limits and namespace isolation.
   Storage failures return safe 503 responses without bypassing limits; CI and the
   explicit local suite cover the actual middleware path with injected errors.
+- SMTP boundary and transaction tests verify safe transport failures, TLS before
+  authentication, signup rollback, preservation of existing OTP state and successful
+  retries. PostgreSQL cases verify committed state across application instances.
+  Transport is mocked; provider delivery and database/SMTP atomicity are outside
+  these guarantees. See [email testing notes](mail-testing.md).
 
 ## Prioritized outstanding work
 

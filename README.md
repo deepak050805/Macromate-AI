@@ -105,6 +105,10 @@ A separate Redis 8 job verifies rate limits across independent application
 processes, namespace isolation and safe storage-failure responses. See
 [Redis test setup](docs/redis-testing.md) for its explicit local command and limits.
 
+The default suite also covers SMTP failure handling and auth/OTP transaction
+rollback with safe retries. [Email testing notes](docs/mail-testing.md) describe
+the mocked transport coverage and delivery guarantees it cannot establish.
+
 `npm run test:frontend` uses Node's built-in runner for API requests and pagination.
 Fetch and the minimal DOM are mocked; tests cover CSRF/credentials, JSON response
 handling, network failures, aborts, failed-page retries and post-save refreshes.
