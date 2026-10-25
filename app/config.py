@@ -4,6 +4,9 @@ import os
 import secrets
 from datetime import timedelta
 
+from redis.backoff import NoBackoff
+from redis.retry import Retry
+
 
 def configuration(overrides=None):
     env = os.getenv("APP_ENV", "development")
@@ -37,6 +40,13 @@ def configuration(overrides=None):
         else None,
     }
     values.update(overrides or {})
+    if values["RATELIMIT_STORAGE_URI"].startswith(("redis://", "rediss://")):
+        values["RATELIMIT_STORAGE_OPTIONS"] = {
+            "socket_connect_timeout": 2,
+            "socket_timeout": 2,
+            "retry": Retry(NoBackoff(), 0),
+            **(values.get("RATELIMIT_STORAGE_OPTIONS") or {}),
+        }
     uri = values["SQLALCHEMY_DATABASE_URI"]
     if uri.startswith("postgres://"):
         uri = uri.replace("postgres://", "postgresql://", 1)

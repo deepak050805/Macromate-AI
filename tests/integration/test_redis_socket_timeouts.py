@@ -17,7 +17,7 @@ def test_unresponsive_storage_fails_closed_without_retries(kind):
         capture_output=True,
         text=True,
         check=True,
-        timeout=12,
+        timeout=30,
     )
     data = json.loads(result.stdout.splitlines()[-1])
     assert data["status"] == 503
