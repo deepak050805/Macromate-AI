@@ -109,3 +109,48 @@ def test_competing_requests_consume_code_once(postgres_app_factory, monkeypatch,
         assert verify_password(user.password, FINAL_PASSWORD)
         assert not verify_password(user.password, ORIGINAL_PASSWORD)
         assert db.session.get(Otp, user_id) is None
+
+
+@pytest.mark.parametrize("near_limit", [False, True], ids=["budget-available", "one-attempt-left"])
+def test_concurrent_invalid_codes_preserve_attempt_budget(
+    postgres_app_factory, monkeypatch, near_limit
+):
+    app, user_id, sent = prepare_challenge(postgres_app_factory, monkeypatch)
+    limit = app.config["OTP_MAX_ATTEMPTS"]
+    initial_attempts = limit - 1 if near_limit else 0
+    with app.app_context():
+        challenge = db.session.get(Otp, user_id)
+        challenge.attempts = initial_attempts
+        db.session.commit()
+    actors = [postgres_app_factory(), postgres_app_factory()]
+    wrong_code = "999999" if sent[0][1] == "000000" else "000000"
+    responses = contended_requests(
+        app,
+        actors,
+        user_id,
+        "/api/auth/verify-otp",
+        {"email": EMAIL, "otp": wrong_code, "password": FINAL_PASSWORD},
+    )
+    assert [status for status, _ in responses] == [400, 400]
+    assert all(body["error"] == "validation_error" for _, body in responses)
+    expected_attempts = min(initial_attempts + len(actors), limit)
+    with app.app_context():
+        assert db.session.get(Otp, user_id).attempts == expected_attempts
+        assert db.session.get(User, user_id).auth_version == INITIAL_AUTH_VERSION
+
+    valid = app.test_client().post(
+        "/api/auth/verify-otp",
+        json={"email": EMAIL, "otp": sent[0][1], "password": FINAL_PASSWORD},
+    )
+    assert valid.status_code == (400 if expected_attempts == limit else 200)
+    with app.app_context():
+        user = db.session.get(User, user_id)
+        if expected_attempts == limit:
+            assert db.session.get(Otp, user_id).attempts == limit
+            assert user.is_verified == 0
+            assert user.auth_version == INITIAL_AUTH_VERSION
+            assert verify_password(user.password, ORIGINAL_PASSWORD)
+        else:
+            assert db.session.get(Otp, user_id) is None
+            assert user.is_verified == 1
+            assert user.auth_version == INITIAL_AUTH_VERSION + 1
