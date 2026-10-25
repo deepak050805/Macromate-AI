@@ -194,6 +194,7 @@ Historical records with unknown dates are retained and sorted after dated record
 | `APP_ENV`               | `development` by default; use `production` for deployment                            |
 | `SECRET_KEY`            | Random session/OTP signing key; at least 32 characters in production                 |
 | `DATABASE_URL`          | PostgreSQL connection string; required at startup                                    |
+| `PGCONNECT_TIMEOUT`     | Optional libpq per-host connection timeout override; app default is five seconds     |
 | `MAIL_*`                | SMTP transport and sender configuration                                              |
 | `OTP_EXPIRY_SECONDS`    | Verification/reset code lifetime                                                     |
 | `OTP_COOLDOWN_SECONDS`  | Minimum resend interval per account                                                  |
@@ -211,6 +212,18 @@ Redis storage defaults to two-second connection/read timeouts with no automatic
 retries. Factory `RATELIMIT_STORAGE_OPTIONS` can override individual defaults;
 Redis URL query options take precedence for their driver fields. These are I/O
 timeouts, not universal request deadlines or bounds on DNS and cluster failover.
+
+New PostgreSQL connections default to a five-second per-host handshake timeout.
+An explicit `connect_timeout` in `DATABASE_URL`, the libpq `PGCONNECT_TIMEOUT`
+environment variable, or factory `SQLALCHEMY_ENGINE_OPTIONS["connect_args"]`
+preserves the operator's setting. Factory connection arguments retain their normal
+precedence over URI/environment values; caller dictionaries are not modified.
+SQLite receives no PostgreSQL options. Explicit zero or negative libpq timeout
+settings disable the timeout. This does not bound SQL query execution, waiting
+for a pooled connection, DNS lookup or the total time spent trying multiple hosts.
+The default suite tests API/HTML/readiness responses against an owned silent
+loopback endpoint using the actual driver; no existing database is paused.
+See [PostgreSQL's connection parameter reference](https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-CONNECT-CONNECT-TIMEOUT).
 
 Run Gunicorn on Linux with a separately configured HTTPS ingress:
 
