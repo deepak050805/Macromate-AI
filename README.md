@@ -281,6 +281,20 @@ in production, with an eight-hour lifetime. Password resets revoke earlier accou
 sessions. All browser mutations, including JSON requests, require a CSRF token.
 Redis storage errors fail closed with a generic HTTP 503; requests do not fall
 back to a per-process limit or bypass rate limiting during an outage.
+
+`APP_ENV` accepts exactly `development`, `testing` or `production`; an unknown mode
+fails at startup. The mode supplied to `create_app({...})` takes precedence over
+the shell environment and selects both cookie defaults and startup safeguards.
+Selecting production through the factory enforces the same requirements as the
+environment variable. An explicit testing mode keeps isolated local defaults.
+
+`MAIL_PORT` must be an integer from 1 to 65535. `OTP_EXPIRY_SECONDS` must be a
+positive integer, and `OTP_COOLDOWN_SECONDS` must be nonnegative; zero explicitly
+disables the resend cooldown. The default OTP attempt budget is five; a factory
+`OTP_MAX_ATTEMPTS` override must be positive. Numeric settings are validated after
+factory overrides, so a valid override can replace a malformed shell value.
+Invalid settings fail at startup with the setting name, without echoing its value.
+
 Redis storage defaults to two-second connection/read timeouts with no automatic
 retries. Factory `RATELIMIT_STORAGE_OPTIONS` can override individual defaults;
 Redis URL query options take precedence for their driver fields. These are I/O
