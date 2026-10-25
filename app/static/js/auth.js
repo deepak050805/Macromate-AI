@@ -1,4 +1,4 @@
-import { api, busy, status } from "./common.js";
+import { api, busy, captureFocus, status } from "./common.js";
 
 function rememberEmail(email) {
   try {
@@ -52,6 +52,7 @@ if (resend)
     const email = form.querySelector('[name="email"]');
     if (!email.reportValidity()) return;
     const feedback = form.querySelector(".status");
+    const restoreFocus = captureFocus(resend);
     resend.disabled = true;
     try {
       const data = await api("/api/auth/send-otp", {
@@ -61,6 +62,7 @@ if (resend)
       status(feedback, data.message);
       const seconds = Number(resend.dataset.cooldown);
       resend.textContent = `Wait ${seconds} seconds before requesting another code`;
+      restoreFocus(form.elements.otp);
       setTimeout(() => {
         resend.disabled = false;
         resend.textContent = "Send a new code";
@@ -68,5 +70,6 @@ if (resend)
     } catch (error) {
       status(feedback, error.message, true);
       resend.disabled = false;
+      restoreFocus();
     }
   });

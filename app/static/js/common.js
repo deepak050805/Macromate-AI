@@ -47,14 +47,45 @@ export function status(element, message, isError = false) {
   element.className = `status ${isError ? "error" : "success"}`;
 }
 
+export function captureFocus(control) {
+  const wasFocused = document.activeElement === control;
+  return (target = control) => {
+    if (
+      wasFocused &&
+      target?.isConnected &&
+      !target.disabled &&
+      document.activeElement === document.body
+    )
+      target.focus();
+  };
+}
+
+const pendingForms = new WeakMap();
 export function busy(form, active) {
   form.setAttribute("aria-busy", String(active));
-  for (const button of form.querySelectorAll('button[type="submit"]')) button.disabled = active;
+  if (active) {
+    if (pendingForms.has(form)) return;
+    const controls = [...form.querySelectorAll('button[type="submit"]')].map((button) => ({
+      button,
+      disabled: button.disabled,
+      restoreFocus: captureFocus(button),
+    }));
+    pendingForms.set(form, controls);
+    for (const { button } of controls) button.disabled = true;
+  } else {
+    const controls = pendingForms.get(form) || [];
+    pendingForms.delete(form);
+    for (const { button, disabled, restoreFocus } of controls) {
+      button.disabled = disabled;
+      restoreFocus();
+    }
+  }
 }
 
 const logout = document.querySelector("#logout");
 if (logout)
   logout.addEventListener("click", async () => {
+    const restoreFocus = captureFocus(logout);
     logout.disabled = true;
     try {
       await api("/api/auth/logout", { method: "POST", body: {} });
@@ -62,5 +93,6 @@ if (logout)
     } catch (error) {
       status(document.querySelector("#global-status"), error.message, true);
       logout.disabled = false;
+      restoreFocus();
     }
   });

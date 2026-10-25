@@ -1,10 +1,12 @@
-import { api, status } from "./common.js";
+import { api, captureFocus, status } from "./common.js";
 const feedback = document.querySelector("#admin-status");
 const previous = document.querySelector("#admin-previous");
 const next = document.querySelector("#admin-next");
 let page = 1;
 let pages = 0;
 async function load(requestedPage = page) {
+  const restorePrevious = captureFocus(previous);
+  const restoreNext = captureFocus(next);
   previous.disabled = true;
   next.disabled = true;
   status(feedback, "Loading accounts…");
@@ -39,6 +41,11 @@ async function load(requestedPage = page) {
   } finally {
     previous.disabled = page <= 1;
     next.disabled = page >= pages;
+    const fallback = [previous, next, document.querySelector("#users-title")].find(
+      (control) => control && !control.disabled,
+    );
+    restorePrevious(previous.disabled ? fallback : previous);
+    restoreNext(next.disabled ? fallback : next);
   }
 }
 previous.addEventListener("click", () => {

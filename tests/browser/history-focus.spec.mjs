@@ -1,15 +1,9 @@
 import { expect, test } from "@playwright/test";
+import { fixtureUrl, signIn } from "./helpers.mjs";
 
 test.beforeEach(async ({ page }) => {
-  const base = process.env.BROWSER_TEST_URL;
-  if (!/^http:\/\/127\.0\.0\.1:\d+$/.test(base || ""))
-    throw new Error("The isolated browser fixture did not publish its loopback URL");
-  await page.goto(`${base}/login`);
-  await page.getByLabel("Email address", { exact: true }).fill("browser-owner@example.test");
-  await page.getByLabel("Password", { exact: true }).fill("fictional browser password");
-  await page.getByRole("button", { name: "Log in", exact: true }).click();
-  await expect(page).toHaveURL(`${base}/dashboard`);
-  await page.goto(`${base}/tracking`);
+  await signIn(page);
+  await page.goto(fixtureUrl("/tracking"));
   await expect(page.locator("#history-status")).not.toHaveText("Loading your history…");
 });
 

@@ -133,14 +133,20 @@ Navigation retains the displayed page until its replacement loads successfully.
 Tests run in the complete local/CI quality gate, alongside ESLint and
 Prettier checks for the test sources. They do not replace real-browser testing.
 
-The separate `npm run test:browser` suite exercises progress-history keyboard focus
-in Chromium with real sign-in and CSRF-protected requests. Install the matching
+The separate `npm run test:browser` suite exercises keyboard focus across sign-in,
+calculation, progress, verification actions and administration pages, with real
+sign-in and CSRF-protected requests. Install the matching
 browser with `npx playwright install chromium`, set `PYTHON_EXECUTABLE` to your
 virtual environment's Python executable, and run the suite. Linux may require
 `npx playwright install --with-deps chromium` for system dependencies. The fixture
-uses fictional accounts, an in-memory database and a dynamic loopback port; it
-requires no SMTP or production service. Its separate CI job runs alongside the
-default gate. This is scoped keyboard coverage, not a full accessibility audit.
+uses fictional owner/admin accounts, seeded pagination data, an in-memory database
+and a dynamic loopback port. Service failures are intercepted; no SMTP or production
+service is required. Tests cover preserving disabled states and user-moved focus,
+restoring usable controls at page boundaries, and focusing the section heading
+when navigation disappears. Its separate CI job runs alongside the default gate.
+This is scoped Chromium coverage, not a full accessibility or assistive-technology
+audit. Run a focused group with `npm run test:browser -- --grep "form loading"`,
+`--grep "manual actions"` or `--grep "pagination:"`; run the full suite before a PR.
 
 GitHub Actions runs the same quality gate on pull requests targeting `main` and
 pushes to `main`, using Python 3.12 and Node 24 on Linux. It can also be started
