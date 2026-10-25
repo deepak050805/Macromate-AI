@@ -52,8 +52,14 @@ For a **new, empty database**, apply migrations and start the development server
 
 Open **http://127.0.0.1:5000**. The calculator works without an account. Registration
 and recovery require working SMTP settings. Debug mode is for local development.
-For an existing installation, follow [the migration guide](docs/migrations.md)
-before running schema commands.
+For an existing installation, stop writes, take an encrypted backup and verify a
+restore before running schema commands. Rehearse changes on that restored copy.
+Inspect the baseline in `migrations/versions/0001_legacy.py` and the security
+migration in `migrations/versions/0002_security.py`; never stamp an unmatched schema
+or recreate existing tables. Resolve duplicate normalized emails, orphaned progress
+and invalid values through reviewed data repair. Verify revision `0002`, row counts,
+ownership and authentication before reopening writes. Legacy plaintext passwords
+require email recovery after migration.
 
 ## Email verification
 
@@ -92,22 +98,26 @@ Or run the complete gate after installing both dependency sets:
 .\.venv\Scripts\python scripts/check.py
 ```
 
-`npm run format` formats JavaScript, CSS, tooling JSON, and documentation. Templates
+`npm run format` formats JavaScript, CSS, tooling JSON, and this README. Templates
 remain Jinja source and are not passed to ESLint or an incompatible HTML formatter.
 There is no frontend build step or TypeScript dependency. The default Python suite
 uses isolated SQLite databases. A separate PostgreSQL 17 integration job runs real
-migrations, constraint checks, persisted OTP and owned progress tests. See
-[PostgreSQL test setup](docs/postgresql-testing.md) for the explicit local command
-and disposable database requirements, and [validation notes](docs/validation.md)
-for earlier verification records.
+migrations, constraint checks, persisted OTP and owned progress tests. To run it
+locally, set `APP_ENV=testing` and `TEST_POSTGRES_URL` to a disposable loopback
+PostgreSQL database whose user and database are both named `macromate_test`, then
+run `python -m pytest tests/postgresql`. Each test owns a unique schema and drops
+only that schema. Never point this suite at an existing application database.
 
 A separate Redis 8 job verifies rate limits across independent application
-processes, namespace isolation and safe storage-failure responses. See
-[Redis test setup](docs/redis-testing.md) for its explicit local command and limits.
+processes, namespace isolation and safe storage-failure responses. For local use,
+set `APP_ENV=testing` and `TEST_REDIS_URL` to a disposable unauthenticated loopback
+Redis database 15, such as `redis://127.0.0.1:6379/15`, then run
+`python -m pytest tests/redis`. Tests use random namespaces and never flush the
+database. Both service suites fail rather than skip when configuration is missing.
 
 The default suite also covers SMTP failure handling and auth/OTP transaction
-rollback with safe retries. [Email testing notes](docs/mail-testing.md) describe
-the mocked transport coverage and delivery guarantees it cannot establish.
+rollback with safe retries. Mail transport is mocked; these tests do not establish
+provider delivery or atomicity between database commits and SMTP acceptance.
 
 `npm run test:frontend` uses Node's built-in runner for API requests and pagination.
 Fetch and the minimal DOM are mocked; tests cover CSRF/credentials, JSON response
@@ -117,9 +127,13 @@ Tests run in the complete local/CI quality gate, alongside ESLint and
 Prettier checks for the test sources. They do not replace real-browser testing.
 
 The separate `npm run test:browser` suite exercises progress-history keyboard focus
-in Chromium with real sign-in and CSRF-protected requests. See the
-[browser test guide](docs/browser-testing.md) for browser installation, the isolated
-in-memory fixture and coverage limits. Its CI job runs alongside the default gate.
+in Chromium with real sign-in and CSRF-protected requests. Install the matching
+browser with `npx playwright install chromium`, set `PYTHON_EXECUTABLE` to your
+virtual environment's Python executable, and run the suite. Linux may require
+`npx playwright install --with-deps chromium` for system dependencies. The fixture
+uses fictional accounts, an in-memory database and a dynamic loopback port; it
+requires no SMTP or production service. Its separate CI job runs alongside the
+default gate. This is scoped keyboard coverage, not a full accessibility audit.
 
 GitHub Actions runs the same quality gate on pull requests targeting `main` and
 pushes to `main`, using Python 3.12 and Node 24 on Linux. It can also be started
@@ -163,7 +177,7 @@ migrations/           Alembic baseline and forward security migration
 tests/                isolated unit, integration and security tests
 scripts/check.py      repeatable local quality gate
 scripts/audit.py      network-backed Python and npm vulnerability checks
-docs/                 migration, architecture roadmap and validation notes
+README.md             application setup, checks and deployment boundaries
 ```
 
 PostgreSQL is the primary application database. The old local SQLite binary is
@@ -194,8 +208,9 @@ sessions. All browser mutations, including JSON requests, require a CSRF token.
 Redis storage errors fail closed with a generic HTTP 503; requests do not fall
 back to a per-process limit or bypass rate limiting during an outage.
 Redis storage defaults to two-second connection/read timeouts with no automatic
-retries. The [Redis notes](docs/redis-testing.md#request-path-timeout-defaults)
-describe explicit overrides and why this is not a universal request deadline.
+retries. Factory `RATELIMIT_STORAGE_OPTIONS` can override individual defaults;
+Redis URL query options take precedence for their driver fields. These are I/O
+timeouts, not universal request deadlines or bounds on DNS and cluster failover.
 
 Run Gunicorn on Linux with a separately configured HTTPS ingress:
 
@@ -204,9 +219,13 @@ gunicorn --bind 0.0.0.0:8000 'app:create_app()'
 ```
 
 Gunicorn is not a Windows development server. Do not deploy Flask's debug server.
-A verified non-root Dockerfile and disposable lifecycle check are available in
-[the container guide](docs/containers.md). The image defaults to production
-configuration and leaves schema migrations as explicit operator actions.
+A non-root Dockerfile and disposable lifecycle check are available. With Docker
+running, execute `python scripts/check_container.py` to build an isolated image and
+verify runtime dependencies, non-root/read-only execution, health, assets, missing
+configuration refusal and SIGTERM. The check removes only its own containers and
+image tag. The image defaults to production configuration and leaves schema
+migrations as explicit operator actions. Never bake local secrets into the image;
+keep `127.0.0.1` in `TRUSTED_HOSTS` for its internal liveness probe.
 The app does not trust forwarded proxy headers automatically. Configure a trusted
 proxy and worker count for your deployment. `/health/live` checks process liveness;
 `/health/ready` checks that the required user, progress and OTP tables and model

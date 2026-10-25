@@ -208,6 +208,7 @@ __marimo__/
 
 # Application and frontend artifacts
 .task-work/
+/docs/
 .env.*
 !.env.example
 node_modules/
