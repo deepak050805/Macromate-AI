@@ -10,7 +10,9 @@ from sqlalchemy.engine import make_url
 
 
 def configuration(overrides=None):
-    env = os.getenv("APP_ENV", "development")
+    env = (overrides or {}).get("APP_ENV", os.getenv("APP_ENV", "development"))
+    if env not in ("development", "testing", "production"):
+        raise ValueError("APP_ENV must be development, testing or production")
     production = env == "production"
     values = {
         "APP_ENV": env,
