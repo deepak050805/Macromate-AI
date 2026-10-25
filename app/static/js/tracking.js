@@ -125,13 +125,19 @@ form.addEventListener("submit", async (event) => {
   busy(form, true);
   status(feedback, "Saving…");
   const editing = recordId.value;
+  const submitted = Object.fromEntries(new FormData(form));
   try {
     await api(editing ? `/api/tracker/${editing}` : "/api/tracker/add", {
       method: editing ? "PUT" : "POST",
-      body: Object.fromEntries(new FormData(form)),
+      body: submitted,
     });
-    resetForm();
-    status(feedback, editing ? "Entry updated." : "Entry saved.");
+    const current = Object.fromEntries(new FormData(form));
+    const newerDraft =
+      recordId.value !== editing ||
+      Object.entries(submitted).some(([key, value]) => current[key] !== value);
+    if (!newerDraft) resetForm();
+    const message = editing ? "Entry updated." : "Entry saved.";
+    status(feedback, message + (newerDraft ? " Your newer draft was kept." : ""));
     await loadHistory(1);
   } catch (error) {
     status(feedback, error.message, true);
