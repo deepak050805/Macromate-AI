@@ -31,6 +31,8 @@ pull request targeting `main`. Commit or PR counts are not acceptance criteria.
 - Separate-process Redis 8 tests verify shared login limits and namespace isolation.
   Storage failures return safe 503 responses without bypassing limits; CI and the
   explicit local suite cover the actual middleware path with injected errors.
+  Real loopback socket-stall regressions also verify finite Redis I/O defaults,
+  no automatic request-path retries, safe HTML/API 503 responses and liveness.
 - SMTP boundary and transaction tests verify safe transport failures, TLS before
   authentication, signup rollback, preservation of existing OTP state and successful
   retries. PostgreSQL cases verify committed state across application instances.
