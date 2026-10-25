@@ -188,6 +188,9 @@ in production, with an eight-hour lifetime. Password resets revoke earlier accou
 sessions. All browser mutations, including JSON requests, require a CSRF token.
 Redis storage errors fail closed with a generic HTTP 503; requests do not fall
 back to a per-process limit or bypass rate limiting during an outage.
+Redis storage defaults to two-second connection/read timeouts with no automatic
+retries. The [Redis notes](docs/redis-testing.md#request-path-timeout-defaults)
+describe explicit overrides and why this is not a universal request deadline.
 
 Run Gunicorn on Linux with a separately configured HTTPS ingress:
 
