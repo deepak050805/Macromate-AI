@@ -105,10 +105,11 @@ A separate Redis 8 job verifies rate limits across independent application
 processes, namespace isolation and safe storage-failure responses. See
 [Redis test setup](docs/redis-testing.md) for its explicit local command and limits.
 
-`npm run test:frontend` uses Node's built-in runner for the shared API client's
-request and error behavior. Fetch and the minimal DOM are mocked; the tests cover
-CSRF/credentials, valid JSON, malformed upstream responses, network failures and
-aborts. They run in the complete local/CI quality gate, alongside ESLint and
+`npm run test:frontend` uses Node's built-in runner for API requests and pagination.
+Fetch and the minimal DOM are mocked; tests cover CSRF/credentials, JSON response
+handling, network failures, aborts, failed-page retries and post-save refreshes.
+Navigation retains the displayed page until its replacement loads successfully.
+Tests run in the complete local/CI quality gate, alongside ESLint and
 Prettier checks for the test sources. They do not replace real-browser testing.
 
 GitHub Actions runs the same quality gate on pull requests targeting `main` and

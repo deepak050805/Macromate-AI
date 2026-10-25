@@ -25,7 +25,8 @@ or a guaranteed processing deadline. Accordingly:
 - GitHub's own achievement display/detail is the final authority. Public absence
   can reflect hidden state or processing; do not promise a 24/48-hour award delay.
 
-Current public profile check: **Pull Shark is not displayed; Gold is not verified**.
+Latest public profile check, **25 October 2026**: **Pull Shark is not displayed;
+Gold is not verified**. Eleven public authored merged candidates were found.
 The authenticated APIs queried did not expose a confirmed qualifying count.
 Recheck the [profile achievement view](https://github.com/deepak050805?tab=achievements)
 after real contributions. If the discrepancy persists, the owner can inspect
@@ -151,12 +152,58 @@ goal complete until GitHub actually displays that award.
 - Verified merged state, ancestry and exact remote-main tree. Profile recheck:
   ten public merged candidates; Pull Shark not displayed, qualifying count unknown.
 
-Latest verified mission snapshot: **4 PRs opened, 4 merged**. Conditional remaining
-estimate: **1,014 if all ten public candidates count**; actual qualifying progress
-is unavailable. Redis reliability is the next independently reproduced issue:
-storage exceptions return 500, and shared limits need separate-process coverage.
+### 5. Redis outage handling and shared limits — merged
+
+- [MacroMate PR #10](https://github.com/deepak050805/Macromate-AI/pull/10), branch
+  `fix/redis-outage-reliability` → `main`.
+- Head: `ccbc0ec8cd9e558ceb4aa82ba01477313cff9e28`.
+- Merge: `d4191487aa761a2c4055b3ffacdd5ef7bda7827c`.
+- Four HTML/API, wrapped/unwrapped error cases failed with 500 before the fix.
+  All passed after safe 503 handling. Full local gate: 137 Python tests, eleven
+  Node tests and lint/format checks passed. Three Redis cases proved shared limits
+  across separate processes, namespace isolation and injected middleware failure.
+  Seven PostgreSQL cases also passed. Both local service containers were removed.
+- [PR CI](https://github.com/deepak050805/Macromate-AI/actions/runs/40109518970)
+  and [main CI](https://github.com/deepak050805/Macromate-AI/actions/runs/40109773752)
+  passed all four jobs, including dependency audits.
+- Automatic approval review initially blocked merging without independent approval.
+  The owner then explicitly authorized merging owned-repository PRs when repository
+  rules require no approval. Rechecked policy and checks before normal merge;
+  no protections were bypassed. Verified merged state, ancestry and exact tree.
+- Profile recheck: eleven public merged candidates; Pull Shark not displayed and
+  qualifying count unavailable.
+
+Latest verified mission snapshot: **5 PRs opened, 5 merged**. Conditional remaining
+estimate: **1,013 if all eleven public candidates count**; actual qualifying progress
+is unavailable. The next reproduced issue is pagination state after failed requests
+in the progress-history and administrator views.
 
 ## Operating boundaries
+
+### Meaningful commits and verified merges
+
+Added 25 October 2026: aim for at least ten meaningful commits in a new PR only
+when its engineering scope supports ten coherent development steps. Commit
+completed steps with Conventional Commit messages and run relevant tests during
+development. Before opening a PR, inspect its commit count and explain any smaller
+scope. Do not pad history, add unrelated changes, or rewrite already merged PRs.
+Commit count does not establish achievement eligibility.
+
+Verified from each merge's first parent to its feature head:
+
+| Mission PR | Meaningful branch commits | Verified merged |
+| ---------- | ------------------------- | --------------- |
+| #6         | 1                         | Yes             |
+| #7         | 1                         | Yes             |
+| #8         | 1                         | Yes             |
+| #9         | 1                         | Yes             |
+| #10        | 1                         | Yes             |
+
+These five PRs preceded the commit-count preference. The pending pagination fix
+uses three coherent steps: six regression cases, the client state fix, and its
+documentation with this tracker update. The focused bug does not warrant ten
+independent commits. Record its actual final count and verified merge separately
+after the PR completes; planned commits are not completed merges.
 
 Preserve unrelated work and secrets. Use a fresh branch from the latest remote
 default branch for each independently useful change. Respect required reviews,
