@@ -23,6 +23,7 @@ def main():
             "SQLALCHEMY_DATABASE_URI": "sqlite://",
             "RATELIMIT_ENABLED": False,
             "WTF_CSRF_ENABLED": True,
+            "OTP_COOLDOWN_SECONDS": 60,
             "MAIL_USERNAME": "",
             "MAIL_PASSWORD": "",
             "MAIL_DEFAULT_SENDER": "",

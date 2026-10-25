@@ -85,6 +85,7 @@ export function busy(form, active) {
 const logout = document.querySelector("#logout");
 if (logout)
   logout.addEventListener("click", async () => {
+    const restoreFocus = captureFocus(logout);
     logout.disabled = true;
     try {
       await api("/api/auth/logout", { method: "POST", body: {} });
@@ -92,5 +93,6 @@ if (logout)
     } catch (error) {
       status(document.querySelector("#global-status"), error.message, true);
       logout.disabled = false;
+      restoreFocus();
     }
   });
