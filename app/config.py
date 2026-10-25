@@ -6,6 +6,7 @@ from datetime import timedelta
 
 from redis.backoff import NoBackoff
 from redis.retry import Retry
+from sqlalchemy.engine import make_url
 
 
 def configuration(overrides=None):
@@ -55,6 +56,13 @@ def configuration(overrides=None):
     values["SQLALCHEMY_DATABASE_URI"] = uri
     if not uri:
         raise ValueError("DATABASE_URL must be configured")
+    if uri.startswith("postgresql+psycopg2://"):
+        options = dict(values["SQLALCHEMY_ENGINE_OPTIONS"])
+        connect_args = dict(options.get("connect_args") or {})
+        if "connect_timeout" not in make_url(uri).query and "PGCONNECT_TIMEOUT" not in os.environ:
+            connect_args.setdefault("connect_timeout", 5)
+        options["connect_args"] = connect_args
+        values["SQLALCHEMY_ENGINE_OPTIONS"] = options
     if production:
         required = (
             "SECRET_KEY",
