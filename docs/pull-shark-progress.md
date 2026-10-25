@@ -26,13 +26,13 @@ or a guaranteed processing deadline. Accordingly:
 - GitHub's own achievement display/detail is the final authority. Public absence
   can reflect hidden state or processing; do not promise a 24/48-hour award delay.
 
-Latest public profile check, **25 October 2026**: **Pull Shark is not displayed;
-Gold is not verified**. Fourteen public authored merged candidates were found.
+Latest public profile check, **25 October 2026**: **Pull Shark Bronze (x2) is
+displayed; Gold is not verified**. Fifteen public authored merged candidates were found.
 The authenticated APIs queried did not expose a confirmed qualifying count.
 Recheck the [profile achievement view](https://github.com/deepak050805?tab=achievements)
-after real contributions. If the discrepancy persists, the owner can inspect
-achievement visibility and provide this evidence to GitHub Support. No visibility
-or security settings have been changed.
+after real contributions. The displayed Bronze asset and x2 label verify that
+award, not a precise qualifying contribution count. No visibility or security
+settings have been changed.
 
 ## Baseline, before this exclusive mission
 
@@ -235,10 +235,35 @@ goal complete until GitHub actually displays that award.
 - Verified merged state, ancestry and exact remote-main tree. Profile recheck:
   fourteen public merged candidates; Pull Shark absent, qualifying count unknown.
 
-Latest verified mission snapshot: **8 PRs opened, 8 merged**, containing **16
-meaningful branch commits**. Conditional remaining estimate: **1,010 if all fourteen
-public candidates count**; actual qualifying progress is unavailable. Gold has not
-been verified. Tracker updates are bundled with useful engineering changes.
+### 9. Bounded Redis request-path I/O — merged
+
+- [Issue #15](https://github.com/deepak050805/Macromate-AI/issues/15) was verified
+  closed by [PR #16](https://github.com/deepak050805/Macromate-AI/pull/16).
+- Head: `03394ad77e686a4b2d4f54b9f836e9739702ffe2`.
+- Merge: `0bf4cfa8c116321b88b0f6d3195d114c5e05887b`.
+- Three meaningful commits: actual socket-stall/config regressions, finite I/O
+  defaults with no automatic retry, and documentation. The scoped defect did not
+  warrant ten independent steps. Before the fix, the actual Redis request exceeded
+  the five-second watchdog; after it, a probe returned safe 503 in 2.11 seconds.
+- Local gate: 157 Python and 17 Node tests plus lint/format passed. Three real Redis
+  cases, dependency audits and runtime dependency consistency also passed.
+  A container-probe attach timeout occurred under concurrent local load; a fresh
+  idle run passed unchanged and cleaned its owned resources. The stalled-request
+  assertion remains below five seconds; its separate process-start watchdog allows
+  Windows startup overhead. These I/O defaults are not a universal HTTP deadline.
+- [PR CI](https://github.com/deepak050805/Macromate-AI/actions/runs/40164770807)
+  and [main CI](https://github.com/deepak050805/Macromate-AI/actions/runs/40164860464)
+  passed all five jobs. Verified merged state, ancestry and exact remote-main tree.
+- The first follow-up audit was blocked by an automatic approval-review usage
+  limit. Normal approval access subsequently returned. The fresh authenticated
+  paginated audit verified fifteen candidates, and the public profile now displays
+  Pull Shark Bronze (x2). Gold and an exact qualifying count are not verified.
+
+Latest verified mission snapshot: **9 PRs opened, 9 merged**, containing **19
+meaningful branch commits**. The latest full profile audit found fifteen candidates.
+Conditional remaining estimate: **1,009 if all fifteen count**. Actual qualifying
+progress is unavailable, and Gold has not been verified. Tracker updates are
+bundled with useful engineering changes.
 
 ## Operating boundaries
 
@@ -249,15 +274,32 @@ well as documented gaps. On 25 October, MacroMate AI had no existing issues or o
 PRs; the inspected crop-yield repository also had no issues. No TODO/FIXME markers
 were found in the inspected application, tests, scripts and documentation.
 
-- Issues created: **2** — [container packaging #13](https://github.com/deepak050805/Macromate-AI/issues/13)
+- Issues created: **3** — [container packaging #13](https://github.com/deepak050805/Macromate-AI/issues/13)
   is verified closed by #14; [Redis socket waits #15](https://github.com/deepak050805/Macromate-AI/issues/15)
-  is open for the reproduced unresponsive-storage defect.
-- Mission PRs opened: **8**; verified merged: **8**; closed without merging: **0**.
-- Meaningful commits in those merged PRs: **16**. Confirmed Pull Shark credits:
+  is verified closed by #16; [keyboard focus #17](https://github.com/deepak050805/Macromate-AI/issues/17)
+  is open, with work on `fix/history-keyboard-focus` and no PR yet.
+- Mission PRs opened: **9**; verified merged: **9**; closed without merging: **0**.
+- Meaningful commits in those merged PRs: **19**. Confirmed Pull Shark credits:
   **unavailable**, not assumed zero.
-- The timeout fix is in progress on `fix/redis-request-timeouts`; its planned
-  three development steps do not warrant ten independent commits. Count its PR,
-  commits and issue closure only after the corresponding actions are verified.
+- The focus branch reproduces three real-Chrome failures: cancellation and
+  successful/failed deletion lost focus before the fix. All six browser scenarios
+  pass afterward, including actual CSRF-protected creation, dismissed confirmation
+  and preserving focus moved elsewhere during a pending request. Python and npm
+  dependency audits found no known vulnerabilities. Merge and issue closure remain
+  pending and are not counted in the verified ledger.
+- Full local gate passed: 157 Python tests, 17 Node tests, Ruff, ESLint and Prettier.
+  Pytest reported a local cache-write permission warning; all tests executed and
+  passed. The six real-browser cases passed separately. Hosted Chromium and the
+  other CI jobs must pass before merging.
+- Five coherent development steps cover the fixture, cancellation fix, deletion
+  fix, CI and documentation. This scope does not warrant ten independent commits;
+  no history padding or unrelated changes were introduced.
+- Automatic approval review temporarily rejected the authenticated audit because
+  its usage limit was reached. Normal access returned on the next continuation;
+  authenticated checks confirmed the expected base, no duplicate open PR and no
+  required reviews or active branch rules. No alternate privileged route was used.
+  Commit the focused changes only after their relevant checks can complete, and
+  recheck repository policy before publishing or merging.
 
 ### Meaningful commits and verified merges
 
@@ -280,6 +322,7 @@ Verified from each merge's first parent to its feature head:
 | #11        | 3                         | Yes             |
 | #12        | 4                         | Yes             |
 | #14        | 4                         | Yes             |
+| #16        | 3                         | Yes             |
 
 The first five PRs preceded the commit-count preference. PR #11 used three coherent
 steps for its narrow bug. PR #12 used four steps:

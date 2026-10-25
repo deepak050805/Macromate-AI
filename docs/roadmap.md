@@ -38,6 +38,10 @@ pull request targeting `main`. Commit or PR counts are not acceptance criteria.
   retries. PostgreSQL cases verify committed state across application instances.
   Transport is mocked; provider delivery and database/SMTP atomicity are outside
   these guarantees. See [email testing notes](mail-testing.md).
+- Isolated real-Chromium progress tests cover sign-in, CSRF-protected creation,
+  cancellation and successful/failed deletion focus. Focus moved elsewhere during
+  a request is preserved. A separate CI job enforces these scoped regressions;
+  see the [browser test guide](browser-testing.md) for setup and limits.
 
 ## Prioritized outstanding work
 
@@ -49,6 +53,8 @@ bounded liveness checks and disposable CI lifecycle validation. See the
    extend transaction rollback checks where an untested failure can lose data.
 2. **Accessibility:** automate relevant keyboard, form feedback and responsive
    interaction checks, building on the recorded browser smoke tests.
+   Progress-history cancellation/deletion keyboard regressions are covered;
+   other forms, assistive technologies, layouts and browsers remain to be assessed.
 3. **Packaging:** add and validate local PostgreSQL/Redis service composition,
    with explicit schema initialization and no production secrets.
 4. **Operations:** rehearse encrypted backup/restore, verify real mail delivery,

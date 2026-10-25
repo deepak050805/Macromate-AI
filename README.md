@@ -116,6 +116,11 @@ Navigation retains the displayed page until its replacement loads successfully.
 Tests run in the complete local/CI quality gate, alongside ESLint and
 Prettier checks for the test sources. They do not replace real-browser testing.
 
+The separate `npm run test:browser` suite exercises progress-history keyboard focus
+in Chromium with real sign-in and CSRF-protected requests. See the
+[browser test guide](docs/browser-testing.md) for browser installation, the isolated
+in-memory fixture and coverage limits. Its CI job runs alongside the default gate.
+
 GitHub Actions runs the same quality gate on pull requests targeting `main` and
 pushes to `main`, using Python 3.12 and Node 24 on Linux. It can also be started
 manually from the Actions tab. The workflow uses isolated test databases and no
