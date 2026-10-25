@@ -13,7 +13,9 @@ RUN pip install --no-cache-dir -r requirements.txt \
 
 COPY app ./app
 COPY migrations ./migrations
+COPY scripts/container_health.py ./scripts/container_health.py
 USER 10001:10001
 EXPOSE 8000
+HEALTHCHECK --interval=10s --timeout=3s --start-period=10s --retries=3 CMD ["python", "/app/scripts/container_health.py"]
 
 CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "2", "--worker-tmp-dir", "/tmp", "app:create_app()"]
