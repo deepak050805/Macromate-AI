@@ -108,6 +108,13 @@ PostgreSQL database whose user and database are both named `macromate_test`, the
 run `python -m pytest tests/postgresql`. Each test owns a unique schema and drops
 only that schema. Never point this suite at an existing application database.
 
+PostgreSQL OTP tests use separate app instances and connections to exercise real
+account-row contention. They verify one-time verification/password resets,
+concurrent failed-attempt budgets and a shared resend cooldown with one mocked
+delivery. Database lock observation and bounded waits make the intended contention
+explicit; this is scoped regression coverage rather than a general load test or
+proof of provider delivery. No SMTP service is contacted by these tests.
+
 A separate Redis 8 job verifies rate limits across independent application
 processes, namespace isolation and safe storage-failure responses. For local use,
 set `APP_ENV=testing` and `TEST_REDIS_URL` to a disposable unauthenticated loopback
