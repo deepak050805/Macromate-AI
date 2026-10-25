@@ -73,16 +73,16 @@ function rowFor(record) {
   return row;
 }
 
-async function loadHistory() {
+async function loadHistory(requestedPage = page) {
   previous.disabled = true;
   next.disabled = true;
   status(historyStatus, "Loading your history…");
   try {
-    const data = await api(`/api/tracker/history?page=${page}`);
-    if (!data.records.length && page > 1) {
-      page -= 1;
-      return await loadHistory();
+    const data = await api(`/api/tracker/history?page=${requestedPage}`);
+    if (!data.records.length && requestedPage > 1) {
+      return await loadHistory(requestedPage - 1);
     }
+    page = data.page;
     lastPage = data.pages;
     document.querySelector("#history-rows").replaceChildren(...data.records.map(rowFor));
     document.querySelector("#history-table").hidden = data.records.length === 0;
@@ -99,14 +99,12 @@ async function loadHistory() {
 }
 previous.addEventListener("click", () => {
   if (page > 1) {
-    page -= 1;
-    loadHistory();
+    loadHistory(page - 1);
   }
 });
 next.addEventListener("click", () => {
   if (page < lastPage) {
-    page += 1;
-    loadHistory();
+    loadHistory(page + 1);
   }
 });
 form.addEventListener("submit", async (event) => {
@@ -120,9 +118,8 @@ form.addEventListener("submit", async (event) => {
       body: Object.fromEntries(new FormData(form)),
     });
     resetForm();
-    page = 1;
     status(feedback, editing ? "Entry updated." : "Entry saved.");
-    await loadHistory();
+    await loadHistory(1);
   } catch (error) {
     status(feedback, error.message, true);
   } finally {

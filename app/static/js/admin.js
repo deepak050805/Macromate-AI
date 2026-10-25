@@ -4,12 +4,13 @@ const previous = document.querySelector("#admin-previous");
 const next = document.querySelector("#admin-next");
 let page = 1;
 let pages = 0;
-async function load() {
+async function load(requestedPage = page) {
   previous.disabled = true;
   next.disabled = true;
   status(feedback, "Loading accounts…");
   try {
-    const data = await api(`/api/auth/all-users?page=${page}`);
+    const data = await api(`/api/auth/all-users?page=${requestedPage}`);
+    page = data.page;
     pages = data.pages;
     const rows = data.users.map((user) => {
       const row = document.createElement("tr");
@@ -42,14 +43,12 @@ async function load() {
 }
 previous.addEventListener("click", () => {
   if (page > 1) {
-    page -= 1;
-    load();
+    load(page - 1);
   }
 });
 next.addEventListener("click", () => {
   if (page < pages) {
-    page += 1;
-    load();
+    load(page + 1);
   }
 });
 load();
