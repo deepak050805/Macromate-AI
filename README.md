@@ -209,7 +209,7 @@ audit. Run a focused group with `npm run test:browser -- --grep "form loading"`,
 `--grep "manual actions"` or `--grep "pagination:"`; run the full suite before a PR.
 
 GitHub Actions runs the same quality gate on pull requests targeting `main` and
-pushes to `main`, using Python 3.12 and Node 24 on Linux. It can also be started
+pushes to `main` or `dev`, using Python 3.12 and Node 24 on Linux. It can also be started
 manually from the Actions tab. The workflow uses isolated test databases and no
 application secrets. Repository owners configure required checks and review rules
 separately; adding the workflow does not enable branch protection.
