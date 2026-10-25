@@ -61,6 +61,66 @@ and invalid values through reviewed data repair. Verify revision `0002`, row cou
 ownership and authentication before reopening writes. Legacy plaintext passwords
 require email recovery after migration.
 
+### Optional local services with Docker Compose
+
+Instead of installing PostgreSQL and creating the local role/database manually,
+use Docker with a current Compose plugin. Edit the Compose settings already in
+your local `.env`: replace `POSTGRES_PASSWORD` and `REDIS_PASSWORD` with strong
+local passwords. `POSTGRES_USER` and `POSTGRES_DB` default to `macromate`.
+Single-quote env-file values containing literal dollar signs or spaces.
+
+```powershell
+docker compose --env-file .env -f compose.yaml up -d --wait
+docker compose --env-file .env -f compose.yaml ps
+```
+
+This starts PostgreSQL 17 and password-protected Redis 8. Only loopback ports are
+published: `127.0.0.1:55432` and `127.0.0.1:56379`. If occupied, set `POSTGRES_PORT`
+and/or `REDIS_PORT` in `.env`, and update the application's URLs to match. For the
+default ports, set the following, substituting percent-encoded passwords:
+
+```text
+DATABASE_URL=postgresql://macromate:URL_ENCODED_POSTGRES_PASSWORD@127.0.0.1:55432/macromate
+RATELIMIT_STORAGE_URI=redis://:URL_ENCODED_REDIS_PASSWORD@127.0.0.1:56379/0
+```
+
+Flask still runs on the host. Generate `SECRET_KEY`, configure SMTP, explicitly
+apply migrations to a new database and start Flask as described above. Compose
+does not start the app, send email or run schema commands. Health checks establish
+service availability; they do not establish application migration readiness.
+This is a local development stack, with no production TLS, backup or rollout setup.
+
+To stop and remove the service containers while retaining data:
+
+```powershell
+docker compose --env-file .env -f compose.yaml down
+```
+
+Project-scoped named volumes retain PostgreSQL data and Redis append-only files
+when containers are recreated. Keep the same project name when restarting.
+`down --volumes` deletes that project's stored data; use ordinary `down` to keep it.
+PostgreSQL's initialization credentials only apply to an empty data volume: changing
+`.env` does not change an existing database password, role or database name. Rotate
+existing credentials through PostgreSQL and update the app configuration together.
+See the [PostgreSQL image reference](https://hub.docker.com/_/postgres) and
+[Compose teardown reference](https://docs.docker.com/reference/cli/docker/compose/down/).
+
+After installing Python dependencies, run the repeatable service check:
+
+```powershell
+.\.venv\Scripts\python scripts/check_compose.py
+```
+
+It requires a local Docker socket and Compose with `up --wait` support. It uses an
+explicit temporary env file with fictional credentials, a unique project and random
+loopback ports; it does not load your `.env`. The check rejects wrong PostgreSQL
+passwords and missing/wrong Redis passwords, writes markers, recreates both
+containers and verifies the markers survived. It validates project ownership and
+storage identities before deleting only its own test containers, network and volumes.
+No existing application database is migrated or inspected. CI runs this separately
+from the offline gate; persistence across graceful recreation is not a backup or
+crash-recovery guarantee.
+
 ## Email verification
 
 Configure `MAIL_SERVER`, `MAIL_PORT`, `MAIL_USE_TLS`, `MAIL_USERNAME`,
@@ -281,8 +341,9 @@ Alembic revision. Apply and verify migrations separately before deployment.
 - Administrator access requires a verified account whose database role is `admin`.
   No public route can promote an account. Grant that role only through an audited
   operator procedure.
-- Local PostgreSQL/Redis composition and a production rollout remain outstanding.
-  Container smoke checks do not establish production readiness.
+- Local PostgreSQL/Redis composition is available for development. A production
+  rollout remains outstanding; container/service checks do not establish production
+  readiness.
 
 ## Troubleshooting
 
