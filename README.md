@@ -146,6 +146,12 @@ locked account before checking session validity, so an intervening reset cannot
 be overwritten by a stale request. A database commit failure preserves the old
 credentials and current session; it does not report a successful change.
 
+Account settings also offer **Sign out all sessions** for a lost/shared device.
+This confirms the current password and revokes the caller and other sessions
+without replacing the password or deleting progress. Its authenticated,
+CSRF-protected `POST /api/auth/revoke-sessions` endpoint accepts `current_password`
+and has the same per-endpoint request limits as password rotation.
+
 **Revoke and rotate the SMTP app password previously committed to this repository.**
 It has been removed from current source, but old history was preserved. Never reuse
 that credential. Mail transport tests use mocks; no real email credentials are
@@ -403,8 +409,15 @@ Alembic revision. Apply and verify migrations separately before deployment.
 - Keep encrypted database backups and verify restores on an isolated database
   before deployment. Never run destructive schema recreation on existing data.
 - Administrator access requires a verified account whose database role is `admin`.
-  No public route can promote an account. Grant that role only through an audited
-  operator procedure.
+  No public route can promote an account. An operator with database access can run
+  `python -m flask --app app:create_app accounts promote --email person@example.test`
+  for an existing verified account. Review the configured database and confirm the
+  prompt before granting privileges; `--yes` is available for deliberate scripted
+  use. The command neither creates nor verifies accounts, revokes existing sessions
+  when privileges change, and logs the account ID without email/password values.
+  The user must sign in again. An already-admin account is a no-op. If a database
+  error occurs, inspect state before retrying because connection failures can make
+  a commit outcome uncertain. Automated command coverage uses isolated test data.
 - Local PostgreSQL/Redis composition is available for development. A production
   rollout remains outstanding; container/service checks do not establish production
   readiness.
