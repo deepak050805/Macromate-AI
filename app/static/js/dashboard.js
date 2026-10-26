@@ -1,4 +1,5 @@
 import { api, captureFocus, status } from "./common.js";
+import { validateProgressPage } from "./responses.js";
 const feedback = document.querySelector("#dashboard-status");
 const retry = document.querySelector("#retry-dashboard");
 async function loadDashboard() {
@@ -8,6 +9,7 @@ async function loadDashboard() {
   status(feedback, "Loading your history…");
 try {
   const data = await api("/api/tracker/history");
+  validateProgressPage(data, 1);
   if (!data.records.length) {
     status(feedback, "No entries yet. Your first record will appear here.");
   } else {
