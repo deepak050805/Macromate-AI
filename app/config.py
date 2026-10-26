@@ -108,6 +108,9 @@ def configuration(overrides=None):
             raise ValueError(
                 "Production requires SECRET_KEY, mail credentials, sender and TRUSTED_HOSTS"
             )
+        scalar_credentials = ("SECRET_KEY", "MAIL_USERNAME", "MAIL_PASSWORD", "MAIL_DEFAULT_SENDER")
+        if any(not isinstance(values[key], str) or not values[key].strip() for key in scalar_credentials):
+            raise ValueError("Production requires nonblank string secrets and mail settings")
         if len(values["SECRET_KEY"]) < 32 or not values["SESSION_COOKIE_SECURE"]:
             raise ValueError("Production requires a strong secret and secure cookies")
         if not values["SQLALCHEMY_DATABASE_URI"].startswith("postgresql+psycopg2://"):
