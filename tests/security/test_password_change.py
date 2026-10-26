@@ -3,6 +3,8 @@ from unittest.mock import Mock
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.extensions import db
+from app.models import Otp
+from app.services.otp import issue
 from app.services.passwords import verify_password
 
 
@@ -60,3 +62,33 @@ def test_failed_password_commit_preserves_old_credentials_and_current_session(lo
     db.session.refresh(account)
     assert verify_password(account.password, "correct horse battery")
     assert logged_in.get("/api/tracker/history").status_code == 200
+
+
+def test_password_change_invalidates_previously_issued_recovery_code(logged_in, account, monkeypatch):
+    codes = []
+    monkeypatch.setattr("app.services.otp.send_code", lambda email, code: codes.append(code))
+    issue(account, "reset")
+    db.session.commit()
+    response = logged_in.post("/api/auth/change-password", json={
+        "current_password": "correct horse battery", "password": "replacement fixture password",
+    })
+    assert response.status_code == 200
+    assert db.session.get(Otp, account.id) is None
+    assert logged_in.post("/api/auth/reset-password", json={
+        "email": account.email, "otp": codes[0], "password": "older code replacement password",
+    }).status_code == 400
+    assert verify_password(account.password, "replacement fixture password")
+
+
+def test_failed_password_change_preserves_the_existing_recovery_code(logged_in, account, monkeypatch):
+    monkeypatch.setattr("app.services.otp.send_code", lambda email, code: None)
+    issue(account, "reset")
+    db.session.commit()
+    original_digest = db.session.get(Otp, account.id).digest
+    with monkeypatch.context() as outage:
+        outage.setattr(db.session, "commit", Mock(side_effect=SQLAlchemyError("failed commit")))
+        response = logged_in.post("/api/auth/change-password", json={
+            "current_password": "correct horse battery", "password": "replacement fixture password",
+        })
+    assert response.status_code == 503
+    assert db.session.get(Otp, account.id).digest == original_digest

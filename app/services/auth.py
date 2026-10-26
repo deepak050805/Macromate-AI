@@ -3,7 +3,7 @@ from sqlalchemy.exc import IntegrityError
 from werkzeug.exceptions import Unauthorized
 
 from app.extensions import db
-from app.models import User
+from app.models import Otp, User
 from app.repositories.users import by_email, by_id
 from app.services.otp import consume, issue
 from app.services.passwords import hash_password, verify_password
@@ -72,6 +72,9 @@ def change_password(data):
     user = _confirmed_account(data)
     user.password = hash_password(password)
     user.auth_version += 1
+    challenge = db.session.get(Otp, user.id)
+    if challenge is not None:
+        db.session.delete(challenge)
     db.session.commit()
     session.clear()
 
