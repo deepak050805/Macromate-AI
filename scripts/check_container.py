@@ -1,12 +1,18 @@
 """Build and verify a disposable runtime image without touching existing services."""
 
 import json
+import os
 import subprocess
 import time
 import uuid
 from pathlib import Path
 from urllib.error import HTTPError, URLError
 from urllib.request import ProxyHandler, build_opener
+
+if __package__:
+    from .docker_endpoint import require_local_docker
+else:
+    from docker_endpoint import require_local_docker
 
 ROOT = Path(__file__).resolve().parents[1]
 OPENER = build_opener(ProxyHandler({}))
@@ -39,6 +45,7 @@ def response(url):
 
 
 def main():
+    require_local_docker(os.environ, output)
     token = uuid.uuid4().hex
     image = "macromate-check:" + token
     name = "macromate-check-" + token
