@@ -274,6 +274,17 @@ Authenticated API clients can use `GET /api/tracker/history` and
 `date_to=YYYY-MM-DD` query parameters. Reversed, invalid and future bounds return
 a validation error. Both routes enforce the current account's ownership.
 
+The dashboard's recent summary covers 30 inclusive UTC dates ending today and can
+be refreshed independently of the latest-entry panel. Averages are per stored
+entry, so multiple records on one day count separately. Weight change compares the
+first and last dated records, with record ID breaking same-date ties; fewer than
+two dated records produces no change estimate. These statistics describe records
+and are not a medical interpretation. `GET /api/tracker/summary` accepts the same
+optional date bounds. An unfiltered summary includes undated rows in counts and
+averages, while dated counts and weight changes exclude them. Empty averages and
+insufficient changes are JSON `null`, not zero. The database computes the summary
+in one statement so its aggregates and edge records share a read snapshot.
+
 ## Configuration and deployment
 
 [.env.example](.env.example) lists all supported environment settings. Key settings:
