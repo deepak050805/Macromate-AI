@@ -9,6 +9,7 @@ from app.errors import register_errors
 from app.extensions import csrf, db, limiter, migrate
 from app.headers import register_headers
 from app.logging_config import configure_logging
+from app.request_context import register_request_context
 
 
 def create_app(config=None):
@@ -16,6 +17,7 @@ def create_app(config=None):
     app = Flask(__name__)
     app.config.update(configuration(config))
     configure_logging(app)
+    register_request_context(app)
     db.init_app(app)
     migrate.init_app(app, db)
     csrf.init_app(app)
