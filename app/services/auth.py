@@ -63,8 +63,8 @@ def confirm(data, purpose):
     user.is_verified = 1
     user.password = hash_password(password)
     user.auth_version += 1
-    session.clear()
     db.session.commit()
+    session.clear()
 
 
 def change_password(data):
