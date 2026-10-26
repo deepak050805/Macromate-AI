@@ -7,7 +7,7 @@ from app.models import User
 def by_email(email, lock=False):
     query = db.select(User).where(User.email == email)
     if lock:
-        query = query.with_for_update()
+        query = query.with_for_update().execution_options(populate_existing=True)
     return db.session.scalar(query)
 
 

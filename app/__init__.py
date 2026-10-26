@@ -3,6 +3,7 @@
 from dotenv import load_dotenv
 from flask import Flask, request
 
+from app.commands import register_commands
 from app.config import configuration
 from app.errors import register_errors
 from app.extensions import csrf, db, limiter, migrate
@@ -32,4 +33,5 @@ def create_app(config=None):
 
     register_errors(app)
     register_headers(app)
+    register_commands(app)
     return app
