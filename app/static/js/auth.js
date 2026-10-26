@@ -60,6 +60,7 @@ for (const form of document.querySelectorAll("form[data-auth]")) {
 }
 
 const notices = {
+  sessions: "All sessions signed out. Log in to continue.",
   verified: "Email verified. You can now log in.",
   reset: "Password updated. Log in with your new password.",
 };
