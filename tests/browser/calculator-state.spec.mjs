@@ -1,6 +1,26 @@
 import { expect, test } from "@playwright/test";
 import { fixtureUrl } from "./helpers.mjs";
 
+for (const [label, body] of [
+  ["missing metrics", {}],
+  ["string metric", { calories: 2310, protein: "140", carbs: 311.5, fats: 56 }],
+  ["null metric", { calories: null, protein: 140, carbs: 311.5, fats: 56 }],
+  ["negative metric", { calories: -1, protein: 140, carbs: 311.5, fats: 56 }],
+]) {
+  test(`calculator response: ${label} never renders as nutrition advice`, async ({ page }) => {
+    await page.goto(fixtureUrl("/calculator"));
+    await page.route("**/api/macros/calculate", (route) => route.fulfill({
+      contentType: "application/json", body: JSON.stringify(body),
+    }));
+    await page.getByLabel("Body weight (kg)", { exact: true }).fill("70");
+    await page.getByRole("button", { name: "Calculate my targets", exact: true }).click();
+    await expect(page.locator("#calculator-status")).toHaveText(
+      "The server returned an unreadable response. Try again.",
+    );
+    await expect(page.locator("#calculator-results")).toBeHidden();
+  });
+}
+
 test("calculator state: changing weight or goal invalidates displayed estimates", async ({ page }) => {
   await page.goto(fixtureUrl("/calculator"));
   const weight = page.getByLabel("Body weight (kg)", { exact: true });

@@ -23,6 +23,9 @@ form.addEventListener("submit", async (event) => {
   try {
     const result = await api("/api/macros/calculate", { method: "POST", body: values });
     if (submittedRevision !== inputRevision) return;
+    if (!["calories", "protein", "carbs", "fats"].every(
+      (key) => Number.isFinite(result[key]) && result[key] >= 0,
+    )) throw new Error("The server returned an unreadable response. Try again.");
     for (const key of ["calories", "protein", "carbs", "fats"])
       document.querySelector(`#result-${key}`).textContent = format.format(result[key]);
     document.querySelector("#result-goal").textContent = goals[values.goal];
