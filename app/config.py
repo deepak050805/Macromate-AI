@@ -49,7 +49,7 @@ def configuration(overrides=None):
         "RATELIMIT_HEADERS_ENABLED": True,
         "MAIL_SERVER": os.getenv("MAIL_SERVER", "smtp.gmail.com"),
         "MAIL_PORT": os.getenv("MAIL_PORT", "587"),
-        "MAIL_USE_TLS": os.getenv("MAIL_USE_TLS", "true").lower() == "true",
+        "MAIL_USE_TLS": os.getenv("MAIL_USE_TLS", "true"),
         "MAIL_USERNAME": os.getenv("MAIL_USERNAME", ""),
         "MAIL_PASSWORD": os.getenv("MAIL_PASSWORD", ""),
         "MAIL_DEFAULT_SENDER": os.getenv("MAIL_DEFAULT_SENDER", ""),
@@ -62,6 +62,17 @@ def configuration(overrides=None):
         else None,
     }
     values.update(overrides or {})
+    for key in ("MAIL_USE_TLS", "SESSION_COOKIE_SECURE"):
+        value = values[key]
+        if isinstance(value, str):
+            normalized = value.strip().lower()
+            if normalized in ("true", "1", "yes", "on"):
+                value = True
+            elif normalized in ("false", "0", "no", "off"):
+                value = False
+        if not isinstance(value, bool):
+            raise ValueError(f"{key} must be a boolean")
+        values[key] = value
     hosts = values["TRUSTED_HOSTS"]
     if hosts is not None:
         if not isinstance(hosts, (list, tuple)) or any(not isinstance(host, str) for host in hosts):
