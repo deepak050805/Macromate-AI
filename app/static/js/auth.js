@@ -31,6 +31,12 @@ function rememberEmail(email) {
   }
 }
 
+function successMessage(data) {
+  if (typeof data.message !== "string" || !data.message.trim())
+    throw new Error("The server returned an unreadable response. Try again.");
+  return data.message;
+}
+
 try {
   const pending = sessionStorage.getItem("pending-email");
   if (pending)
@@ -53,12 +59,13 @@ for (const form of document.querySelectorAll("form[data-auth]")) {
     }));
     try {
       const data = await api(form.dataset.auth, { method: "POST", body: values });
+      const message = successMessage(data);
       if (typeof values.email === "string") {
         rememberEmail(values.email);
         for (const { input, value } of emailDrafts)
           if (input.value === value) input.value = values.email;
       }
-      status(feedback, data.message);
+      status(feedback, message);
       if (form.dataset.redirect) window.location.assign(form.dataset.redirect);
     } catch (error) {
       status(feedback, error.message, true);
@@ -110,8 +117,9 @@ if (resend) {
         body: { email: requestedEmail },
       });
       if (email.value !== requestedEmail) return;
+      const message = successMessage(data);
       rememberEmail(requestedEmail);
-      status(feedback, data.message);
+      status(feedback, message);
       const seconds = Number(resend.dataset.cooldown);
       cooldownEmail = requestedEmail;
       resend.textContent = `Wait ${seconds} seconds before requesting another code`;
