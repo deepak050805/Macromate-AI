@@ -57,6 +57,7 @@ def register_errors(app):
             401: "Please log in to continue",
             403: "Access denied",
             404: "Page or record not found",
+            409: "This request conflicts with an earlier save. Start a new entry or use the original values.",
             429: "Too many attempts. Try again later.",
         }
         result = make_response(

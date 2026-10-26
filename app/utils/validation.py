@@ -1,6 +1,7 @@
 import math
 import re
 from datetime import date, datetime, timezone
+from uuid import UUID
 
 from flask import request
 
@@ -77,3 +78,17 @@ def date_range(values):
     if start is not None and end is not None and start > end:
         raise ValidationError("Start date must be on or before end date")
     return start, end
+
+
+def request_key_value(value):
+    if value is None:
+        return None
+    try:
+        if not isinstance(value, str) or len(value) != 36:
+            raise ValueError
+        canonical = str(UUID(value))
+        if canonical != value.lower():
+            raise ValueError
+    except ValueError:
+        raise ValidationError("Request key must be a canonical UUID") from None
+    return canonical
