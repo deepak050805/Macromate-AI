@@ -110,6 +110,7 @@ if (resend) {
         body: { email: requestedEmail },
       });
       if (email.value !== requestedEmail) return;
+      rememberEmail(requestedEmail);
       status(feedback, data.message);
       const seconds = Number(resend.dataset.cooldown);
       cooldownEmail = requestedEmail;
