@@ -424,6 +424,13 @@ Alembic revision. Apply and verify migrations separately before deployment.
 
 ## Troubleshooting
 
+Every HTTP response includes a server-generated `X-Request-ID`. When reporting a
+failure, include that ID and the approximate time; operators can match it to the
+`request_id` field in JSON application logs. Incoming request IDs are replaced.
+The identifier contains no account information, and application events do not
+automatically include URLs, query strings or request bodies. CLI events have no
+request ID. Reverse-proxy access logs need their own privacy configuration.
+
 - **DATABASE_URL must be configured:** create/edit `.env` in the repository root.
 - **Database unavailable:** check PostgreSQL is running, the database/user exists,
   connection credentials are correct, and migrations have been applied.
