@@ -5,8 +5,7 @@ const next = document.querySelector("#admin-next");
 let page = 1;
 let pages = 0;
 let directoryRevision = 0;
-async function load(requestedPage = page) {
-  const requestRevision = ++directoryRevision;
+async function load(requestedPage = page, requestRevision = ++directoryRevision) {
   const restorePrevious = captureFocus(previous);
   const restoreNext = captureFocus(next);
   previous.disabled = true;
@@ -15,6 +14,10 @@ async function load(requestedPage = page) {
   try {
     const data = await api(`/api/auth/all-users?page=${requestedPage}`);
     if (requestRevision !== directoryRevision) return;
+    if (!data.users.length && requestedPage > 1) {
+      const fallbackPage = Math.min(requestedPage - 1, Math.max(1, data.pages));
+      return await load(fallbackPage, requestRevision);
+    }
     page = data.page;
     pages = data.pages;
     const rows = data.users.map((user) => {

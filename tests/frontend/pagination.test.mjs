@@ -192,3 +192,24 @@ for (const view of views) {
     });
   }
 }
+
+for (const view of views) {
+  test(`${view.module}: a collapsed dataset jumps directly to the last available page`, async (t) => {
+    const ui = await setup(t, view);
+    const requestedPages = [];
+    t.mock.method(globalThis, 'fetch', async (path) => {
+      const requested = Number(new URL(path, 'https://example.test').searchParams.get('page'));
+      requestedPages.push(requested);
+      const collapsed = requested === 3;
+      return new Response(JSON.stringify({
+        page: requested, pages: collapsed ? 1 : 3, total: collapsed ? 1 : 45,
+        records: collapsed ? [] : [{ id: 1, date: '2024-01-01', weight: 70, calories: 2000 }],
+        users: collapsed ? [] : [{ id: 1, email: 'person@example.test', verified: true }],
+      }));
+    });
+    await ui.click(view.next);
+    await ui.click(view.next);
+    assert.deepEqual(requestedPages, [2, 3, 1]);
+    assert.equal(ui.element(view.label).textContent, 'Page 1 of 3');
+  });
+}

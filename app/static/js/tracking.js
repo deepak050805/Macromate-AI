@@ -98,7 +98,8 @@ async function loadHistory(requestedPage = page, requestRevision = ++historyRevi
     const data = await api(`/api/tracker/history?page=${requestedPage}`);
     if (requestRevision !== historyRevision) return;
     if (!data.records.length && requestedPage > 1) {
-      return await loadHistory(requestedPage - 1, requestRevision);
+      const fallbackPage = Math.min(requestedPage - 1, Math.max(1, data.pages));
+      return await loadHistory(fallbackPage, requestRevision);
     }
     page = data.page;
     lastPage = data.pages;
