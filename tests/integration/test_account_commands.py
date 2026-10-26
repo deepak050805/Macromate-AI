@@ -1,3 +1,7 @@
+from unittest.mock import Mock
+
+from sqlalchemy.exc import SQLAlchemyError
+
 from app.extensions import db
 
 
@@ -45,3 +49,17 @@ def test_promotion_does_not_create_missing_accounts(app):
     result = promote(app, "missing-operator@example.test")
     assert result.exit_code != 0
     assert "Account not found" in result.output
+
+
+def test_failed_promotion_rolls_back_and_hides_database_diagnostics(app, account, monkeypatch, caplog):
+    version = account.auth_version
+    with monkeypatch.context() as outage:
+        outage.setattr(db.session, "commit", Mock(side_effect=SQLAlchemyError("private-operator-diagnostic")))
+        result = promote(app, account.email)
+    assert result.exit_code != 0
+    assert "inspect account state" in result.output
+    assert "private-operator-diagnostic" not in result.output
+    assert "private-operator-diagnostic" not in caplog.text
+    db.session.refresh(account)
+    assert account.role == "user"
+    assert account.auth_version == version
