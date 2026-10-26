@@ -1,5 +1,11 @@
-import { api, status } from "./common.js";
+import { api, captureFocus, status } from "./common.js";
 const feedback = document.querySelector("#dashboard-status");
+const retry = document.querySelector("#retry-dashboard");
+async function loadDashboard() {
+  const restoreFocus = captureFocus(retry);
+  retry.hidden = true;
+  retry.disabled = true;
+  status(feedback, "Loading your history…");
 try {
   const data = await api("/api/tracker/history");
   if (!data.records.length) {
@@ -14,4 +20,11 @@ try {
   }
 } catch (error) {
   status(feedback, error.message, true);
+  retry.hidden = false;
+} finally {
+  retry.disabled = false;
+  restoreFocus(retry.hidden ? document.querySelector("#latest-title") : retry);
 }
+}
+retry.addEventListener("click", loadDashboard);
+loadDashboard();

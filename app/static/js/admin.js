@@ -1,11 +1,15 @@
 import { api, captureFocus, status } from "./common.js";
 const feedback = document.querySelector("#admin-status");
+const retryDirectory = document.querySelector("#retry-users");
 const previous = document.querySelector("#admin-previous");
 const next = document.querySelector("#admin-next");
 let page = 1;
 let pages = 0;
 let directoryRevision = 0;
 async function load(requestedPage = page, requestRevision = ++directoryRevision) {
+  const restoreRetry = captureFocus(retryDirectory);
+  retryDirectory.hidden = true;
+  retryDirectory.disabled = true;
   const restorePrevious = captureFocus(previous);
   const restoreNext = captureFocus(next);
   previous.disabled = true;
@@ -43,9 +47,13 @@ async function load(requestedPage = page, requestRevision = ++directoryRevision)
         : "No accounts registered yet.",
     );
   } catch (error) {
-    if (requestRevision === directoryRevision) status(feedback, error.message, true);
+    if (requestRevision === directoryRevision) {
+      status(feedback, error.message, true);
+      retryDirectory.hidden = false;
+    }
   } finally {
     if (requestRevision === directoryRevision) {
+    retryDirectory.disabled = false;
     previous.disabled = page <= 1;
     next.disabled = page >= pages;
     const fallback = [previous, next, document.querySelector("#users-title")].find(
@@ -53,9 +61,11 @@ async function load(requestedPage = page, requestRevision = ++directoryRevision)
     );
     restorePrevious(previous.disabled ? fallback : previous);
     restoreNext(next.disabled ? fallback : next);
+    restoreRetry(retryDirectory.hidden ? document.querySelector("#users-title") : retryDirectory);
     }
   }
 }
+retryDirectory.addEventListener("click", () => load());
 previous.addEventListener("click", () => {
   if (page > 1) {
     load(page - 1);

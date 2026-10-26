@@ -2,6 +2,7 @@ import { api, busy, captureFocus, status } from "./common.js";
 const form = document.querySelector("#tracking-form");
 const feedback = document.querySelector("#entry-status");
 const historyStatus = document.querySelector("#history-status");
+const retryHistory = document.querySelector("#retry-history");
 const dateInput = document.querySelector("#record-date");
 const recordId = document.querySelector("#record-id");
 const cancel = document.querySelector("#cancel-edit");
@@ -89,6 +90,9 @@ function rowFor(record) {
 }
 
 async function loadHistory(requestedPage = page, requestRevision = ++historyRevision) {
+  const restoreRetry = captureFocus(retryHistory);
+  retryHistory.hidden = true;
+  retryHistory.disabled = true;
   const restorePrevious = captureFocus(previous);
   const restoreNext = captureFocus(next);
   previous.disabled = true;
@@ -110,9 +114,13 @@ async function loadHistory(requestedPage = page, requestRevision = ++historyRevi
     document.querySelector("#page-label").textContent = `Page ${data.page} of ${data.pages}`;
     status(historyStatus, `${data.total} ${data.total === 1 ? "entry" : "entries"} recorded.`);
   } catch (error) {
-    if (requestRevision === historyRevision) status(historyStatus, error.message, true);
+    if (requestRevision === historyRevision) {
+      status(historyStatus, error.message, true);
+      retryHistory.hidden = false;
+    }
   } finally {
     if (requestRevision === historyRevision) {
+    retryHistory.disabled = false;
     previous.disabled = page <= 1;
     next.disabled = page >= lastPage;
     const fallback = [previous, next, document.querySelector("#history-title")].find(
@@ -120,9 +128,11 @@ async function loadHistory(requestedPage = page, requestRevision = ++historyRevi
     );
     restorePrevious(previous.disabled ? fallback : previous);
     restoreNext(next.disabled ? fallback : next);
+    restoreRetry(retryHistory.hidden ? document.querySelector("#history-title") : retryHistory);
     }
   }
 }
+retryHistory.addEventListener("click", () => loadHistory());
 previous.addEventListener("click", () => {
   if (page > 1) {
     loadHistory(page - 1);
