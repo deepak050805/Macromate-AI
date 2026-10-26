@@ -11,7 +11,9 @@ def by_email(email, lock=False):
     return db.session.scalar(query)
 
 
-def by_id(user_id):
+def by_id(user_id, lock=False):
+    if lock:
+        return db.session.scalar(db.select(User).where(User.id == user_id).with_for_update().execution_options(populate_existing=True))
     return db.session.get(User, user_id)
 
 

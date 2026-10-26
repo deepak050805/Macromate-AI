@@ -1,6 +1,7 @@
 from flask import Blueprint, abort, jsonify, session
 
 from app.extensions import limiter
+from app.security import authenticated
 from app.services import auth
 from app.utils.validation import payload
 
@@ -52,3 +53,11 @@ def request_reset():
 def reset():
     auth.confirm(payload(), "reset")
     return jsonify(message="Password updated. Please log in.")
+
+
+@bp.post("/change-password")
+@authenticated
+@limiter.limit("5 per minute; 20 per hour")
+def change_password():
+    auth.change_password(payload())
+    return jsonify(message="Password updated. Please log in again.")

@@ -1,9 +1,10 @@
 from flask import session
 from sqlalchemy.exc import IntegrityError
+from werkzeug.exceptions import Unauthorized
 
 from app.extensions import db
 from app.models import User
-from app.repositories.users import by_email
+from app.repositories.users import by_email, by_id
 from app.services.otp import consume, issue
 from app.services.passwords import hash_password, verify_password
 from app.utils.validation import ValidationError, email_value, password_value
@@ -64,3 +65,18 @@ def confirm(data, purpose):
     user.auth_version += 1
     session.clear()
     db.session.commit()
+
+
+def change_password(data):
+    password = password_value(data.get("password"))
+    current = data.get("current_password")
+    user = by_id(session.get("user_id"), lock=True)
+    if not user or not user.is_verified or user.auth_version != session.get("auth_version"):
+        session.clear()
+        raise Unauthorized()
+    if not isinstance(current, str) or len(current) > 128 or not verify_password(user.password, current):
+        raise ValidationError("Current password is incorrect")
+    user.password = hash_password(password)
+    user.auth_version += 1
+    db.session.commit()
+    session.clear()
