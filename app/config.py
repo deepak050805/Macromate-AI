@@ -62,6 +62,11 @@ def configuration(overrides=None):
         else None,
     }
     values.update(overrides or {})
+    hosts = values["TRUSTED_HOSTS"]
+    if hosts is not None:
+        if not isinstance(hosts, (list, tuple)) or any(not isinstance(host, str) for host in hosts):
+            raise ValueError("TRUSTED_HOSTS must be a list of hostnames")
+        values["TRUSTED_HOSTS"] = [host.strip() for host in hosts if host.strip()] or None
     for key, minimum, maximum in (
         ("MAIL_PORT", 1, 65535),
         ("OTP_EXPIRY_SECONDS", 1, None),
