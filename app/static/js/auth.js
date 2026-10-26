@@ -23,11 +23,15 @@ for (const form of document.querySelectorAll("form[data-auth]")) {
     busy(form, true);
     status(feedback, "Working…");
     const values = Object.fromEntries(new FormData(form));
+    const emailDrafts = [...document.querySelectorAll('input[name="email"]')].map((input) => ({
+      input,
+      value: input.value,
+    }));
     try {
       const data = await api(form.dataset.auth, { method: "POST", body: values });
       rememberEmail(values.email);
-      for (const input of document.querySelectorAll('input[name="email"]'))
-        input.value = values.email;
+      for (const { input, value } of emailDrafts)
+        if (input.value === value) input.value = values.email;
       status(feedback, data.message);
       if (form.dataset.redirect) window.location.assign(form.dataset.redirect);
     } catch (error) {
