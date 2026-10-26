@@ -8,6 +8,7 @@ from datetime import timedelta
 from redis.backoff import NoBackoff
 from redis.retry import Retry
 from sqlalchemy.engine import make_url
+from sqlalchemy.exc import ArgumentError
 
 
 def _integer_setting(value, name, minimum, maximum=None):
@@ -93,17 +94,21 @@ def configuration(overrides=None):
             **(values.get("RATELIMIT_STORAGE_OPTIONS") or {}),
         }
     uri = values["SQLALCHEMY_DATABASE_URI"]
+    if not isinstance(uri, str) or not uri.strip():
+        raise ValueError("DATABASE_URL must be a nonblank connection URL")
     if uri.startswith("postgres://"):
         uri = uri.replace("postgres://", "postgresql://", 1)
     if uri.startswith("postgresql://"):
         uri = uri.replace("postgresql://", "postgresql+psycopg2://", 1)
+    try:
+        database_url = make_url(uri)
+    except (ArgumentError, TypeError, ValueError):
+        raise ValueError("DATABASE_URL must be a valid connection URL") from None
     values["SQLALCHEMY_DATABASE_URI"] = uri
-    if not uri:
-        raise ValueError("DATABASE_URL must be configured")
     if uri.startswith("postgresql+psycopg2://"):
         options = dict(values["SQLALCHEMY_ENGINE_OPTIONS"])
         connect_args = dict(options.get("connect_args") or {})
-        if "connect_timeout" not in make_url(uri).query and "PGCONNECT_TIMEOUT" not in os.environ:
+        if "connect_timeout" not in database_url.query and "PGCONNECT_TIMEOUT" not in os.environ:
             connect_args.setdefault("connect_timeout", 5)
         options["connect_args"] = connect_args
         values["SQLALCHEMY_ENGINE_OPTIONS"] = options
