@@ -2,11 +2,16 @@ import json
 import logging
 import sys
 
+from flask import g, has_request_context
+
 
 class EventFormatter(logging.Formatter):
     def format(self, record):
+        event = {"level": record.levelname, "logger": record.name, "event": record.getMessage()}
+        if has_request_context():
+            event["request_id"] = getattr(g, "request_id", None)
         return json.dumps(
-            {"level": record.levelname, "logger": record.name, "event": record.getMessage()}
+            event
         )
 
 
