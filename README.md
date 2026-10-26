@@ -433,6 +433,22 @@ Alembic revision. Apply and verify migrations separately before deployment.
   rollout remains outstanding; container/service checks do not establish production
   readiness.
 
+Expired OTP challenges cannot authenticate, but remain stored until replaced or
+explicitly cleaned up. Operators can inspect a bounded batch without changing data:
+
+```sh
+python -m flask --app app:create_app otp cleanup --limit 1000
+```
+
+Review the configured database before using `--apply`, which requires confirmation.
+`--apply --yes` explicitly skips that prompt for a deliberate maintenance job;
+`--yes` alone remains a dry run. The limit accepts 1 through 10000 and applies to
+the oldest expired challenges at a fixed command cutoff. Active challenges and
+accounts are preserved. PostgreSQL skips accounts locked by another transaction,
+so an applied batch can delete fewer rows than a preceding dry run. Repeat later
+if needed. No scheduled cleanup is enabled automatically. Following a database
+error, inspect state before retrying because the commit outcome may be uncertain.
+
 ## Troubleshooting
 
 Every HTTP response includes a server-generated `X-Request-ID`. When reporting a
