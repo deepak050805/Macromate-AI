@@ -105,3 +105,24 @@ test("progress drafts: keep a new draft started after cancelling a pending edit"
   await expect(page.getByLabel("Weight (kg)", { exact: true })).toHaveValue("72");
   await expect(page.getByRole("button", { name: "Cancel editing", exact: true })).toBeHidden();
 });
+
+test("progress drafts: keep fields edited while their original record is being deleted", async ({ page }) => {
+  await createEntry(page, "2024-07-01");
+  await page.getByRole("button", { name: "Edit entry for 2024-07-01", exact: true }).click();
+  const release = await holdSaves(page, "DELETE");
+  const deleted = savedResponse(page, "DELETE");
+  page.once("dialog", (dialog) => dialog.accept());
+  await page.getByRole("button", { name: "Delete entry for 2024-07-01", exact: true }).click();
+  try {
+    await expect(page.getByRole("button", { name: "Delete entry for 2024-07-01", exact: true })).toBeDisabled();
+    await fillEntry(page, "2024-07-02", "73", "2300");
+  } finally {
+    release();
+  }
+  await deleted;
+  await expect(page.locator("#entry-status")).toContainText("draft was kept as a new entry");
+  await expect(page.locator("#record-id")).toHaveValue("");
+  await expect(page.getByLabel("Weight (kg)", { exact: true })).toHaveValue("73");
+  await expect(page.getByLabel("Date (UTC)", { exact: true })).toHaveValue("2024-07-02");
+  await expect(page.locator("#entry-title")).toHaveText("Add a progress entry");
+});

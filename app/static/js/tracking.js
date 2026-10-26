@@ -33,15 +33,18 @@ document.addEventListener("visibilitychange", () => {
   if (document.visibilityState === "visible") refreshDateLimit();
 });
 
-function resetForm() {
+function endEditing() {
   createAttempt = null;
-  form.reset();
   recordId.value = "";
-  dateInput.value = todayUtc();
-  refreshDateLimit();
   document.querySelector("#entry-title").textContent = "Add a progress entry";
   document.querySelector("#save-entry").textContent = "Save entry";
   cancel.hidden = true;
+}
+function resetForm() {
+  form.reset();
+  dateInput.value = todayUtc();
+  refreshDateLimit();
+  endEditing();
 }
 cancel.addEventListener("click", () => {
   resetForm();
@@ -83,12 +86,20 @@ function rowFor(record) {
   remove.setAttribute("aria-label", `Delete entry for ${record.date || "unknown date"}`);
   remove.addEventListener("click", async () => {
     if (!window.confirm("Delete this progress entry? This cannot be undone.")) return;
+    const deletedDraft = Number(recordId.value) === record.id
+      ? Object.fromEntries(new FormData(form)) : null;
     const restoreFocus = captureFocus(remove);
     remove.disabled = true;
     try {
       await api(`/api/tracker/${record.id}`, { method: "DELETE" });
-      if (Number(recordId.value) === record.id) resetForm();
-      status(feedback, "Entry deleted.");
+      let keptDraft = false;
+      if (Number(recordId.value) === record.id) {
+        const current = Object.fromEntries(new FormData(form));
+        keptDraft = !deletedDraft || Object.entries(deletedDraft).some(([key, value]) => current[key] !== value);
+        if (keptDraft) endEditing();
+        else resetForm();
+      }
+      status(feedback, "Entry deleted." + (keptDraft ? " Your draft was kept as a new entry." : ""));
       await loadHistory();
       restoreFocus(document.querySelector("#history-title"));
     } catch (error) {
