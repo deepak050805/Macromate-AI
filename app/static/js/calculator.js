@@ -7,13 +7,22 @@ const goals = {
   fat_loss: "10% below estimated maintenance",
   gain: "10% above estimated maintenance",
 };
+let inputRevision = 0;
+form.addEventListener("input", () => {
+  inputRevision += 1;
+  document.querySelector("#calculator-results").hidden = true;
+  document.querySelector("#result-placeholder").hidden = false;
+  status(feedback, "Inputs changed. Calculate again to update your targets.");
+});
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
   busy(form, true);
   status(feedback, "Calculating…");
   const values = Object.fromEntries(new FormData(form));
+  const submittedRevision = inputRevision;
   try {
     const result = await api("/api/macros/calculate", { method: "POST", body: values });
+    if (submittedRevision !== inputRevision) return;
     for (const key of ["calories", "protein", "carbs", "fats"])
       document.querySelector(`#result-${key}`).textContent = format.format(result[key]);
     document.querySelector("#result-goal").textContent = goals[values.goal];
@@ -21,6 +30,7 @@ form.addEventListener("submit", async (event) => {
     document.querySelector("#calculator-results").hidden = false;
     status(feedback, `Targets updated: ${format.format(result.calories)} kcal per day.`);
   } catch (error) {
+    if (submittedRevision !== inputRevision) return;
     document.querySelector("#calculator-results").hidden = true;
     document.querySelector("#result-placeholder").hidden = false;
     status(feedback, error.message, true);
