@@ -55,9 +55,10 @@ and recovery require working SMTP settings. Debug mode is for local development.
 For an existing installation, stop writes, take an encrypted backup and verify a
 restore before running schema commands. Rehearse changes on that restored copy.
 Inspect the baseline in `migrations/versions/0001_legacy.py` and the security
-migration in `migrations/versions/0002_security.py`; never stamp an unmatched schema
+migration in `migrations/versions/0002_security.py` and retry-identity migration in
+`migrations/versions/0003_progress_requests.py`; never stamp an unmatched schema
 or recreate existing tables. Resolve duplicate normalized emails, orphaned progress
-and invalid values through reviewed data repair. Verify revision `0002`, row counts,
+and invalid values through reviewed data repair. Verify revision `0003`, row counts,
 ownership and authentication before reopening writes. Legacy plaintext passwords
 require email recovery after migration.
 

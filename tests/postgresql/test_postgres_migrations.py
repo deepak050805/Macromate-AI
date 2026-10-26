@@ -21,7 +21,7 @@ def test_fresh_migration(postgres_app_factory):
             "otp_challenges",
         }
         assert (
-            db.session.execute(text("SELECT version_num FROM alembic_version")).scalar() == "0002"
+            db.session.execute(text("SELECT version_num FROM alembic_version")).scalar() == "0003"
         )
         assert "ix_progress_email_date" in {
             index["name"] for index in inspect(db.engine).get_indexes("progress")

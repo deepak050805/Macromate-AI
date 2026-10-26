@@ -7,12 +7,14 @@ class Progress(db.Model):
         db.CheckConstraint("weight > 0 AND weight <= 500", name="ck_progress_weight"),
         db.CheckConstraint("calories >= 0 AND calories <= 20000", name="ck_progress_calories"),
         db.Index("ix_progress_email_date", "email", "record_date", "id"),
+        db.Index("uq_progress_email_request_key", "email", "request_key", unique=True),
     )
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.Text, db.ForeignKey("users.email"), nullable=False)
     weight = db.Column(db.Float, nullable=False)
     calories = db.Column(db.Integer, nullable=False)
     record_date = db.Column(db.Date, nullable=True)
+    request_key = db.Column(db.String(36), nullable=True)
     created_at = db.Column(db.DateTime(timezone=True), server_default=db.func.now())
 
     def as_dict(self):
