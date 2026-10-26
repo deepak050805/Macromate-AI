@@ -1,3 +1,7 @@
+from unittest.mock import Mock
+
+from sqlalchemy.exc import SQLAlchemyError
+
 from app.extensions import db
 from app.services.passwords import verify_password
 
@@ -42,3 +46,17 @@ def test_invalid_new_password_is_rejected_before_mutation(logged_in, account):
 
 def test_anonymous_password_change_is_forbidden(client):
     assert client.post("/api/auth/change-password", json={}).status_code == 401
+
+
+def test_failed_password_commit_preserves_old_credentials_and_current_session(logged_in, account, monkeypatch, caplog):
+    with monkeypatch.context() as outage:
+        outage.setattr(db.session, "commit", Mock(side_effect=SQLAlchemyError("private-commit-diagnostic")))
+        response = logged_in.post("/api/auth/change-password", json={
+            "current_password": "correct horse battery", "password": "replacement fixture password",
+        })
+    assert response.status_code == 503
+    assert "private-commit-diagnostic" not in response.text
+    assert "private-commit-diagnostic" not in caplog.text
+    db.session.refresh(account)
+    assert verify_password(account.password, "correct horse battery")
+    assert logged_in.get("/api/tracker/history").status_code == 200
