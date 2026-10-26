@@ -286,6 +286,18 @@ averages, while dated counts and weight changes exclude them. Empty averages and
 insufficient changes are JSON `null`, not zero. The database computes the summary
 in one statement so its aggregates and edge records share a read snapshot.
 
+Progress creation accepts an optional canonical UUID `request_key`. Repeating a
+create with the same owner, key and normalized date/weight/calories returns the
+existing record; reusing a key for different values returns HTTP 409. Keys are
+unique per owner and retained for the record's lifetime. Deleting a record removes
+its request identity too. Clients omitting a key keep the original create behavior.
+The browser reuses a key for unchanged retries within the current page, starts a
+new key for changed values, and clears it after a successful/reset form. It does
+not persist create intent across page reloads. This protects retrying a save whose
+response was lost; it is not a general exactly-once delivery guarantee. Apply
+migration `0003` before deploying the request-identity model. Development and CI
+exercise migrations only on disposable databases, never a configured live URL.
+
 ## Configuration and deployment
 
 [.env.example](.env.example) lists all supported environment settings. Key settings:
