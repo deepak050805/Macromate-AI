@@ -26,7 +26,8 @@ function rememberEmail(email) {
 try {
   const pending = sessionStorage.getItem("pending-email");
   if (pending)
-    for (const input of document.querySelectorAll('input[name="email"]')) input.value = pending;
+    for (const input of document.querySelectorAll('input[name="email"]'))
+      if (!input.value) input.value = pending;
 } catch {
   /* Storage is optional. */
 }
