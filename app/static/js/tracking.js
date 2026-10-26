@@ -135,7 +135,7 @@ next.addEventListener("click", () => {
 });
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
-  busy(form, true);
+  if (!busy(form, true)) return;
   status(feedback, "Saving…");
   const editing = recordId.value;
   const submitted = Object.fromEntries(new FormData(form));

@@ -20,7 +20,7 @@ for (const form of document.querySelectorAll("form[data-auth]")) {
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
     const feedback = form.querySelector(".status");
-    busy(form, true);
+    if (!busy(form, true)) return;
     status(feedback, "Working…");
     const values = Object.fromEntries(new FormData(form));
     const emailDrafts = [...document.querySelectorAll('input[name="email"]')].map((input) => ({

@@ -64,7 +64,7 @@ const pendingForms = new WeakMap();
 export function busy(form, active) {
   form.setAttribute("aria-busy", String(active));
   if (active) {
-    if (pendingForms.has(form)) return;
+    if (pendingForms.has(form)) return false;
     const controls = [...form.querySelectorAll('button[type="submit"]')].map((button) => ({
       button,
       disabled: button.disabled,
@@ -72,6 +72,7 @@ export function busy(form, active) {
     }));
     pendingForms.set(form, controls);
     for (const { button } of controls) button.disabled = true;
+    return true;
   } else {
     const controls = pendingForms.get(form) || [];
     pendingForms.delete(form);

@@ -16,7 +16,7 @@ form.addEventListener("input", () => {
 });
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
-  busy(form, true);
+  if (!busy(form, true)) return;
   status(feedback, "Calculating…");
   const values = Object.fromEntries(new FormData(form));
   const submittedRevision = inputRevision;
