@@ -97,3 +97,29 @@ test("body-read aborts retain timeout feedback", async (t) => {
   }));
   await assert.rejects(api("/api/test"), { message: "The request timed out. Try again." });
 });
+
+test('CSV requests retain authentication and validate the download content type', async (t) => {
+  t.mock.method(globalThis, 'fetch', async (path, options) => {
+    assert.equal(options.headers.Accept, 'text/csv');
+    assert.equal(options.credentials, 'same-origin');
+    return new Response('date_utc,weight_kg,calories_kcal\r\n', {
+      headers: { 'Content-Type': 'text/csv; charset=utf-8' },
+    });
+  });
+  const blob = await api('/api/tracker/export.csv', { responseFormat: 'csv' });
+  assert.equal(await blob.text(), 'date_utc,weight_kg,calories_kcal\r\n');
+});
+
+test('CSV failures keep useful JSON validation feedback', async (t) => {
+  t.mock.method(globalThis, 'fetch', async () => jsonResponse({ message: 'Narrow the date range.' }, 400));
+  await assert.rejects(api('/api/tracker/export.csv', { responseFormat: 'csv' }), {
+    message: 'Narrow the date range.',
+  });
+});
+
+test('CSV downloads reject a successful response with the wrong content type', async (t) => {
+  t.mock.method(globalThis, 'fetch', async () => jsonResponse({ message: 'Not a CSV file' }));
+  await assert.rejects(api('/api/tracker/export.csv', { responseFormat: 'csv' }), {
+    message: 'The server returned an unreadable response. Try again.',
+  });
+});

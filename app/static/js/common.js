@@ -1,8 +1,8 @@
-export async function api(path, { method = "GET", body } = {}) {
+export async function api(path, { method = "GET", body, responseFormat = "json" } = {}) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 15000);
   try {
-    const headers = { Accept: "application/json" };
+    const headers = { Accept: responseFormat === "csv" ? "text/csv" : "application/json" };
     if (method !== "GET") {
       headers["Content-Type"] = "application/json";
       headers["X-CSRFToken"] = document.querySelector('meta[name="csrf-token"]').content;
@@ -14,6 +14,12 @@ export async function api(path, { method = "GET", body } = {}) {
       signal: controller.signal,
       ...(body === undefined ? {} : { body: JSON.stringify(body) }),
     });
+    if (responseFormat === "csv" && response.ok) {
+      const type = response.headers.get("Content-Type")?.split(";")[0].trim().toLowerCase();
+      if (type !== "text/csv")
+        throw new Error("The server returned an unreadable response. Try again.");
+      return await response.blob();
+    }
     let data;
     try {
       data = await response.json();

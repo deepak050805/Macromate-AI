@@ -11,6 +11,8 @@ const next = document.querySelector("#next-page");
 const filterForm = document.querySelector("#history-filters");
 const filterFrom = document.querySelector("#filter-date-from");
 const filterTo = document.querySelector("#filter-date-to");
+const exportButton = document.querySelector("#export-history");
+const exportStatus = document.querySelector("#export-status");
 let activeFilters = { date_from: "", date_to: "" };
 const todayUtc = () => new Date().toISOString().slice(0, 10);
 let page = 1;
@@ -147,6 +149,38 @@ async function loadHistory(requestedPage = page, requestRevision = ++historyRevi
   }
 }
 retryHistory.addEventListener("click", () => loadHistory());
+exportButton.addEventListener("click", async () => {
+  if (exportButton.disabled) return;
+  const restoreFocus = captureFocus(exportButton);
+  exportButton.disabled = true;
+  exportButton.setAttribute("aria-busy", "true");
+  status(exportStatus, "Preparing your CSV…");
+  const query = new URLSearchParams();
+  for (const [key, value] of Object.entries(activeFilters))
+    if (value) query.set(key, value);
+  try {
+    const blob = await api(`/api/tracker/export.csv?${query}`, { responseFormat: "csv" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "macromate-progress.csv";
+    link.hidden = true;
+    document.body.append(link);
+    try {
+      link.click();
+    } finally {
+      link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+    status(exportStatus, "CSV download started.");
+  } catch (error) {
+    status(exportStatus, error.message, true);
+  } finally {
+    exportButton.disabled = false;
+    exportButton.setAttribute("aria-busy", "false");
+    restoreFocus();
+  }
+});
 filterForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   const start = filterFrom.value || "";
