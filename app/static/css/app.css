@@ -273,6 +273,12 @@ p {
 .field {
   margin-bottom: 1.1rem;
 }
+.password-toggle {
+  margin-top: 0.4rem;
+  min-height: 36px;
+  padding: 0.25rem 0.7rem;
+  font-size: 0.85rem;
+}
 label {
   display: block;
   font-weight: 650;

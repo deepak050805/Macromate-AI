@@ -2,7 +2,7 @@
 <div class="field"><label for="{{ id }}">Email address</label><input id="{{ id }}" name="email" type="email" autocomplete="email" maxlength="254" required></div>
 {% endmacro %}
 {% macro password(id='password', new=false) %}
-<div class="field"><label for="{{ id }}">{% if new %}New password{% else %}Password{% endif %}</label><input id="{{ id }}" name="password" type="password" autocomplete="{{ 'new-password' if new else 'current-password' }}" {% if new %}minlength="12" aria-describedby="{{ id }}-help"{% endif %} maxlength="128" required>{% if new %}<p id="{{ id }}-help" class="hint">Use 12–128 characters. A long, unique passphrase works well.</p>{% endif %}</div>
+<div class="field"><label for="{{ id }}">{% if new %}New password{% else %}Password{% endif %}</label><input id="{{ id }}" name="password" type="password" autocomplete="{{ 'new-password' if new else 'current-password' }}" {% if new %}minlength="12" aria-describedby="{{ id }}-help"{% endif %} maxlength="128" required><button type="button" class="secondary password-toggle" data-password-toggle="{{ id }}" aria-controls="{{ id }}" aria-pressed="false" hidden>Show password</button>{% if new %}<p id="{{ id }}-help" class="hint">Use 12–128 characters. A long, unique passphrase works well.</p>{% endif %}</div>
 {% endmacro %}
 {% macro code(id='otp') %}
 <div class="field"><label for="{{ id }}">Six-digit verification code</label><input id="{{ id }}" name="otp" type="text" inputmode="numeric" pattern="[0-9]{6}" minlength="6" maxlength="6" autocomplete="one-time-code" aria-describedby="{{ id }}-help" required><p id="{{ id }}-help" class="hint">Codes expire after {{ config.OTP_EXPIRY_SECONDS }} seconds. Requesting a new code replaces the previous one.</p></div>

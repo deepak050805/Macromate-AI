@@ -1,5 +1,20 @@
 import { api, busy, captureFocus, status } from "./common.js";
 
+for (const button of document.querySelectorAll("[data-password-toggle]")) {
+  const input = document.getElementById(button.dataset.passwordToggle);
+  if (!input) continue;
+  const label = input.labels?.[0]?.textContent.trim().toLowerCase() || "password";
+  button.hidden = false;
+  button.setAttribute("aria-label", `Show ${label}`);
+  button.addEventListener("click", () => {
+    const revealed = input.type === "password";
+    input.type = revealed ? "text" : "password";
+    button.textContent = revealed ? "Hide password" : "Show password";
+    button.setAttribute("aria-pressed", String(revealed));
+    button.setAttribute("aria-label", `${revealed ? "Hide" : "Show"} ${label}`);
+  });
+}
+
 function rememberEmail(email) {
   try {
     sessionStorage.setItem("pending-email", email);
