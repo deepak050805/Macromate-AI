@@ -5,6 +5,7 @@ import { test } from "node:test";
 class Element {
   listeners = {};
   disabled = false;
+  value = "";
   textContent = "";
   children = [];
   addEventListener(event, callback) {
@@ -51,6 +52,10 @@ async function setup(t, view) {
     if (!nodes.has(selector)) nodes.set(selector, new Element());
     return nodes.get(selector);
   }
+  element("#tracking-form").elements = {
+    weight: element("#record-weight"),
+    calories: element("#record-calories"),
+  };
   const originalDocument = globalThis.document;
   t.after(() => {
     if (originalDocument === undefined) delete globalThis.document;

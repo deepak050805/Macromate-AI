@@ -21,7 +21,26 @@ let lastPage = 0;
 let historyRevision = 0;
 let retryPage = 1;
 let createAttempt = null;
+let submittedDraft = null;
 dateInput.value = todayUtc();
+function draftSnapshot() {
+  const numeric = (input) => [
+    input.value === "" ? "" : Number(input.value),
+    Boolean(input.validity?.badInput),
+  ];
+  return JSON.stringify([
+    recordId.value,
+    dateInput.value,
+    numeric(form.elements.weight),
+    numeric(form.elements.calories),
+  ]);
+}
+let pristineDraft = draftSnapshot();
+function mayDiscardDraft() {
+  const current = draftSnapshot();
+  return current === pristineDraft || current === submittedDraft ||
+    window.confirm("Discard your unsaved progress changes?");
+}
 function refreshDateLimit() {
   dateInput.max = todayUtc();
   filterFrom.max = todayUtc();
@@ -47,8 +66,10 @@ function resetForm() {
   dateInput.value = todayUtc();
   refreshDateLimit();
   endEditing();
+  pristineDraft = draftSnapshot();
 }
 cancel.addEventListener("click", () => {
+  if (!mayDiscardDraft()) return;
   resetForm();
   form.elements.weight.focus();
 });
@@ -72,6 +93,7 @@ function rowFor(record) {
   edit.textContent = "Edit";
   edit.setAttribute("aria-label", `Edit entry for ${record.date || "unknown date"}`);
   edit.addEventListener("click", () => {
+    if (recordId.value === String(record.id) || !mayDiscardDraft()) return;
     recordId.value = record.id;
     dateInput.value = record.date || todayUtc();
     form.elements.weight.value = record.weight;
@@ -79,6 +101,7 @@ function rowFor(record) {
     document.querySelector("#entry-title").textContent = "Edit progress entry";
     document.querySelector("#save-entry").textContent = "Update entry";
     cancel.hidden = false;
+    pristineDraft = draftSnapshot();
     form.elements.weight.focus();
   });
   const remove = document.createElement("button");
@@ -236,6 +259,7 @@ form.addEventListener("submit", async (event) => {
   status(feedback, "Saving…");
   const editing = recordId.value;
   const submitted = Object.fromEntries(new FormData(form));
+  submittedDraft = draftSnapshot();
   try {
     const body = { ...submitted };
     if (!editing) {
@@ -254,6 +278,7 @@ form.addEventListener("submit", async (event) => {
     const newerDraft =
       recordId.value !== editing ||
       Object.entries(submitted).some(([key, value]) => current[key] !== value);
+    if (editing && recordId.value === editing) pristineDraft = submittedDraft;
     if (!newerDraft) resetForm();
     const message = editing ? "Entry updated." : "Entry saved.";
     status(feedback, message + (newerDraft ? " Your newer draft was kept." : ""));
@@ -261,6 +286,7 @@ form.addEventListener("submit", async (event) => {
   } catch (error) {
     status(feedback, error.message, true);
   } finally {
+    submittedDraft = null;
     busy(form, false);
   }
 });
