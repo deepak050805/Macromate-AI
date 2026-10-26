@@ -3,6 +3,9 @@ from app.models import Progress
 
 
 def owned(record_id, email):
+    # PostgreSQL Integer primary keys cannot represent arbitrary URL integers.
+    if not 1 <= record_id <= 2_147_483_647:
+        return None
     return db.session.scalar(
         db.select(Progress).where(Progress.id == record_id, Progress.email == email)
     )
