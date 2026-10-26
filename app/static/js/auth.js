@@ -68,30 +68,53 @@ const notice = new URLSearchParams(window.location.search).get("notice");
 if (notices[notice]) status(document.querySelector("form .status"), notices[notice]);
 
 const resend = document.querySelector("#resend");
-if (resend)
+if (resend) {
+  const form = document.querySelector("#verification-form");
+  const email = form.querySelector('[name="email"]');
+  const feedback = form.querySelector(".status");
+  let pending = false;
+  let cooldownEmail = null;
+  let cooldownTimer = null;
+  const clearCooldown = () => {
+    clearTimeout(cooldownTimer);
+    cooldownTimer = null;
+    cooldownEmail = null;
+    resend.disabled = pending;
+    resend.textContent = "Send a new code";
+  };
+  email.addEventListener("input", () => {
+    if (cooldownEmail !== null && email.value !== cooldownEmail) {
+      clearCooldown();
+      status(feedback, "");
+    }
+  });
   resend.addEventListener("click", async () => {
-    const form = document.querySelector("#verification-form");
-    const email = form.querySelector('[name="email"]');
+    if (pending || cooldownTimer !== null) return;
     if (!email.reportValidity()) return;
-    const feedback = form.querySelector(".status");
+    const requestedEmail = email.value;
     const restoreFocus = captureFocus(resend);
+    pending = true;
     resend.disabled = true;
     try {
       const data = await api("/api/auth/send-otp", {
         method: "POST",
-        body: { email: email.value },
+        body: { email: requestedEmail },
       });
+      if (email.value !== requestedEmail) return;
       status(feedback, data.message);
       const seconds = Number(resend.dataset.cooldown);
+      cooldownEmail = requestedEmail;
       resend.textContent = `Wait ${seconds} seconds before requesting another code`;
       restoreFocus(form.elements.otp);
-      setTimeout(() => {
-        resend.disabled = false;
-        resend.textContent = "Send a new code";
-      }, seconds * 1000);
+      cooldownTimer = setTimeout(clearCooldown, seconds * 1000);
     } catch (error) {
-      status(feedback, error.message, true);
-      resend.disabled = false;
-      restoreFocus();
+      if (email.value === requestedEmail) status(feedback, error.message, true);
+    } finally {
+      pending = false;
+      if (cooldownTimer === null) {
+        resend.disabled = false;
+        if (email.value === requestedEmail) restoreFocus();
+      }
     }
   });
+}
