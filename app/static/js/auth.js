@@ -1,19 +1,27 @@
 import { api, busy, captureFocus, status } from "./common.js";
 
+const maskPasswords = [];
 for (const button of document.querySelectorAll("[data-password-toggle]")) {
   const input = document.getElementById(button.dataset.passwordToggle);
   if (!input) continue;
   const label = input.labels?.[0]?.textContent.trim().toLowerCase() || "password";
   button.hidden = false;
-  button.setAttribute("aria-label", `Show ${label}`);
-  button.addEventListener("click", () => {
-    const revealed = input.type === "password";
+  const setRevealed = (revealed) => {
     input.type = revealed ? "text" : "password";
     button.textContent = revealed ? "Hide password" : "Show password";
     button.setAttribute("aria-pressed", String(revealed));
     button.setAttribute("aria-label", `${revealed ? "Hide" : "Show"} ${label}`);
-  });
+  };
+  setRevealed(false);
+  maskPasswords.push(() => setRevealed(false));
+  button.addEventListener("click", () => setRevealed(input.type === "password"));
 }
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) for (const mask of maskPasswords) mask();
+});
+window.addEventListener("pagehide", () => {
+  for (const mask of maskPasswords) mask();
+});
 
 function rememberEmail(email) {
   try {
