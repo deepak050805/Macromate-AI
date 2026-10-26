@@ -159,4 +159,28 @@ def configuration(overrides=None):
             raise ValueError("Production requires shared Redis rate-limit storage")
         if not values["MAIL_USE_TLS"]:
             raise ValueError("Production SMTP requires TLS")
+    mail_server = values["MAIL_SERVER"]
+    if not isinstance(mail_server, str) or (production and not mail_server):
+        raise ValueError("MAIL_SERVER must be a nonblank SMTP hostname")
+    if mail_server:
+        if any(character.isspace() or ord(character) < 32 or ord(character) == 127 for character in mail_server):
+            raise ValueError("MAIL_SERVER must be a valid SMTP hostname")
+        try:
+            mail_server.encode("idna")
+        except UnicodeError:
+            raise ValueError("MAIL_SERVER must be a valid SMTP hostname") from None
+    sender = values["MAIL_DEFAULT_SENDER"]
+    if not isinstance(sender, str):
+        raise ValueError("MAIL_DEFAULT_SENDER must be a sender string")
+    sender_key = "MAIL_DEFAULT_SENDER" if sender else "MAIL_USERNAME"
+    sender = sender or values["MAIL_USERNAME"]
+    if not isinstance(sender, str):
+        raise ValueError(f"{sender_key} must be a sender string")
+    if sender:
+        if not sender.strip() or any(ord(character) < 32 or ord(character) == 127 for character in sender):
+            raise ValueError(f"{sender_key} must be a valid sender header")
+        try:
+            sender.encode("utf-8")
+        except UnicodeError:
+            raise ValueError(f"{sender_key} must be a valid sender header") from None
     return values
