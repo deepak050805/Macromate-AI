@@ -258,6 +258,22 @@ ignored and is not loaded by the application. Progress is scoped to the logged-i
 account and supports creation, editing, deletion, and 20-record history pages.
 Historical records with unknown dates are retained and sorted after dated records.
 
+The progress view supports inclusive **From date** and **Through date** filters
+using UTC dates. Apply dates to start at the first matching page; clear dates to
+restore the complete history. Any date bound excludes legacy entries with unknown
+dates. Unsaved entry fields are independent of history filters and downloads.
+
+**Download CSV** exports all matching owned records, across history pages, with
+`date_utc`, `weight_kg` and `calories_kcal` columns. Without date filters it retains
+undated entries with an empty date cell. Exports are limited to 10,000 rows; narrow
+the date interval if the limit is reached. The server returns an error instead of
+silently truncating the file. CSV files contain personal progress data in plain
+text; store downloaded copies accordingly. This export is not a database backup.
+Authenticated API clients can use `GET /api/tracker/history` and
+`GET /api/tracker/export.csv` with optional `date_from=YYYY-MM-DD` and
+`date_to=YYYY-MM-DD` query parameters. Reversed, invalid and future bounds return
+a validation error. Both routes enforce the current account's ownership.
+
 ## Configuration and deployment
 
 [.env.example](.env.example) lists all supported environment settings. Key settings:
