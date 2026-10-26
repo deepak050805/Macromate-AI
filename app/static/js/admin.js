@@ -10,6 +10,7 @@ let activeFilters = { q: "", verification: "all" };
 let page = 1;
 let pages = 0;
 let directoryRevision = 0;
+let retryPage = 1;
 async function load(requestedPage = page, requestRevision = ++directoryRevision) {
   const restoreRetry = captureFocus(retryDirectory);
   retryDirectory.hidden = true;
@@ -56,6 +57,7 @@ async function load(requestedPage = page, requestRevision = ++directoryRevision)
     );
   } catch (error) {
     if (requestRevision === directoryRevision) {
+      retryPage = requestedPage;
       status(feedback, error.message, true);
       retryDirectory.hidden = false;
     }
@@ -73,7 +75,7 @@ async function load(requestedPage = page, requestRevision = ++directoryRevision)
     }
   }
 }
-retryDirectory.addEventListener("click", () => load());
+retryDirectory.addEventListener("click", () => load(retryPage));
 filters.addEventListener("submit", async (event) => {
   event.preventDefault();
   if (!busy(filters, true)) return;

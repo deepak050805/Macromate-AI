@@ -18,6 +18,7 @@ const todayUtc = () => new Date().toISOString().slice(0, 10);
 let page = 1;
 let lastPage = 0;
 let historyRevision = 0;
+let retryPage = 1;
 let createAttempt = null;
 dateInput.value = todayUtc();
 function refreshDateLimit() {
@@ -144,6 +145,7 @@ async function loadHistory(requestedPage = page, requestRevision = ++historyRevi
     status(historyStatus, `${data.total} ${data.total === 1 ? "entry" : "entries"} recorded.`);
   } catch (error) {
     if (requestRevision === historyRevision) {
+      retryPage = requestedPage;
       status(historyStatus, error.message, true);
       retryHistory.hidden = false;
     }
@@ -161,7 +163,7 @@ async function loadHistory(requestedPage = page, requestRevision = ++historyRevi
     }
   }
 }
-retryHistory.addEventListener("click", () => loadHistory());
+retryHistory.addEventListener("click", () => loadHistory(retryPage));
 exportButton.addEventListener("click", async () => {
   if (exportButton.disabled) return;
   const restoreFocus = captureFocus(exportButton);

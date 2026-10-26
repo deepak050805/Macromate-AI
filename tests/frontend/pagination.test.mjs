@@ -31,6 +31,7 @@ const views = [
     label: "#page-label",
     rows: "#history-rows",
     feedback: "#history-status",
+    retry: "#retry-history",
   },
   {
     module: "admin",
@@ -39,6 +40,7 @@ const views = [
     label: "#admin-page",
     rows: "#users-rows",
     feedback: "#admin-status",
+    retry: "#retry-users",
   },
 ];
 
@@ -211,5 +213,16 @@ for (const view of views) {
     await ui.click(view.next);
     assert.deepEqual(requestedPages, [2, 3, 1]);
     assert.equal(ui.element(view.label).textContent, 'Page 1 of 3');
+  });
+}
+
+for (const view of views) {
+  test(`${view.module}: Retry requests the failed destination rather than the displayed page`, async (t) => {
+    const ui = await setup(t, view);
+    ui.failNext();
+    await ui.click(view.next);
+    await ui.click(view.retry);
+    assert.deepEqual(ui.requests, [1, 2, 2]);
+    assert.equal(ui.element(view.label).textContent, "Page 2 of 3");
   });
 }
