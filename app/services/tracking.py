@@ -18,7 +18,7 @@ def values(data):
 
 def save(email, data, record_id=None):
     fields = values(data)
-    record = owned(record_id, email) if record_id else Progress(email=email)
+    record = owned(record_id, email) if record_id is not None else Progress(email=email)
     if record is None:
         return None
     for key, value in fields.items():

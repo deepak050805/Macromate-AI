@@ -22,3 +22,13 @@ def test_validation(logged_in):
         == 400
     )
     assert logged_in.get("/api/tracker/history?page=0").status_code == 400
+
+def test_updating_record_zero_does_not_create_an_entry(logged_in):
+    from app.extensions import db
+    from app.models import Progress
+    before = db.session.scalar(db.select(db.func.count(Progress.id)))
+    response = logged_in.put('/api/tracker/0', json={
+        'weight': 70, 'calories': 2000, 'date': '2024-01-01',
+    })
+    assert response.status_code == 404
+    assert db.session.scalar(db.select(db.func.count(Progress.id))) == before
