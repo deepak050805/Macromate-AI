@@ -89,6 +89,11 @@ if (logout)
     logout.disabled = true;
     try {
       await api("/api/auth/logout", { method: "POST", body: {} });
+      try {
+        sessionStorage.removeItem("pending-email");
+      } catch {
+        /* Storage restrictions must not prevent server-side logout. */
+      }
       window.location.assign("/login");
     } catch (error) {
       status(document.querySelector("#global-status"), error.message, true);
