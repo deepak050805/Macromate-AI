@@ -31,6 +31,10 @@ def email_value(value):
 def password_value(value):
     if not isinstance(value, str) or not 12 <= len(value) <= 128:
         raise ValidationError("Password must contain 12 to 128 characters")
+    try:
+        value.encode("utf-8")
+    except UnicodeEncodeError:
+        raise ValidationError("Password must contain valid Unicode characters") from None
     return value
 
 

@@ -43,6 +43,12 @@ def test_bad_password(value):
         password_value(value)
 
 
+def test_password_rejects_unpaired_surrogates_without_rejecting_unicode():
+    with pytest.raises(ValidationError, match="valid Unicode"):
+        password_value("long password \ud800")
+    assert password_value("long password \U0001f512") == "long password \U0001f512"
+
+
 @pytest.mark.parametrize(
     "value",
     [
