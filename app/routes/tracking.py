@@ -1,11 +1,16 @@
-from flask import Blueprint, abort, jsonify, request
+import csv
+import io
 
-from app.repositories.progress import history
+from flask import Blueprint, Response, abort, jsonify, request
+
+from app.extensions import db
+from app.repositories.progress import history, query_for_owner
 from app.security import authenticated, current_user
 from app.services import tracking
-from app.utils.validation import date_range, page_number, payload
+from app.utils.validation import ValidationError, date_range, page_number, payload
 
 bp = Blueprint("tracking", __name__, url_prefix="/api/tracker")
+EXPORT_LIMIT = 10000
 
 
 @bp.post("/add")
@@ -34,6 +39,31 @@ def legacy_history(email):
     if email != current_user().email:
         abort(403)
     return get_history()
+
+
+@bp.get("/export.csv")
+@authenticated
+def export_csv():
+    start, end = date_range(request.args)
+    records = db.session.scalars(
+        query_for_owner(current_user().email, start, end).limit(EXPORT_LIMIT + 1)
+    ).all()
+    if len(records) > EXPORT_LIMIT:
+        raise ValidationError(
+            f"Export is limited to {EXPORT_LIMIT} records. Select a narrower date range."
+        )
+    output = io.StringIO(newline="")
+    writer = csv.writer(output)
+    writer.writerow(["date_utc", "weight_kg", "calories_kcal"])
+    for record in records:
+        writer.writerow([
+            record.record_date.isoformat() if record.record_date else "",
+            float(record.weight), int(record.calories),
+        ])
+    return Response(
+        output.getvalue(), mimetype="text/csv",
+        headers={"Content-Disposition": "attachment; filename=macromate-progress.csv"},
+    )
 
 
 @bp.put("/<int:record_id>")

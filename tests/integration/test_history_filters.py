@@ -1,3 +1,5 @@
+import csv
+import io
 from datetime import date
 
 import pytest
@@ -41,3 +43,34 @@ def test_invalid_history_ranges_return_safe_validation_errors(logged_in, query):
     response = logged_in.get("/api/tracker/history?" + query)
     assert response.status_code == 400
     assert response.json["error"] == "validation_error"
+
+
+def test_csv_export_contains_only_owned_records_and_retains_unknown_dates(logged_in, dated_entries):
+    response = logged_in.get("/api/tracker/export.csv")
+    assert response.status_code == 200
+    assert response.mimetype == "text/csv"
+    assert "attachment" in response.headers["Content-Disposition"]
+    assert response.headers["Cache-Control"] == "no-store"
+    rows = list(csv.DictReader(io.StringIO(response.text)))
+    assert [float(row["weight_kg"]) for row in rows] == [72, 71, 70, 69]
+    assert rows[-1]["date_utc"] == ""
+
+
+def test_csv_export_uses_the_same_inclusive_range(logged_in, dated_entries):
+    response = logged_in.get("/api/tracker/export.csv?date_from=2024-01-15&date_to=2024-01-15")
+    rows = list(csv.DictReader(io.StringIO(response.text)))
+    assert len(rows) == 1
+    assert float(rows[0]["weight_kg"]) == 71
+
+
+def test_csv_limit_returns_an_error_instead_of_silently_truncating(logged_in, dated_entries, monkeypatch):
+    monkeypatch.setattr("app.routes.tracking.EXPORT_LIMIT", 1)
+    response = logged_in.get("/api/tracker/export.csv")
+    assert response.status_code == 400
+    assert response.json["error"] == "validation_error"
+    assert "narrower date range" in response.json["message"]
+    assert "Content-Disposition" not in response.headers
+
+
+def test_csv_export_requires_authentication(client):
+    assert client.get("/api/tracker/export.csv").status_code == 401
