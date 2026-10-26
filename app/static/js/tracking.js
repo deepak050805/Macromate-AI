@@ -1,4 +1,5 @@
 import { api, busy, captureFocus, requestKey, status } from "./common.js";
+import { validateProgressPage } from "./responses.js";
 const form = document.querySelector("#tracking-form");
 const feedback = document.querySelector("#entry-status");
 const historyStatus = document.querySelector("#history-status");
@@ -128,6 +129,7 @@ async function loadHistory(requestedPage = page, requestRevision = ++historyRevi
       if (value) query.set(key, value);
     const data = await api(`/api/tracker/history?${query}`);
     if (requestRevision !== historyRevision) return;
+    validateProgressPage(data, requestedPage);
     if (!data.records.length && requestedPage > 1) {
       const fallbackPage = Math.min(requestedPage - 1, Math.max(1, data.pages));
       return await loadHistory(fallbackPage, requestRevision);
