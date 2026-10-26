@@ -69,6 +69,14 @@ def confirm(data, purpose):
 
 def change_password(data):
     password = password_value(data.get("password"))
+    user = _confirmed_account(data)
+    user.password = hash_password(password)
+    user.auth_version += 1
+    db.session.commit()
+    session.clear()
+
+
+def _confirmed_account(data):
     current = data.get("current_password")
     user = by_id(session.get("user_id"), lock=True)
     if not user or not user.is_verified or user.auth_version != session.get("auth_version"):
@@ -76,7 +84,11 @@ def change_password(data):
         raise Unauthorized()
     if not isinstance(current, str) or len(current) > 128 or not verify_password(user.password, current):
         raise ValidationError("Current password is incorrect")
-    user.password = hash_password(password)
+    return user
+
+
+def revoke_sessions(data):
+    user = _confirmed_account(data)
     user.auth_version += 1
     db.session.commit()
     session.clear()

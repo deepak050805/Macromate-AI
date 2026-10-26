@@ -61,3 +61,11 @@ def reset():
 def change_password():
     auth.change_password(payload())
     return jsonify(message="Password updated. Please log in again.")
+
+
+@bp.post("/revoke-sessions")
+@authenticated
+@limiter.limit("5 per minute; 20 per hour")
+def revoke_sessions():
+    auth.revoke_sessions(payload())
+    return jsonify(message="All sessions signed out. Please log in again.")
