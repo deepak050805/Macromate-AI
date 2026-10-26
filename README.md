@@ -136,6 +136,16 @@ characters. The password chosen during email verification replaces any unverifie
 signup credentials. The verification form includes this field; API clients must
 send it too. Invalid passwords do not consume a valid verification code.
 
+Signed-in users can open **Account** to change a password by confirming the
+current password. A successful change revokes every session, including the caller,
+and requires a new sign-in. Recovery by email remains available if the current
+password is forgotten. The authenticated, CSRF-protected
+`POST /api/auth/change-password` endpoint accepts `current_password` and `password`
+and is limited to five attempts per minute and twenty per hour. It refreshes the
+locked account before checking session validity, so an intervening reset cannot
+be overwritten by a stale request. A database commit failure preserves the old
+credentials and current session; it does not report a successful change.
+
 **Revoke and rotate the SMTP app password previously committed to this repository.**
 It has been removed from current source, but old history was preserved. Never reuse
 that credential. Mail transport tests use mocks; no real email credentials are
