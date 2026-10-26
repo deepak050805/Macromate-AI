@@ -8,6 +8,10 @@ const recordId = document.querySelector("#record-id");
 const cancel = document.querySelector("#cancel-edit");
 const previous = document.querySelector("#previous-page");
 const next = document.querySelector("#next-page");
+const filterForm = document.querySelector("#history-filters");
+const filterFrom = document.querySelector("#filter-date-from");
+const filterTo = document.querySelector("#filter-date-to");
+let activeFilters = { date_from: "", date_to: "" };
 const todayUtc = () => new Date().toISOString().slice(0, 10);
 let page = 1;
 let lastPage = 0;
@@ -15,9 +19,13 @@ let historyRevision = 0;
 dateInput.value = todayUtc();
 function refreshDateLimit() {
   dateInput.max = todayUtc();
+  filterFrom.max = todayUtc();
+  filterTo.max = todayUtc();
 }
 refreshDateLimit();
 dateInput.addEventListener("focus", refreshDateLimit);
+filterFrom.addEventListener("focus", refreshDateLimit);
+filterTo.addEventListener("focus", refreshDateLimit);
 document.addEventListener("visibilitychange", () => {
   if (document.visibilityState === "visible") refreshDateLimit();
 });
@@ -99,7 +107,10 @@ async function loadHistory(requestedPage = page, requestRevision = ++historyRevi
   next.disabled = true;
   status(historyStatus, "Loading your history…");
   try {
-    const data = await api(`/api/tracker/history?page=${requestedPage}`);
+    const query = new URLSearchParams({ page: requestedPage });
+    for (const [key, value] of Object.entries(activeFilters))
+      if (value) query.set(key, value);
+    const data = await api(`/api/tracker/history?${query}`);
     if (requestRevision !== historyRevision) return;
     if (!data.records.length && requestedPage > 1) {
       const fallbackPage = Math.min(requestedPage - 1, Math.max(1, data.pages));
@@ -110,6 +121,9 @@ async function loadHistory(requestedPage = page, requestRevision = ++historyRevi
     document.querySelector("#history-rows").replaceChildren(...data.records.map(rowFor));
     document.querySelector("#history-table").hidden = data.records.length === 0;
     document.querySelector("#history-empty").hidden = data.records.length !== 0;
+    document.querySelector("#history-empty").textContent = activeFilters.date_from || activeFilters.date_to
+      ? "No entries match these dates. Change or clear the filters."
+      : "No entries yet. Save your first entry to start your history.";
     document.querySelector("#history-pagination").hidden = data.pages <= 1;
     document.querySelector("#page-label").textContent = `Page ${data.page} of ${data.pages}`;
     status(historyStatus, `${data.total} ${data.total === 1 ? "entry" : "entries"} recorded.`);
@@ -133,6 +147,28 @@ async function loadHistory(requestedPage = page, requestRevision = ++historyRevi
   }
 }
 retryHistory.addEventListener("click", () => loadHistory());
+filterForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const start = filterFrom.value || "";
+  const end = filterTo.value || "";
+  if (start && end && start > end) {
+    status(historyStatus, "Start date must be on or before end date", true);
+    filterFrom.focus();
+    return;
+  }
+  if (!busy(filterForm, true)) return;
+  activeFilters = { date_from: start, date_to: end };
+  try {
+    await loadHistory(1);
+  } finally {
+    busy(filterForm, false);
+  }
+});
+document.querySelector("#clear-filters").addEventListener("click", () => {
+  filterForm.reset();
+  activeFilters = { date_from: "", date_to: "" };
+  loadHistory(1);
+});
 previous.addEventListener("click", () => {
   if (page > 1) {
     loadHistory(page - 1);
