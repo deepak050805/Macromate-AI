@@ -23,6 +23,12 @@ def test_bad_email(value):
         email_value(value)
 
 
+@pytest.mark.parametrize("control", ["\x00", "\x01", "\x1b", "\x7f", "\ud800", "\udfff"])
+def test_email_rejects_non_text_characters_before_storage_or_delivery(control):
+    with pytest.raises(ValidationError, match="valid email"):
+        email_value(f"person{control}@example.test")
+
+
 @pytest.mark.parametrize(
     "value", [None, True, "2024-02-30", "9999-01-01", "1999-01-01", "20240101"]
 )

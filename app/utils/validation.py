@@ -20,6 +20,8 @@ def payload():
 def email_value(value):
     if not isinstance(value, str):
         raise ValidationError("Enter a valid email address")
+    if any(ord(char) < 32 or ord(char) == 127 or 0xD800 <= ord(char) <= 0xDFFF for char in value):
+        raise ValidationError("Enter a valid email address")
     value = value.strip().lower()
     if len(value) > 254 or not re.fullmatch(r"[^\s@]+@[^\s@]+\.[^\s@]+", value):
         raise ValidationError("Enter a valid email address")
