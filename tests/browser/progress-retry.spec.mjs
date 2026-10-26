@@ -45,3 +45,34 @@ test("progress retries: a successful reset starts a distinct create intent", asy
   expect(keys).toHaveLength(2);
   expect(keys[0]).not.toBe(keys[1]);
 });
+
+test("progress retries: a confirmed create releases its key while retaining a newer draft", async ({ page }) => {
+  await signIn(page);
+  await page.goto(fixtureUrl("/tracking"));
+  const pending = Promise.withResolvers();
+  const keys = [];
+  const records = [];
+  await page.route("**/api/tracker/add", async (route) => {
+    keys.push(route.request().postDataJSON().request_key);
+    const response = await route.fetch();
+    records.push((await response.json()).record.id);
+    if (keys.length === 1) await pending.promise;
+    await route.fulfill({ response });
+  });
+  await fillEntry(page, "2024-06-03");
+  await page.locator("#save-entry").click();
+  try {
+    await expect(page.locator("#save-entry")).toBeDisabled();
+    await page.getByLabel("Weight (kg)", { exact: true }).fill("71");
+  } finally {
+    pending.resolve();
+  }
+  await expect(page.locator("#save-entry")).toBeEnabled();
+  await expect(page.locator("#entry-status")).toContainText("newer draft was kept");
+  await page.getByLabel("Weight (kg)", { exact: true }).fill("70");
+  await page.locator("#save-entry").click();
+  await expect(page.locator("#save-entry")).toBeEnabled();
+  expect(keys).toHaveLength(2);
+  expect(keys[0]).not.toBe(keys[1]);
+  expect(records[0]).not.toBe(records[1]);
+});

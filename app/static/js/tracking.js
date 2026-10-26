@@ -233,6 +233,8 @@ form.addEventListener("submit", async (event) => {
       method: editing ? "PUT" : "POST",
       body,
     });
+    // A confirmed create is complete even when a newer draft prevents a form reset.
+    if (!editing) createAttempt = null;
     const current = Object.fromEntries(new FormData(form));
     const newerDraft =
       recordId.value !== editing ||
