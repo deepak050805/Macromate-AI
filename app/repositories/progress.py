@@ -8,10 +8,20 @@ def owned(record_id, email):
     )
 
 
-def history(email, page=1):
+def query_for_owner(email, date_from=None, date_to=None):
     query = (
         db.select(Progress)
         .where(Progress.email == email)
         .order_by(Progress.record_date.desc().nullslast(), Progress.id.desc())
     )
-    return db.paginate(query, page=page, per_page=20, error_out=False)
+    if date_from is not None:
+        query = query.where(Progress.record_date >= date_from)
+    if date_to is not None:
+        query = query.where(Progress.record_date <= date_to)
+    return query
+
+
+def history(email, page=1, date_from=None, date_to=None):
+    return db.paginate(
+        query_for_owner(email, date_from, date_to), page=page, per_page=20, error_out=False
+    )

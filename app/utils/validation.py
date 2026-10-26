@@ -69,3 +69,11 @@ def page_number(value):
     if not 1 <= page <= 10000:
         raise ValidationError("Page must be between 1 and 10000")
     return page
+
+
+def date_range(values):
+    start = record_date(values["date_from"]) if values.get("date_from") else None
+    end = record_date(values["date_to"]) if values.get("date_to") else None
+    if start is not None and end is not None and start > end:
+        raise ValidationError("Start date must be on or before end date")
+    return start, end

@@ -3,7 +3,7 @@ from flask import Blueprint, abort, jsonify, request
 from app.repositories.progress import history
 from app.security import authenticated, current_user
 from app.services import tracking
-from app.utils.validation import page_number, payload
+from app.utils.validation import date_range, page_number, payload
 
 bp = Blueprint("tracking", __name__, url_prefix="/api/tracker")
 
@@ -18,7 +18,8 @@ def add():
 @bp.get("/history")
 @authenticated
 def get_history():
-    records = history(current_user().email, page_number(request.args.get("page", "1")))
+    start, end = date_range(request.args)
+    records = history(current_user().email, page_number(request.args.get("page", "1")), start, end)
     return jsonify(
         records=[record.as_dict() for record in records.items],
         page=records.page,
