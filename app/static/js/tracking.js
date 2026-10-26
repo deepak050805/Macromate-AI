@@ -1,4 +1,4 @@
-import { api, busy, captureFocus, status } from "./common.js";
+import { api, busy, captureFocus, requestKey, status } from "./common.js";
 const form = document.querySelector("#tracking-form");
 const feedback = document.querySelector("#entry-status");
 const historyStatus = document.querySelector("#history-status");
@@ -18,6 +18,7 @@ const todayUtc = () => new Date().toISOString().slice(0, 10);
 let page = 1;
 let lastPage = 0;
 let historyRevision = 0;
+let createAttempt = null;
 dateInput.value = todayUtc();
 function refreshDateLimit() {
   dateInput.max = todayUtc();
@@ -33,6 +34,7 @@ document.addEventListener("visibilitychange", () => {
 });
 
 function resetForm() {
+  createAttempt = null;
   form.reset();
   recordId.value = "";
   dateInput.value = todayUtc();
@@ -220,9 +222,16 @@ form.addEventListener("submit", async (event) => {
   const editing = recordId.value;
   const submitted = Object.fromEntries(new FormData(form));
   try {
+    const body = { ...submitted };
+    if (!editing) {
+      const signature = JSON.stringify([submitted.date, Number(submitted.weight), Number(submitted.calories)]);
+      if (!createAttempt || createAttempt.signature !== signature)
+        createAttempt = { signature, key: requestKey() };
+      body.request_key = createAttempt.key;
+    }
     await api(editing ? `/api/tracker/${editing}` : "/api/tracker/add", {
       method: editing ? "PUT" : "POST",
-      body: submitted,
+      body,
     });
     const current = Object.fromEntries(new FormData(form));
     const newerDraft =

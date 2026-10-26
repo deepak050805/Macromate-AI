@@ -6,7 +6,7 @@ globalThis.document = {
   querySelector: (selector) =>
     selector === 'meta[name="csrf-token"]' ? { content: "test-csrf-token" } : null,
 };
-const { api } = await import("../../app/static/js/common.js");
+const { api, requestKey } = await import("../../app/static/js/common.js");
 after(() => {
   if (originalDocument === undefined) delete globalThis.document;
   else globalThis.document = originalDocument;
@@ -122,4 +122,14 @@ test('CSV downloads reject a successful response with the wrong content type', a
   await assert.rejects(api('/api/tracker/export.csv', { responseFormat: 'csv' }), {
     message: 'The server returned an unreadable response. Try again.',
   });
+});
+
+test('request identities use native UUID generation when available', () => {
+  const expected = '12345678-1234-4234-8234-123456789abc';
+  assert.equal(requestKey({ randomUUID: () => expected }), expected);
+});
+
+test('request identity fallback retains canonical UUID version and variant bits', () => {
+  const key = requestKey({ getRandomValues: (bytes) => bytes.fill(0) });
+  assert.equal(key, '00000000-0000-4000-8000-000000000000');
 });
