@@ -66,6 +66,13 @@ def export_csv():
     )
 
 
+@bp.get("/summary")
+@authenticated
+def get_summary():
+    start, end = date_range(request.args)
+    return jsonify(tracking.summarize(current_user().email, start, end))
+
+
 @bp.put("/<int:record_id>")
 @authenticated
 def update(record_id):

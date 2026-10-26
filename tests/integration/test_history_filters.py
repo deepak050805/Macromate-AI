@@ -11,6 +11,7 @@ from app.models import Progress, User
 @pytest.fixture
 def dated_entries(account):
     db.session.add(User(email="other-filter@example.test", password="!disabled", is_verified=1))
+    db.session.flush()
     db.session.add_all([
         Progress(email=account.email, weight=70, calories=2000, record_date=date(2024, 1, 1)),
         Progress(email=account.email, weight=71, calories=2100, record_date=date(2024, 1, 15)),
@@ -74,3 +75,31 @@ def test_csv_limit_returns_an_error_instead_of_silently_truncating(logged_in, da
 
 def test_csv_export_requires_authentication(client):
     assert client.get("/api/tracker/export.csv").status_code == 401
+
+
+def test_progress_summary_is_owned_and_excludes_undated_rows_from_change(logged_in, dated_entries):
+    response = logged_in.get("/api/tracker/summary")
+    assert response.status_code == 200
+    assert response.json == {
+        "total": 4, "dated": 3, "average_weight": 70.5, "average_calories": 2050.0,
+        "first_date": "2024-01-01", "last_date": "2024-02-01", "weight_change": 2.0,
+    }
+
+
+def test_single_dated_record_does_not_claim_a_weight_change(logged_in, dated_entries):
+    response = logged_in.get("/api/tracker/summary?date_from=2024-01-15&date_to=2024-01-15")
+    assert response.json["total"] == 1
+    assert response.json["average_weight"] == 71
+    assert response.json["weight_change"] is None
+
+
+def test_empty_progress_summary_has_null_estimates(logged_in):
+    response = logged_in.get("/api/tracker/summary")
+    assert response.json["total"] == response.json["dated"] == 0
+    assert response.json["average_weight"] is None
+    assert response.json["average_calories"] is None
+    assert response.json["weight_change"] is None
+
+
+def test_summary_requires_authentication(client):
+    assert client.get("/api/tracker/summary").status_code == 401

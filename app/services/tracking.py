@@ -1,6 +1,6 @@
 from app.extensions import db
 from app.models import Progress
-from app.repositories.progress import owned
+from app.repositories.progress import owned, summary
 from app.utils.validation import ValidationError, number, record_date
 
 
@@ -35,3 +35,14 @@ def delete(email, record_id):
     db.session.delete(record)
     db.session.commit()
     return True
+
+
+def summarize(email, date_from=None, date_to=None):
+    result = summary(email, date_from, date_to)
+    for key in ("average_weight", "average_calories", "weight_change"):
+        if result[key] is not None:
+            result[key] = round(float(result[key]), 2)
+    for key in ("first_date", "last_date"):
+        if result[key] is not None:
+            result[key] = result[key].isoformat()
+    return result
