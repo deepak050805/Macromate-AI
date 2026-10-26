@@ -362,8 +362,13 @@ environment variable, or factory `SQLALCHEMY_ENGINE_OPTIONS["connect_args"]`
 preserves the operator's setting. Factory connection arguments retain their normal
 precedence over URI/environment values; caller dictionaries are not modified.
 SQLite receives no PostgreSQL options. Explicit zero or negative libpq timeout
-settings disable the timeout. This does not bound SQL query execution, waiting
-for a pooled connection, DNS lookup or the total time spent trying multiple hosts.
+settings disable the timeout. This does not bound SQL query execution,
+DNS lookup or the total time spent trying multiple hosts.
+PostgreSQL pool checkout separately waits at most five seconds by default before
+returning the normal safe service-unavailable response. Set
+`DATABASE_POOL_TIMEOUT_SECONDS` to an integer from 1 through 300 to tune that wait;
+an explicit factory engine `pool_timeout` takes precedence. SQLite pools are
+unchanged. Pool exhaustion does not make process liveness fail.
 The default suite tests API/HTML/readiness responses against an owned silent
 loopback endpoint using the actual driver; no existing database is paused.
 See [PostgreSQL's connection parameter reference](https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-CONNECT-CONNECT-TIMEOUT).

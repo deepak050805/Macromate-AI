@@ -62,6 +62,7 @@ def configuration(overrides=None):
         "OTP_MAX_ATTEMPTS": 5,
         "LOG_LEVEL": os.getenv("LOG_LEVEL", "INFO"),
         "TRUSTED_PROXY_HOPS": os.getenv("TRUSTED_PROXY_HOPS", "0"),
+        "DATABASE_POOL_TIMEOUT_SECONDS": os.getenv("DATABASE_POOL_TIMEOUT_SECONDS", "5"),
         "TRUSTED_HOSTS": os.getenv("TRUSTED_HOSTS", "").split(",")
         if os.getenv("TRUSTED_HOSTS")
         else None,
@@ -100,6 +101,7 @@ def configuration(overrides=None):
         ("OTP_COOLDOWN_SECONDS", 0, None),
         ("OTP_MAX_ATTEMPTS", 1, None),
         ("TRUSTED_PROXY_HOPS", 0, 5),
+        ("DATABASE_POOL_TIMEOUT_SECONDS", 1, 300),
     ):
         values[key] = _integer_setting(values[key], key, minimum, maximum)
     storage_uri = values["RATELIMIT_STORAGE_URI"]
@@ -133,6 +135,7 @@ def configuration(overrides=None):
     values["SQLALCHEMY_DATABASE_URI"] = uri
     if uri.startswith("postgresql+psycopg2://"):
         options = dict(values["SQLALCHEMY_ENGINE_OPTIONS"])
+        options.setdefault("pool_timeout", values["DATABASE_POOL_TIMEOUT_SECONDS"])
         connect_args = dict(options.get("connect_args") or {})
         if "connect_timeout" not in database_url.query and "PGCONNECT_TIMEOUT" not in os.environ:
             connect_args.setdefault("connect_timeout", 5)
