@@ -7,7 +7,10 @@ from app.repositories.users import by_id
 
 def current_user():
     user = by_id(session["user_id"]) if session.get("user_id") else None
-    if user and (not user.is_verified or user.auth_version != session.get("auth_version")):
+    if session.get("user_id") and (
+        not user or not user.is_verified or user.auth_version != session.get("auth_version")
+    ):
+        session.clear()
         return None
     return user
 
