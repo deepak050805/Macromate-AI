@@ -1,4 +1,5 @@
 import { api, busy, captureFocus, status } from "./common.js";
+import { validatePage } from "./responses.js";
 const feedback = document.querySelector("#admin-status");
 const retryDirectory = document.querySelector("#retry-users");
 const previous = document.querySelector("#admin-previous");
@@ -11,6 +12,16 @@ let page = 1;
 let pages = 0;
 let directoryRevision = 0;
 let retryPage = 1;
+function validateDirectory(data, requestedPage) {
+  validatePage(data, requestedPage, data?.users, 25);
+  if (data.users.some((user) =>
+    user === null || typeof user !== "object" || Array.isArray(user) ||
+    !Number.isSafeInteger(user.id) || user.id < 1 ||
+    typeof user.email !== "string" || !user.email.trim() || user.email.length > 254 ||
+    /[\u0000-\u001f\u007f\uD800-\uDFFF]/u.test(user.email) ||
+    typeof user.verified !== "boolean"
+  )) throw new Error("The server returned an unreadable response. Try again.");
+}
 async function load(requestedPage = page, requestRevision = ++directoryRevision) {
   const restoreRetry = captureFocus(retryDirectory);
   retryDirectory.hidden = true;
@@ -26,6 +37,7 @@ async function load(requestedPage = page, requestRevision = ++directoryRevision)
     if (activeFilters.verification !== "all") query.set("verification", activeFilters.verification);
     const data = await api(`/api/auth/all-users?${query}`);
     if (requestRevision !== directoryRevision) return;
+    validateDirectory(data, requestedPage);
     if (!data.users.length && requestedPage > 1) {
       const fallbackPage = Math.min(requestedPage - 1, Math.max(1, data.pages));
       return await load(fallbackPage, requestRevision);
