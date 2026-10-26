@@ -61,6 +61,7 @@ def configuration(overrides=None):
         "OTP_COOLDOWN_SECONDS": os.getenv("OTP_COOLDOWN_SECONDS", "60"),
         "OTP_MAX_ATTEMPTS": 5,
         "LOG_LEVEL": os.getenv("LOG_LEVEL", "INFO"),
+        "TRUSTED_PROXY_HOPS": os.getenv("TRUSTED_PROXY_HOPS", "0"),
         "TRUSTED_HOSTS": os.getenv("TRUSTED_HOSTS", "").split(",")
         if os.getenv("TRUSTED_HOSTS")
         else None,
@@ -98,6 +99,7 @@ def configuration(overrides=None):
         ("OTP_EXPIRY_SECONDS", 1, None),
         ("OTP_COOLDOWN_SECONDS", 0, None),
         ("OTP_MAX_ATTEMPTS", 1, None),
+        ("TRUSTED_PROXY_HOPS", 0, 5),
     ):
         values[key] = _integer_setting(values[key], key, minimum, maximum)
     storage_uri = values["RATELIMIT_STORAGE_URI"]

@@ -2,6 +2,7 @@
 
 from dotenv import load_dotenv
 from flask import Flask, request
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 from app.commands import register_commands
 from app.config import configuration
@@ -16,6 +17,11 @@ def create_app(config=None):
     load_dotenv(override=False)
     app = Flask(__name__)
     app.config.update(configuration(config))
+    hops = app.config["TRUSTED_PROXY_HOPS"]
+    if hops:
+        app.wsgi_app = ProxyFix(
+            app.wsgi_app, x_for=hops, x_proto=hops, x_host=0, x_port=0, x_prefix=0
+        )
     configure_logging(app)
     register_request_context(app)
     db.init_app(app)

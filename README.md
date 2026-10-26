@@ -382,8 +382,14 @@ configuration refusal and SIGTERM. The check removes only its own containers and
 image tag. The image defaults to production configuration and leaves schema
 migrations as explicit operator actions. Never bake local secrets into the image;
 keep `127.0.0.1` in `TRUSTED_HOSTS` for its internal liveness probe.
-The app does not trust forwarded proxy headers automatically. Configure a trusted
-proxy and worker count for your deployment. `/health/live` checks process liveness;
+The app ignores forwarded headers by default. Behind a trusted HTTPS ingress,
+`TRUSTED_PROXY_HOPS` can explicitly trust 1 through 5 rightmost proxy values for
+`X-Forwarded-For` and `X-Forwarded-Proto`, allowing client-specific rate limits and
+the original request scheme. Keep `0` for direct access. Enable it only when that
+many trusted proxies sanitize both headers and clients cannot reach the app
+directly; a wrong count permits client IP/scheme spoofing. Forwarded host, port
+and path prefix remain ignored. Configure worker count separately.
+`/health/live` checks process liveness;
 `/health/ready` checks that the required user, progress and OTP tables and model
 columns can be queried, without reading their data or disclosing connection details.
 An empty or outdated schema returns 503; health checks never create or migrate it.
