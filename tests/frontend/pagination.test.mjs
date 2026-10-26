@@ -55,6 +55,7 @@ async function setup(t, view) {
     else globalThis.document = originalDocument;
   });
   globalThis.document = {
+    addEventListener() {},
     querySelector: (selector) => (selector === "#logout" ? null : element(selector)),
     createElement: () => new Element(),
     createTextNode: (value) => value,

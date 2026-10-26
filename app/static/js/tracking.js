@@ -7,16 +7,24 @@ const recordId = document.querySelector("#record-id");
 const cancel = document.querySelector("#cancel-edit");
 const previous = document.querySelector("#previous-page");
 const next = document.querySelector("#next-page");
-const today = new Date().toISOString().slice(0, 10);
+const todayUtc = () => new Date().toISOString().slice(0, 10);
 let page = 1;
 let lastPage = 0;
-dateInput.value = today;
-dateInput.max = today;
+dateInput.value = todayUtc();
+function refreshDateLimit() {
+  dateInput.max = todayUtc();
+}
+refreshDateLimit();
+dateInput.addEventListener("focus", refreshDateLimit);
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "visible") refreshDateLimit();
+});
 
 function resetForm() {
   form.reset();
   recordId.value = "";
-  dateInput.value = today;
+  dateInput.value = todayUtc();
+  refreshDateLimit();
   document.querySelector("#entry-title").textContent = "Add a progress entry";
   document.querySelector("#save-entry").textContent = "Save entry";
   cancel.hidden = true;
@@ -46,7 +54,7 @@ function rowFor(record) {
   edit.setAttribute("aria-label", `Edit entry for ${record.date || "unknown date"}`);
   edit.addEventListener("click", () => {
     recordId.value = record.id;
-    dateInput.value = record.date || today;
+    dateInput.value = record.date || todayUtc();
     form.elements.weight.value = record.weight;
     form.elements.calories.value = record.calories;
     document.querySelector("#entry-title").textContent = "Edit progress entry";
