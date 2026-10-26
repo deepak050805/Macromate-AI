@@ -30,8 +30,8 @@ def save(email, data, record_id=None):
         return None
     if record_id is None:
         record.request_key = key
-    for key, value in fields.items():
-        setattr(record, key, value)
+    for field, value in fields.items():
+        setattr(record, field, value)
     db.session.add(record)
     try:
         db.session.commit()

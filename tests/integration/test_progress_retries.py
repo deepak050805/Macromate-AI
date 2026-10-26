@@ -2,6 +2,7 @@ from uuid import uuid4
 
 from app.extensions import db
 from app.models import Progress, User
+from app.services import tracking
 
 
 def entry():
@@ -60,3 +61,21 @@ def test_uppercase_uuid_replays_the_same_canonical_request(logged_in):
     first = logged_in.post("/api/tracker/add", json=body)
     second = logged_in.post("/api/tracker/add", json={**body, "request_key": body["request_key"].upper()})
     assert first.json == second.json
+
+
+def test_unique_insert_collision_recovers_the_original_request_key(logged_in, monkeypatch):
+    body = entry()
+    first = logged_in.post("/api/tracker/add", json=body)
+    lookup = tracking._request_record
+    calls = []
+
+    def concurrent_lookup(email, key):
+        calls.append(key)
+        return None if len(calls) == 1 else lookup(email, key)
+
+    monkeypatch.setattr(tracking, "_request_record", concurrent_lookup)
+    retry = logged_in.post("/api/tracker/add", json=body)
+    assert retry.status_code == 201
+    assert retry.json == first.json
+    assert calls == [body["request_key"], body["request_key"]]
+    assert db.session.scalar(db.select(db.func.count(Progress.id))) == 1
