@@ -1,6 +1,8 @@
 import math
 import re
 from datetime import date, datetime, timezone
+from email.errors import HeaderParseError
+from email.headerregistry import Address
 from uuid import UUID
 
 from flask import request
@@ -25,6 +27,10 @@ def email_value(value):
     value = value.strip().lower()
     if len(value) > 254 or not re.fullmatch(r"[^\s@]+@[^\s@]+\.[^\s@]+", value):
         raise ValidationError("Enter a valid email address")
+    try:
+        Address(addr_spec=value)
+    except (ValueError, HeaderParseError):
+        raise ValidationError("Enter a valid email address") from None
     return value
 
 
