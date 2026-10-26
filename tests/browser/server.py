@@ -37,6 +37,7 @@ def main():
             [
                 User(email="browser-owner@example.test", password=password, is_verified=1),
                 User(email="browser-pages@example.test", password=password, is_verified=1),
+                User(email="browser-settings@example.test", password=password, is_verified=1),
                 User(
                     email="browser-admin@example.test",
                     password=password,

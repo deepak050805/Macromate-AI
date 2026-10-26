@@ -44,9 +44,11 @@ for (const form of document.querySelectorAll("form[data-auth]")) {
     }));
     try {
       const data = await api(form.dataset.auth, { method: "POST", body: values });
-      rememberEmail(values.email);
-      for (const { input, value } of emailDrafts)
-        if (input.value === value) input.value = values.email;
+      if (typeof values.email === "string") {
+        rememberEmail(values.email);
+        for (const { input, value } of emailDrafts)
+          if (input.value === value) input.value = values.email;
+      }
       status(feedback, data.message);
       if (form.dataset.redirect) window.location.assign(form.dataset.redirect);
     } catch (error) {

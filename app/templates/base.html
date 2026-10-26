@@ -20,6 +20,7 @@
           {% if viewer %}
           <a href="/dashboard"{% if request.path == '/dashboard' %} aria-current="page"{% endif %}>Dashboard</a>
           <a href="/tracking"{% if request.path == '/tracking' %} aria-current="page"{% endif %}>Progress</a>
+          <a href="/settings"{% if request.path == '/settings' %} aria-current="page"{% endif %}>Account</a>
           {% if viewer.role == 'admin' %}<a href="/admin"{% if request.path == '/admin' %} aria-current="page"{% endif %}>Admin</a>{% endif %}
           <button id="logout" class="secondary" type="button">Log out</button>
           {% else %}

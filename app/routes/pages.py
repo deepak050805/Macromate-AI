@@ -38,6 +38,12 @@ def dashboard():
     return render_template("dashboard/index.html")
 
 
+@bp.get("/settings")
+@authenticated
+def settings():
+    return render_template("account/settings.html")
+
+
 @bp.get("/calculator")
 def calculator():
     return render_template("calculator/index.html")
