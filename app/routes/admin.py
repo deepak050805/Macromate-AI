@@ -13,6 +13,8 @@ def users():
     search = request.args.get("q", "").strip()
     if len(search) > 254:
         raise ValidationError("Email search is limited to 254 characters")
+    if any(ord(char) < 32 or ord(char) == 127 or 0xD800 <= ord(char) <= 0xDFFF for char in search):
+        raise ValidationError("Email search must contain valid text")
     state = request.args.get("verification", "all")
     if state not in ("all", "verified", "pending"):
         raise ValidationError("Choose all, verified or pending accounts")
