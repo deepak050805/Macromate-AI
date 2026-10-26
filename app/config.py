@@ -1,5 +1,6 @@
 """Environment configuration; production startup fails closed."""
 
+import logging
 import math
 import os
 import secrets
@@ -65,6 +66,17 @@ def configuration(overrides=None):
         else None,
     }
     values.update(overrides or {})
+    level = values["LOG_LEVEL"]
+    if isinstance(level, str):
+        level = level.strip()
+        names = logging.getLevelNamesMapping()
+        if level not in names:
+            level = level.upper()
+        if level not in names:
+            raise ValueError("LOG_LEVEL must be a registered logging name or integer")
+    elif isinstance(level, bool) or not isinstance(level, int):
+        raise ValueError("LOG_LEVEL must be a registered logging name or integer")
+    values["LOG_LEVEL"] = level
     for key in ("MAIL_USE_TLS", "SESSION_COOKIE_SECURE"):
         value = values[key]
         if isinstance(value, str):
