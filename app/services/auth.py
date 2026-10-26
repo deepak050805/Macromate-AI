@@ -9,6 +9,7 @@ from app.services.passwords import hash_password, verify_password
 from app.utils.validation import ValidationError, email_value, password_value
 
 NOTICE = "If the account is eligible, a verification code has been sent."
+_DUMMY_PASSWORD_HASH = hash_password("placeholder that never owns an account")
 
 
 def signup(data):
@@ -36,7 +37,8 @@ def login(data):
     if not isinstance(password, str) or len(password) > 128:
         raise ValidationError("Invalid credentials")
     user = by_email(email)
-    if not user or not verify_password(user.password, password) or not user.is_verified:
+    matches = verify_password(user.password if user else _DUMMY_PASSWORD_HASH, password)
+    if not user or not matches or not user.is_verified:
         return None
     session.clear()
     session.permanent = True
