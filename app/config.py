@@ -3,9 +3,11 @@
 import math
 import os
 import secrets
+from collections.abc import Mapping
 from datetime import timedelta
 
 from redis.backoff import NoBackoff
+from redis.connection import parse_url as parse_redis_url
 from redis.retry import Retry
 from sqlalchemy.engine import make_url
 from sqlalchemy.exc import ArgumentError
@@ -86,12 +88,22 @@ def configuration(overrides=None):
         ("OTP_MAX_ATTEMPTS", 1, None),
     ):
         values[key] = _integer_setting(values[key], key, minimum, maximum)
-    if values["RATELIMIT_STORAGE_URI"].startswith(("redis://", "rediss://")):
+    storage_uri = values["RATELIMIT_STORAGE_URI"]
+    if not isinstance(storage_uri, str) or not storage_uri.strip():
+        raise ValueError("RATELIMIT_STORAGE_URI must be a nonblank storage URL")
+    if storage_uri.startswith(("redis://", "rediss://")):
+        try:
+            parse_redis_url(storage_uri)
+        except (TypeError, ValueError):
+            raise ValueError("RATELIMIT_STORAGE_URI must be a valid Redis URL") from None
+        storage_options = values.get("RATELIMIT_STORAGE_OPTIONS")
+        if storage_options is not None and not isinstance(storage_options, Mapping):
+            raise ValueError("RATELIMIT_STORAGE_OPTIONS must be a mapping")
         values["RATELIMIT_STORAGE_OPTIONS"] = {
             "socket_connect_timeout": 2,
             "socket_timeout": 2,
             "retry": Retry(NoBackoff(), 0),
-            **(values.get("RATELIMIT_STORAGE_OPTIONS") or {}),
+            **(storage_options or {}),
         }
     uri = values["SQLALCHEMY_DATABASE_URI"]
     if not isinstance(uri, str) or not uri.strip():
