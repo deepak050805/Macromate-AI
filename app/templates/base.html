@@ -14,16 +14,16 @@
     <a class="skip-link" href="#main">Skip to content</a>
     <header class="site-header">
       <div class="header-inner">
-        <a class="wordmark" href="/" aria-label="MacroMate home">macro<span>mate.</span></a>
+        <a class="wordmark" href="/" aria-label="MacroMate home"{% if request.path == '/' %} aria-current="page"{% endif %}>macro<span>mate.</span></a>
         <nav aria-label="Main navigation">
           <a href="/calculator"{% if request.path == '/calculator' %} aria-current="page"{% endif %}>Calculator</a>
           {% if viewer %}
           <a href="/dashboard"{% if request.path == '/dashboard' %} aria-current="page"{% endif %}>Dashboard</a>
           <a href="/tracking"{% if request.path == '/tracking' %} aria-current="page"{% endif %}>Progress</a>
-          {% if viewer.role == 'admin' %}<a href="/admin">Admin</a>{% endif %}
+          {% if viewer.role == 'admin' %}<a href="/admin"{% if request.path == '/admin' %} aria-current="page"{% endif %}>Admin</a>{% endif %}
           <button id="logout" class="secondary" type="button">Log out</button>
           {% else %}
-          <a href="/login">Log in</a><a class="button" href="/signup">Get started</a>
+          <a href="/login"{% if request.path == '/login' %} aria-current="page"{% endif %}>Log in</a><a class="button" href="/signup"{% if request.path == '/signup' %} aria-current="page"{% endif %}>Get started</a>
           {% endif %}
         </nav>
       </div>
