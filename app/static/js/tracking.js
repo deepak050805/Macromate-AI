@@ -10,6 +10,7 @@ const next = document.querySelector("#next-page");
 const todayUtc = () => new Date().toISOString().slice(0, 10);
 let page = 1;
 let lastPage = 0;
+let historyRevision = 0;
 dateInput.value = todayUtc();
 function refreshDateLimit() {
   dateInput.max = todayUtc();
@@ -87,7 +88,7 @@ function rowFor(record) {
   return row;
 }
 
-async function loadHistory(requestedPage = page) {
+async function loadHistory(requestedPage = page, requestRevision = ++historyRevision) {
   const restorePrevious = captureFocus(previous);
   const restoreNext = captureFocus(next);
   previous.disabled = true;
@@ -95,8 +96,9 @@ async function loadHistory(requestedPage = page) {
   status(historyStatus, "Loading your history…");
   try {
     const data = await api(`/api/tracker/history?page=${requestedPage}`);
+    if (requestRevision !== historyRevision) return;
     if (!data.records.length && requestedPage > 1) {
-      return await loadHistory(requestedPage - 1);
+      return await loadHistory(requestedPage - 1, requestRevision);
     }
     page = data.page;
     lastPage = data.pages;
@@ -107,8 +109,9 @@ async function loadHistory(requestedPage = page) {
     document.querySelector("#page-label").textContent = `Page ${data.page} of ${data.pages}`;
     status(historyStatus, `${data.total} ${data.total === 1 ? "entry" : "entries"} recorded.`);
   } catch (error) {
-    status(historyStatus, error.message, true);
+    if (requestRevision === historyRevision) status(historyStatus, error.message, true);
   } finally {
+    if (requestRevision === historyRevision) {
     previous.disabled = page <= 1;
     next.disabled = page >= lastPage;
     const fallback = [previous, next, document.querySelector("#history-title")].find(
@@ -116,6 +119,7 @@ async function loadHistory(requestedPage = page) {
     );
     restorePrevious(previous.disabled ? fallback : previous);
     restoreNext(next.disabled ? fallback : next);
+    }
   }
 }
 previous.addEventListener("click", () => {

@@ -161,3 +161,34 @@ for (const view of views) {
     assert.equal(ui.element(view.label).textContent, "Page 1 of 3");
   });
 }
+
+for (const view of views) {
+  for (const oldOutcome of ['success', 'failure']) {
+    test(`${view.module}: an outdated ${oldOutcome} cannot overwrite the newest page`, async (t) => {
+      const ui = await setup(t, view);
+      const older = Promise.withResolvers();
+      let calls = 0;
+      t.mock.method(globalThis, 'fetch', async () => {
+        calls += 1;
+        if (calls === 1) return older.promise;
+        return new Response(JSON.stringify({
+          page: 2, pages: 3, total: 46,
+          records: [{ id: 2, date: '2024-01-01', weight: 70, calories: 2000 }],
+          users: [{ id: 2, email: 'new@example.test', verified: true }],
+        }));
+      });
+      await ui.click(view.next);
+      await ui.click(view.next);
+      assert.match(ui.element(view.feedback).textContent, /46/);
+      if (oldOutcome === 'failure') older.reject(new TypeError('old request failed'));
+      else older.resolve(new Response(JSON.stringify({
+        page: 2, pages: 3, total: 45,
+        records: [{ id: 1, date: '2024-01-01', weight: 70, calories: 2000 }],
+        users: [{ id: 1, email: 'old@example.test', verified: true }],
+      })));
+      await setImmediate();
+      assert.match(ui.element(view.feedback).textContent, /46/);
+      assert.equal(ui.element(view.label).textContent, 'Page 2 of 3');
+    });
+  }
+}

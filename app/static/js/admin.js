@@ -4,7 +4,9 @@ const previous = document.querySelector("#admin-previous");
 const next = document.querySelector("#admin-next");
 let page = 1;
 let pages = 0;
+let directoryRevision = 0;
 async function load(requestedPage = page) {
+  const requestRevision = ++directoryRevision;
   const restorePrevious = captureFocus(previous);
   const restoreNext = captureFocus(next);
   previous.disabled = true;
@@ -12,6 +14,7 @@ async function load(requestedPage = page) {
   status(feedback, "Loading accounts…");
   try {
     const data = await api(`/api/auth/all-users?page=${requestedPage}`);
+    if (requestRevision !== directoryRevision) return;
     page = data.page;
     pages = data.pages;
     const rows = data.users.map((user) => {
@@ -37,8 +40,9 @@ async function load(requestedPage = page) {
         : "No accounts registered yet.",
     );
   } catch (error) {
-    status(feedback, error.message, true);
+    if (requestRevision === directoryRevision) status(feedback, error.message, true);
   } finally {
+    if (requestRevision === directoryRevision) {
     previous.disabled = page <= 1;
     next.disabled = page >= pages;
     const fallback = [previous, next, document.querySelector("#users-title")].find(
@@ -46,6 +50,7 @@ async function load(requestedPage = page) {
     );
     restorePrevious(previous.disabled ? fallback : previous);
     restoreNext(next.disabled ? fallback : next);
+    }
   }
 }
 previous.addEventListener("click", () => {
