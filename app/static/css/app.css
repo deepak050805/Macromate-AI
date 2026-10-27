@@ -57,6 +57,9 @@ button,
   font-weight: 650;
   text-decoration: none;
   cursor: pointer;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  text-align: center;
   transition: background 0.16s ease;
 }
 button:hover,
@@ -275,6 +278,7 @@ p {
 }
 .field {
   margin-bottom: 1.1rem;
+  min-width: 0;
 }
 .password-toggle {
   margin-top: 0.4rem;
@@ -362,6 +366,7 @@ input:invalid:not(:placeholder-shown):not(:focus) {
   margin: 0.3rem 0 0;
   font-size: 1.3rem;
   font-weight: 700;
+  overflow-wrap: anywhere;
 }
 dl {
   margin: 0;
@@ -486,6 +491,19 @@ td button {
   }
   .card {
     padding: 1.25rem;
+  }
+}
+@media (max-width: 480px) {
+  .filter-fields {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (max-width: 400px) {
+  .macros {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .calorie-target small {
+    display: block;
   }
 }
 @media (prefers-reduced-motion: reduce) {
