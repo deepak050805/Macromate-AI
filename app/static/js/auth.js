@@ -40,6 +40,8 @@ function successMessage(data) {
 let verificationPending = false;
 let resendPending = false;
 let resendCooldown = false;
+const resetForms = [...document.querySelectorAll('form[data-auth-group="password-reset"]')];
+let resetPending = false;
 function synchronizeVerificationActions() {
   if (!resend) return;
   resend.disabled = verificationPending || resendPending || resendCooldown;
@@ -60,9 +62,14 @@ for (const form of document.querySelectorAll("form[data-auth]")) {
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
     const verifying = form.id === "verification-form";
-    if (verifying && resendPending) return;
+    const resetting = resetForms.includes(form);
+    if ((verifying && resendPending) || (resetting && resetPending)) return;
     const feedback = form.querySelector(".status");
     if (!busy(form, true)) return;
+    if (resetting) {
+      resetPending = true;
+      for (const other of resetForms) if (other !== form) busy(other, true);
+    }
     if (verifying) {
       verificationPending = true;
       synchronizeVerificationActions();
@@ -87,6 +94,10 @@ for (const form of document.querySelectorAll("form[data-auth]")) {
       status(feedback, error.message, true);
     } finally {
       busy(form, false);
+      if (resetting) {
+        for (const other of resetForms) if (other !== form) busy(other, false);
+        resetPending = false;
+      }
       if (verifying) {
         verificationPending = false;
         synchronizeVerificationActions();
