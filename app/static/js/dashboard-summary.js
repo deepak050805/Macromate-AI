@@ -1,5 +1,6 @@
 import { api, captureFocus, status } from "./common.js";
 import { utcDateRange } from "./date-ranges.js";
+import { validateProgressSummary } from "./responses.js";
 
 const feedback = document.querySelector("#summary-status");
 const refresh = document.querySelector("#refresh-summary");
@@ -17,14 +18,7 @@ async function loadSummary() {
     const { date_from: start, date_to: end } = utcDateRange(30);
     const query = new URLSearchParams({ date_from: start, date_to: end });
     const data = await api(`/api/tracker/summary?${query}`);
-    const validCount = Number.isInteger(data.total) && data.total >= 0
-      && Number.isInteger(data.dated) && data.dated >= 0 && data.dated <= data.total;
-    const validAverages = [data.average_weight, data.average_calories].every(
-      (value) => data.total === 0 ? value === null : Number.isFinite(value) && value >= 0,
-    );
-    if (!validCount || !validAverages || (
-      data.dated < 2 ? data.weight_change !== null : !Number.isFinite(data.weight_change)
-    )) throw new Error("The server returned an unreadable response. Try again.");
+    validateProgressSummary(data, { date_from: start, date_to: end });
     document.querySelector("#summary-range").textContent = `${start} through ${end} (UTC)`;
     document.querySelector("#summary-total").textContent = format.format(data.total);
     document.querySelector("#summary-weight").textContent = data.average_weight === null
