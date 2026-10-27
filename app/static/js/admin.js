@@ -46,12 +46,13 @@ async function load(requestedPage = page, requestRevision = ++directoryRevision)
     pages = data.pages;
     const rows = data.users.map((user) => {
       const row = document.createElement("tr");
-      for (const value of [
+      for (const [index, value] of [
         user.id,
         user.email,
         user.verified ? "Verified" : "Pending verification",
-      ]) {
+      ].entries()) {
         const cell = document.createElement("td");
+        if (index === 1) cell.className = "account-email";
         cell.textContent = value;
         row.append(cell);
       }

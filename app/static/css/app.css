@@ -427,6 +427,10 @@ td button {
   min-height: 40px;
   padding: 0.3rem 0.6rem;
 }
+.account-email {
+  max-width: 36ch;
+  overflow-wrap: anywhere;
+}
 .empty {
   padding: 2rem 0;
   color: var(--muted);
