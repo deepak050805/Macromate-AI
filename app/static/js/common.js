@@ -4,8 +4,11 @@ export async function api(path, { method = "GET", body, responseFormat = "json" 
   try {
     const headers = { Accept: responseFormat === "csv" ? "text/csv" : "application/json" };
     if (method !== "GET") {
+      const token = document.querySelector('meta[name="csrf-token"]')?.content;
+      if (typeof token !== "string" || !token.trim())
+        throw new Error("Your session expired. Reload the page and try again.");
       headers["Content-Type"] = "application/json";
-      headers["X-CSRFToken"] = document.querySelector('meta[name="csrf-token"]').content;
+      headers["X-CSRFToken"] = token;
     }
     const response = await fetch(path, {
       method,

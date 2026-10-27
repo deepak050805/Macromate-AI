@@ -45,6 +45,18 @@ test("POST retains JSON serialization and CSRF protection", async (t) => {
   });
 });
 
+for (const token of [null, { content: "" }, { content: "   " }]) {
+  test(`mutation rejects missing CSRF credentials ${JSON.stringify(token)} before fetch`, async (t) => {
+    t.mock.method(globalThis.document, "querySelector", () => token);
+    let requests = 0;
+    t.mock.method(globalThis, "fetch", async () => { requests += 1; return jsonResponse({}); });
+    await assert.rejects(api("/api/test", { method: "POST", body: {} }), {
+      message: "Your session expired. Reload the page and try again.",
+    });
+    assert.equal(requests, 0);
+  });
+}
+
 test("structured API errors preserve useful server feedback", async (t) => {
   t.mock.method(globalThis, "fetch", async () =>
     jsonResponse({ message: "Weight must be valid" }, 400),
