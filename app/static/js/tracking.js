@@ -1,5 +1,6 @@
 import { api, busy, captureFocus, requestKey, status } from "./common.js";
 import { validateProgressPage, validateSavedProgress } from "./responses.js";
+import { utcDateRange } from "./date-ranges.js";
 const form = document.querySelector("#tracking-form");
 const feedback = document.querySelector("#entry-status");
 const historyStatus = document.querySelector("#history-status");
@@ -14,6 +15,7 @@ const filterFrom = document.querySelector("#filter-date-from");
 const filterTo = document.querySelector("#filter-date-to");
 const exportButton = document.querySelector("#export-history");
 const exportStatus = document.querySelector("#export-status");
+const presets = [...document.querySelector("#history-presets").querySelectorAll("button[data-days]")];
 let activeFilters = { date_from: "", date_to: "" };
 const todayUtc = () => new Date().toISOString().slice(0, 10);
 let page = 1;
@@ -239,6 +241,16 @@ exportButton.addEventListener("click", async () => {
     restoreFocus();
   }
 });
+for (const button of presets) button.addEventListener("click", () => {
+  if (button.disabled) return;
+  try {
+    const range = utcDateRange(Number(button.dataset.days));
+    filterFrom.value = range.date_from;
+    filterTo.value = range.date_to;
+    refreshDateLimit();
+    filterForm.requestSubmit();
+  } catch (error) { status(historyStatus, error.message, true); }
+});
 filterForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   const start = filterFrom.value || "";
@@ -249,11 +261,13 @@ filterForm.addEventListener("submit", async (event) => {
     return;
   }
   if (!busy(filterForm, true)) return;
+  for (const button of presets) button.disabled = true;
   activeFilters = { date_from: start, date_to: end };
   try {
     await loadHistory(1);
   } finally {
     busy(filterForm, false);
+    for (const button of presets) button.disabled = false;
   }
 });
 document.querySelector("#clear-filters").addEventListener("click", () => {

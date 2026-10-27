@@ -1,4 +1,5 @@
 import { api, captureFocus, status } from "./common.js";
+import { utcDateRange } from "./date-ranges.js";
 
 const feedback = document.querySelector("#summary-status");
 const refresh = document.querySelector("#refresh-summary");
@@ -12,11 +13,8 @@ async function loadSummary() {
   const restoreFocus = captureFocus(refresh);
   refresh.disabled = true;
   status(feedback, "Loading your recent record summary…");
-  const today = new Date();
-  const from = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate() - 29));
-  const start = from.toISOString().slice(0, 10);
-  const end = today.toISOString().slice(0, 10);
   try {
+    const { date_from: start, date_to: end } = utcDateRange(30);
     const query = new URLSearchParams({ date_from: start, date_to: end });
     const data = await api(`/api/tracker/summary?${query}`);
     const validCount = Number.isInteger(data.total) && data.total >= 0
