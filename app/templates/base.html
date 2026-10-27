@@ -6,7 +6,9 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="description" content="Estimate your daily nutrition targets and keep a simple record of your progress with MacroMate.">
     <title>{% block title %}MacroMate · A clearer path to your goals{% endblock %}</title>
+    <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/themes.css') }}">
     <script type="module" src="{{ url_for('static', filename='js/common.js') }}"></script>
     <script type="module" src="{{ url_for('static', filename='js/navigation.js') }}"></script>
     <script type="module" src="{{ url_for('static', filename='js/connectivity.js') }}"></script>
@@ -39,6 +41,6 @@
       {% if viewer %}<aside id="session-notice" class="session-notice" role="alert" hidden><p><strong>Your session has ended.</strong> Sign in again to continue. Keep any unsaved work before leaving this page.</p><a class="button secondary" href="/login">Sign in again</a></aside>{% endif %}
       {% block content %}{% endblock %}
     </main>
-    <footer class="site-footer">MacroMate AI uses formulas, not AI or machine learning. Nutrition targets are estimates, not medical advice.</footer>
+    <footer class="site-footer"><p>MacroMate AI uses formulas, not AI or machine learning. Nutrition targets are estimates, not medical advice.</p><div id="appearance-control" class="appearance-control" hidden><label for="appearance">Appearance</label><select id="appearance"><option value="system">Use device setting</option><option value="light">Light</option><option value="dark">Dark</option></select></div></footer>
   </body>
 </html>

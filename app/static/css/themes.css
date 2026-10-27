@@ -1,0 +1,41 @@
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --background: #101b15;
+    --surface: #19291f;
+    --ink: #eaf2ed;
+    --muted: #b1c2b7;
+    --accent: #a1dfbb;
+    --accent-hover: #c0efd2;
+    --soft: #20392b;
+    --border: #3c5546;
+    --danger: #ffaaaa;
+    --on-accent: #10271a;
+    --input-border: #819b88;
+    --focus: #ffca70;
+    --danger-soft: #432727;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --background: #101b15;
+  --surface: #19291f;
+  --ink: #eaf2ed;
+  --muted: #b1c2b7;
+  --accent: #a1dfbb;
+  --accent-hover: #c0efd2;
+  --soft: #20392b;
+  --border: #3c5546;
+  --danger: #ffaaaa;
+  --on-accent: #10271a;
+  --input-border: #819b88;
+  --focus: #ffca70;
+  --danger-soft: #432727;
+}
+.appearance-control {
+  margin-top: 1rem;
+  max-width: 16rem;
+}
+.appearance-control select {
+  font-size: 0.9rem;
+}

@@ -9,6 +9,10 @@
   --soft: #e9f0e7;
   --border: #d4ddd3;
   --danger: #a32929;
+  --on-accent: #fff;
+  --input-border: #85978a;
+  --focus: #925c09;
+  --danger-soft: #fff0ed;
   --radius: 16px;
   --space: 1.5rem;
   font:
@@ -50,7 +54,7 @@ button,
   justify-content: center;
   gap: 0.5rem;
   padding: 0.65rem 1.15rem;
-  color: white;
+  color: var(--on-accent);
   background: var(--accent);
   border: 1px solid var(--accent);
   border-radius: 9px;
@@ -65,7 +69,7 @@ button,
 button:hover,
 .button:hover {
   background: var(--accent-hover);
-  color: white;
+  color: var(--on-accent);
 }
 button:disabled {
   cursor: wait;
@@ -82,15 +86,15 @@ button:disabled {
 }
 .danger {
   color: var(--danger);
-  background: white;
+  background: var(--surface);
   border-color: var(--border);
 }
 .danger:hover {
-  background: #fff0ed;
+  background: var(--danger-soft);
   color: var(--danger);
 }
 :focus-visible {
-  outline: 3px solid #925c09;
+  outline: 3px solid var(--focus);
   outline-offset: 4px;
 }
 .skip-link {
@@ -98,7 +102,7 @@ button:disabled {
   top: -100px;
   left: 1rem;
   z-index: 5;
-  background: white;
+  background: var(--surface);
   padding: 0.75rem;
 }
 .skip-link:focus {
@@ -296,14 +300,14 @@ input,
 select {
   width: 100%;
   min-height: 48px;
-  border: 1px solid #85978a;
+  border: 1px solid var(--input-border);
   border-radius: 8px;
   padding: 0.65rem 0.8rem;
   color: var(--ink);
-  background: white;
+  background: var(--surface);
 }
 input:invalid:not(:placeholder-shown):not(:focus) {
-  border-color: #85978a;
+  border-color: var(--input-border);
 }
 .status {
   min-height: 1.6em;
