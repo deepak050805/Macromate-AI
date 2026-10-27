@@ -82,8 +82,7 @@ test("progress discard: pristine and numerically equivalent values need no confi
   expect(dialogs).toEqual([]);
 });
 
-test("progress discard: a submitted draft can be switched while its save is pending", async ({ page }) => {
-  const dialogs = watchDialogs(page);
+test("progress discard: a submitted draft can be switched after confirming its pending save", async ({ page }) => {
   await edit(page, "2024-05-01").click();
   await page.getByLabel("Weight (kg)", { exact: true }).fill("74");
   const pending = Promise.withResolvers();
@@ -99,6 +98,10 @@ test("progress discard: a submitted draft can be switched while its save is pend
   await save.click();
   try {
     await expect(save).toBeDisabled();
+    page.once("dialog", async (dialog) => {
+      expect(dialog.message()).toBe("This save has not been confirmed. Discard your unsaved progress changes?");
+      await dialog.accept();
+    });
     await edit(page, "2024-05-02").click();
     await expect(page.locator("#record-id")).toHaveValue("702");
   } finally {
@@ -106,7 +109,6 @@ test("progress discard: a submitted draft can be switched while its save is pend
   }
   await expect(save).toBeEnabled();
   await expect(page.locator("#record-id")).toHaveValue("702");
-  expect(dialogs).toEqual([]);
 });
 
 test("progress discard: a failed save remains an unsaved draft", async ({ page }) => {

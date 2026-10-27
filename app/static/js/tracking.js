@@ -60,8 +60,10 @@ form.addEventListener("input", updateNavigationGuard);
 form.addEventListener("change", updateNavigationGuard);
 function mayDiscardDraft() {
   const current = draftSnapshot();
-  return current === pristineDraft || current === submittedDraft ||
-    window.confirm("Discard your unsaved progress changes?");
+  if (current === pristineDraft) return true;
+  return window.confirm(savePending && current === submittedDraft
+    ? "This save has not been confirmed. Discard your unsaved progress changes?"
+    : "Discard your unsaved progress changes?");
 }
 function refreshDateLimit() {
   const today = todayUtc();
