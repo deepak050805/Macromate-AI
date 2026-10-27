@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
     <script type="module" src="{{ url_for('static', filename='js/common.js') }}"></script>
     <script type="module" src="{{ url_for('static', filename='js/navigation.js') }}"></script>
+    <script type="module" src="{{ url_for('static', filename='js/connectivity.js') }}"></script>
     {% block scripts %}{% endblock %}
   </head>
   <body>
@@ -34,6 +35,7 @@
     <main id="main" tabindex="-1">
       <noscript><p class="status error">JavaScript is required for sign-in, calculations and progress forms. Enable it and reload before submitting.</p></noscript>
       <p id="global-status" class="status" role="status" aria-live="polite"></p>
+      <p id="connection-status" class="status" role="status" aria-live="polite" hidden></p>
       {% if viewer %}<aside id="session-notice" class="session-notice" role="alert" hidden><p><strong>Your session has ended.</strong> Sign in again to continue. Keep any unsaved work before leaving this page.</p><a class="button secondary" href="/login">Sign in again</a></aside>{% endif %}
       {% block content %}{% endblock %}
     </main>
