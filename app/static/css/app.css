@@ -355,6 +355,7 @@ input:invalid:not(:placeholder-shown):not(:focus) {
   line-height: 1.2;
   letter-spacing: -0.06em;
   margin: 0.5rem 0 1.5rem;
+  overflow-wrap: anywhere;
 }
 .calorie-target small {
   font-size: 1rem;
