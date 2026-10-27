@@ -62,14 +62,22 @@ function mayDiscardDraft() {
     window.confirm("Discard your unsaved progress changes?");
 }
 function refreshDateLimit() {
-  dateInput.max = todayUtc();
-  filterFrom.max = todayUtc();
-  filterTo.max = todayUtc();
+  const today = todayUtc();
+  if (!recordId.value && dateInput.value !== today && draftSnapshot() === pristineDraft) {
+    dateInput.value = today;
+    pristineDraft = draftSnapshot();
+    updateNavigationGuard();
+  }
+  dateInput.max = today;
+  filterFrom.max = today;
+  filterTo.max = today;
 }
 refreshDateLimit();
+form.addEventListener("focusin", refreshDateLimit);
 dateInput.addEventListener("focus", refreshDateLimit);
 filterFrom.addEventListener("focus", refreshDateLimit);
 filterTo.addEventListener("focus", refreshDateLimit);
+for (const input of [dateInput, filterFrom, filterTo]) input.addEventListener("input", refreshDateLimit);
 document.addEventListener("visibilitychange", () => {
   if (document.visibilityState === "visible") refreshDateLimit();
 });
