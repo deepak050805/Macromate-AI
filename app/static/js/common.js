@@ -36,7 +36,7 @@ export async function api(path, { method = "GET", body, responseFormat = "json" 
       throw new Error("The server returned an unreadable response. Try again.");
     if (!response.ok)
       throw new Error(
-        typeof data.message === "string" && data.message
+        typeof data.message === "string" && data.message.trim()
           ? data.message
           : "The request could not be completed.",
       );

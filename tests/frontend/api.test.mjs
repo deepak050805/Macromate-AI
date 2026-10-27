@@ -79,6 +79,13 @@ test("non-string error messages use a safe fallback", async (t) => {
   await assert.rejects(api("/api/test"), { message: "The request could not be completed." });
 });
 
+for (const message of ["", "   ", "\t\n"]) {
+  test(`blank error feedback ${JSON.stringify(message)} retains an actionable fallback`, async (t) => {
+    t.mock.method(globalThis, "fetch", async () => jsonResponse({ message }, 503));
+    await assert.rejects(api("/api/test"), { message: "The request could not be completed." });
+  });
+}
+
 test("fetch connection failures keep actionable feedback", async (t) => {
   t.mock.method(globalThis, "fetch", async () => {
     throw new TypeError("private network diagnostic");
