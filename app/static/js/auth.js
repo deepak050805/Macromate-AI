@@ -81,7 +81,7 @@ const notices = {
   reset: "Password updated. Log in with your new password.",
 };
 const notice = new URLSearchParams(window.location.search).get("notice");
-if (notices[notice]) status(document.querySelector("form .status"), notices[notice]);
+if (Object.hasOwn(notices, notice)) status(document.querySelector("form .status"), notices[notice]);
 
 const resend = document.querySelector("#resend");
 if (resend) {
