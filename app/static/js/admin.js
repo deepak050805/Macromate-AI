@@ -8,10 +8,12 @@ const filters = document.querySelector("#account-filters");
 const emailSearch = document.querySelector("#account-search");
 const verification = document.querySelector("#account-verification");
 let activeFilters = { q: "", verification: "all" };
+let displayedFilters = null;
 let page = 1;
 let pages = 0;
 let directoryRevision = 0;
 let retryPage = 1;
+let retryFilters = { ...activeFilters };
 function validateDirectory(data, requestedPage) {
   validatePage(data, requestedPage, data?.users, 25);
   if (data.users.some((user) =>
@@ -22,8 +24,8 @@ function validateDirectory(data, requestedPage) {
     typeof user.verified !== "boolean"
   )) throw new Error("The server returned an unreadable response. Try again.");
 }
-async function load(requestedPage = page, requestRevision = ++directoryRevision) {
-  const requestedFilters = { ...activeFilters };
+async function load(requestedPage = page, requestRevision = ++directoryRevision, filters = displayedFilters || activeFilters) {
+  const requestedFilters = { ...filters };
   const restoreRetry = captureFocus(retryDirectory);
   retryDirectory.hidden = true;
   retryDirectory.disabled = true;
@@ -41,10 +43,11 @@ async function load(requestedPage = page, requestRevision = ++directoryRevision)
     validateDirectory(data, requestedPage);
     if (!data.users.length && requestedPage > 1) {
       const fallbackPage = Math.min(requestedPage - 1, Math.max(1, data.pages));
-      return await load(fallbackPage, requestRevision);
+      return await load(fallbackPage, requestRevision, requestedFilters);
     }
     page = data.page;
     pages = data.pages;
+    displayedFilters = requestedFilters;
     const states = { all: "All verification states", verified: "Verified accounts", pending: "Pending verification" };
     document.querySelector("#directory-filter-summary").textContent =
       `${requestedFilters.q ? `Email contains "${requestedFilters.q}"` : "Any email"}; ${states[requestedFilters.verification]}`;
@@ -75,6 +78,7 @@ async function load(requestedPage = page, requestRevision = ++directoryRevision)
   } catch (error) {
     if (requestRevision === directoryRevision) {
       retryPage = requestedPage;
+      retryFilters = requestedFilters;
       status(feedback, error.message, true);
       retryDirectory.hidden = false;
     }
@@ -92,13 +96,13 @@ async function load(requestedPage = page, requestRevision = ++directoryRevision)
     }
   }
 }
-retryDirectory.addEventListener("click", () => load(retryPage));
+retryDirectory.addEventListener("click", () => load(retryPage, ++directoryRevision, retryFilters));
 filters.addEventListener("submit", async (event) => {
   event.preventDefault();
   if (!busy(filters, true)) return;
   activeFilters = { q: emailSearch.value.trim(), verification: verification.value };
   try {
-    await load(1);
+    await load(1, ++directoryRevision, activeFilters);
   } finally {
     busy(filters, false);
   }
@@ -106,7 +110,7 @@ filters.addEventListener("submit", async (event) => {
 document.querySelector("#clear-account-filters").addEventListener("click", () => {
   filters.reset();
   activeFilters = { q: "", verification: "all" };
-  load(1);
+  load(1, ++directoryRevision, activeFilters);
 });
 previous.addEventListener("click", () => {
   if (page > 1) {

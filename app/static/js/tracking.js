@@ -25,6 +25,7 @@ let page = 1;
 let lastPage = 0;
 let historyRevision = 0;
 let retryPage = 1;
+let retryFilters = { ...activeFilters };
 let createAttempt = null;
 let submittedDraft = null;
 let savePending = false;
@@ -168,8 +169,8 @@ function rowFor(record) {
   return row;
 }
 
-async function loadHistory(requestedPage = page, requestRevision = ++historyRevision) {
-  const requestedFilters = { ...activeFilters };
+async function loadHistory(requestedPage = page, requestRevision = ++historyRevision, filters = displayedFilters || activeFilters) {
+  const requestedFilters = { ...filters };
   const restoreRetry = captureFocus(retryHistory);
   retryHistory.hidden = true;
   retryHistory.disabled = true;
@@ -187,7 +188,7 @@ async function loadHistory(requestedPage = page, requestRevision = ++historyRevi
     validateProgressPage(data, requestedPage);
     if (!data.records.length && requestedPage > 1) {
       const fallbackPage = Math.min(requestedPage - 1, Math.max(1, data.pages));
-      return await loadHistory(fallbackPage, requestRevision);
+      return await loadHistory(fallbackPage, requestRevision, requestedFilters);
     }
     page = data.page;
     lastPage = data.pages;
@@ -209,6 +210,7 @@ async function loadHistory(requestedPage = page, requestRevision = ++historyRevi
   } catch (error) {
     if (requestRevision === historyRevision) {
       retryPage = requestedPage;
+      retryFilters = requestedFilters;
       status(historyStatus, error.message, true);
       retryHistory.hidden = false;
     }
@@ -226,7 +228,7 @@ async function loadHistory(requestedPage = page, requestRevision = ++historyRevi
     }
   }
 }
-retryHistory.addEventListener("click", () => loadHistory(retryPage));
+retryHistory.addEventListener("click", () => loadHistory(retryPage, ++historyRevision, retryFilters));
 exportButton.addEventListener("click", async () => {
   if (exportButton.disabled || !displayedFilters) return;
   const restoreFocus = captureFocus(exportButton);
@@ -284,7 +286,7 @@ filterForm.addEventListener("submit", async (event) => {
   for (const button of presets) button.disabled = true;
   activeFilters = { date_from: start, date_to: end };
   try {
-    await loadHistory(1);
+    await loadHistory(1, ++historyRevision, activeFilters);
   } finally {
     busy(filterForm, false);
     for (const button of presets) button.disabled = false;
@@ -293,7 +295,7 @@ filterForm.addEventListener("submit", async (event) => {
 document.querySelector("#clear-filters").addEventListener("click", () => {
   filterForm.reset();
   activeFilters = { date_from: "", date_to: "" };
-  loadHistory(1);
+  loadHistory(1, ++historyRevision, activeFilters);
 });
 previous.addEventListener("click", () => {
   if (page > 1) {
