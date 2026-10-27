@@ -17,6 +17,9 @@ const exportButton = document.querySelector("#export-history");
 const exportStatus = document.querySelector("#export-status");
 const presets = [...document.querySelector("#history-presets").querySelectorAll("button[data-days]")];
 let activeFilters = { date_from: "", date_to: "" };
+let displayedFilters = null;
+let exportPending = false;
+exportButton.disabled = true;
 const todayUtc = () => new Date().toISOString().slice(0, 10);
 let page = 1;
 let lastPage = 0;
@@ -158,6 +161,7 @@ function rowFor(record) {
 }
 
 async function loadHistory(requestedPage = page, requestRevision = ++historyRevision) {
+  const requestedFilters = { ...activeFilters };
   const restoreRetry = captureFocus(retryHistory);
   retryHistory.hidden = true;
   retryHistory.disabled = true;
@@ -168,7 +172,7 @@ async function loadHistory(requestedPage = page, requestRevision = ++historyRevi
   status(historyStatus, "Loading your history…");
   try {
     const query = new URLSearchParams({ page: requestedPage });
-    for (const [key, value] of Object.entries(activeFilters))
+    for (const [key, value] of Object.entries(requestedFilters))
       if (value) query.set(key, value);
     const data = await api(`/api/tracker/history?${query}`);
     if (requestRevision !== historyRevision) return;
@@ -179,6 +183,12 @@ async function loadHistory(requestedPage = page, requestRevision = ++historyRevi
     }
     page = data.page;
     lastPage = data.pages;
+    displayedFilters = requestedFilters;
+    exportButton.disabled = exportPending;
+    const { date_from: start, date_to: end } = displayedFilters;
+    document.querySelector("#history-range").textContent = start && end
+      ? `${start} through ${end} (UTC)` : start ? `From ${start} (UTC)`
+        : end ? `Through ${end} (UTC)` : "All dates, including undated entries.";
     document.querySelector("#history-rows").replaceChildren(...data.records.map(rowFor));
     document.querySelector("#history-table").hidden = data.records.length === 0;
     document.querySelector("#history-empty").hidden = data.records.length !== 0;
@@ -210,13 +220,14 @@ async function loadHistory(requestedPage = page, requestRevision = ++historyRevi
 }
 retryHistory.addEventListener("click", () => loadHistory(retryPage));
 exportButton.addEventListener("click", async () => {
-  if (exportButton.disabled) return;
+  if (exportButton.disabled || !displayedFilters) return;
   const restoreFocus = captureFocus(exportButton);
   exportButton.disabled = true;
+  exportPending = true;
   exportButton.setAttribute("aria-busy", "true");
   status(exportStatus, "Preparing your CSV…");
   const query = new URLSearchParams();
-  for (const [key, value] of Object.entries(activeFilters))
+  for (const [key, value] of Object.entries(displayedFilters))
     if (value) query.set(key, value);
   try {
     const blob = await api(`/api/tracker/export.csv?${query}`, { responseFormat: "csv" });
@@ -236,7 +247,8 @@ exportButton.addEventListener("click", async () => {
   } catch (error) {
     status(exportStatus, error.message, true);
   } finally {
-    exportButton.disabled = false;
+    exportPending = false;
+    exportButton.disabled = !displayedFilters;
     exportButton.setAttribute("aria-busy", "false");
     restoreFocus();
   }
