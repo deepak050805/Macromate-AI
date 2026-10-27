@@ -331,6 +331,10 @@ input:invalid:not(:placeholder-shown):not(:focus) {
 .session-notice p {
   margin-bottom: 0.75rem;
 }
+.error-reference {
+  overflow-wrap: anywhere;
+  font-size: 0.9rem;
+}
 .full {
   width: 100%;
 }

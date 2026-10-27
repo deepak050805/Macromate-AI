@@ -1,3 +1,11 @@
 {% extends "base.html" %}
+{% set titles = {400: 'Check your request', 401: 'Sign in to continue', 403: 'Access restricted', 404: 'Page not found', 405: 'Action unavailable', 413: 'Request too large', 429: 'Too many requests', 500: 'Something went wrong', 503: 'Temporarily unavailable'} %}
 {% block title %}{{ status }} · MacroMate{% endblock %}
-{% block content %}<h1>{{ status }}</h1><p>{{ message }}</p><a href="/login">Log in</a> <a href="/">Return home</a>{% endblock %}
+{% block scripts %}<script type="module" src="{{ url_for('static', filename='js/error-page.js') }}"></script>{% endblock %}
+{% block content %}
+<section class="card stack" aria-labelledby="error-title">
+  <header class="page-heading"><p class="eyebrow">Error {{ status }}</p><h1 id="error-title">{{ titles.get(status, 'Unable to complete request') }}</h1><p>{{ message }}</p></header>
+  <div class="actions"><a class="button" href="/">Return home</a><a class="button secondary" href="/login">Log in</a></div>
+  {% if g.request_id %}<div><p class="hint">If you report this problem, include this reference:</p><p class="error-reference"><code id="error-reference">{{ g.request_id }}</code></p><button id="copy-reference" class="secondary" type="button" hidden>Copy reference</button><p id="reference-status" class="status" role="status" aria-live="polite"></p></div>{% endif %}
+</section>
+{% endblock %}
