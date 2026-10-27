@@ -1,5 +1,5 @@
 import { api, busy, captureFocus, requestKey, status } from "./common.js";
-import { validateProgressPage } from "./responses.js";
+import { validateProgressPage, validateSavedProgress } from "./responses.js";
 const form = document.querySelector("#tracking-form");
 const feedback = document.querySelector("#entry-status");
 const historyStatus = document.querySelector("#history-status");
@@ -268,10 +268,11 @@ form.addEventListener("submit", async (event) => {
         createAttempt = { signature, key: requestKey() };
       body.request_key = createAttempt.key;
     }
-    await api(editing ? `/api/tracker/${editing}` : "/api/tracker/add", {
+    const result = await api(editing ? `/api/tracker/${editing}` : "/api/tracker/add", {
       method: editing ? "PUT" : "POST",
       body,
     });
+    validateSavedProgress(result, submitted, editing);
     // A confirmed create is complete even when a newer draft prevents a form reset.
     if (!editing) createAttempt = null;
     const current = Object.fromEntries(new FormData(form));

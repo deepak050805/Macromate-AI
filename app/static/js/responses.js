@@ -35,3 +35,13 @@ export function validateProgressPage(data, requestedPage) {
   for (const record of data.records) validateProgressRecord(record);
   return data;
 }
+
+export function validateSavedProgress(data, submitted, editing = "") {
+  const record = validateProgressRecord(data?.record);
+  if (
+    (editing && record.id !== Number(editing)) ||
+    record.date !== submitted.date || record.weight !== Number(submitted.weight) ||
+    record.calories !== Number(submitted.calories)
+  ) throw unreadable();
+  return record;
+}

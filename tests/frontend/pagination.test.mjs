@@ -71,7 +71,12 @@ async function setup(t, view) {
   let fail = false;
   let empty = false;
   t.mock.method(globalThis, "fetch", async (path, options) => {
-    if (options.method !== "GET") return new Response(JSON.stringify({ message: "Saved" }));
+    if (options.method !== "GET") {
+      const submitted = JSON.parse(options.body);
+      return new Response(JSON.stringify({ message: "Saved", record: {
+        id: 99, date: submitted.date, weight: Number(submitted.weight), calories: Number(submitted.calories),
+      } }));
+    }
     const page = Number(new URL(path, "https://example.test").searchParams.get("page"));
     requests.push(page);
     if (fail) {
