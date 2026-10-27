@@ -313,6 +313,16 @@ input:invalid:not(:placeholder-shown):not(:focus) {
 .status.success {
   color: var(--accent);
 }
+.session-notice {
+  border: 1px solid var(--danger);
+  border-radius: var(--radius);
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  background: var(--surface);
+}
+.session-notice p {
+  margin-bottom: 0.75rem;
+}
 .full {
   width: 100%;
 }

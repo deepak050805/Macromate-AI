@@ -14,6 +14,10 @@ export async function api(path, { method = "GET", body, responseFormat = "json" 
       signal: controller.signal,
       ...(body === undefined ? {} : { body: JSON.stringify(body) }),
     });
+    if (response.status === 401 && document.querySelector("#logout")) {
+      const notice = document.querySelector("#session-notice");
+      if (notice) notice.hidden = false;
+    }
     if (responseFormat === "csv" && response.ok) {
       const type = response.headers.get("Content-Type")?.split(";")[0].trim().toLowerCase();
       if (type !== "text/csv")

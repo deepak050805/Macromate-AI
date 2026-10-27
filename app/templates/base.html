@@ -34,6 +34,7 @@
     <main id="main" tabindex="-1">
       <noscript><p class="status error">JavaScript is required for sign-in, calculations and progress forms. Enable it and reload before submitting.</p></noscript>
       <p id="global-status" class="status" role="status" aria-live="polite"></p>
+      {% if viewer %}<aside id="session-notice" class="session-notice" role="alert" hidden><p><strong>Your session has ended.</strong> Sign in again to continue. Keep any unsaved work before leaving this page.</p><a class="button secondary" href="/login">Sign in again</a></aside>{% endif %}
       {% block content %}{% endblock %}
     </main>
     <footer class="site-footer">MacroMate AI uses formulas, not AI or machine learning. Nutrition targets are estimates, not medical advice.</footer>
