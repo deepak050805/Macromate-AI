@@ -2,6 +2,7 @@ import { api, busy, captureFocus, status } from "./common.js";
 import { validatePage } from "./responses.js";
 const feedback = document.querySelector("#admin-status");
 const retryDirectory = document.querySelector("#retry-users");
+const refreshDirectory = document.querySelector("#refresh-users");
 const previous = document.querySelector("#admin-previous");
 const next = document.querySelector("#admin-next");
 const filters = document.querySelector("#account-filters");
@@ -26,6 +27,9 @@ function validateDirectory(data, requestedPage) {
 }
 async function load(requestedPage = page, requestRevision = ++directoryRevision, filters = displayedFilters || activeFilters) {
   const requestedFilters = { ...filters };
+  const restoreRefresh = captureFocus(refreshDirectory);
+  refreshDirectory.disabled = true;
+  refreshDirectory.setAttribute("aria-busy", "true");
   const restoreRetry = captureFocus(retryDirectory);
   retryDirectory.hidden = true;
   retryDirectory.disabled = true;
@@ -85,6 +89,9 @@ async function load(requestedPage = page, requestRevision = ++directoryRevision,
   } finally {
     if (requestRevision === directoryRevision) {
     retryDirectory.disabled = false;
+    refreshDirectory.disabled = false;
+    refreshDirectory.setAttribute("aria-busy", "false");
+    restoreRefresh();
     previous.disabled = page <= 1;
     next.disabled = page >= pages;
     const fallback = [previous, next, document.querySelector("#users-title")].find(
@@ -97,6 +104,9 @@ async function load(requestedPage = page, requestRevision = ++directoryRevision,
   }
 }
 retryDirectory.addEventListener("click", () => load(retryPage, ++directoryRevision, retryFilters));
+refreshDirectory.addEventListener("click", () => {
+  if (!refreshDirectory.disabled) load();
+});
 filters.addEventListener("submit", async (event) => {
   event.preventDefault();
   if (!busy(filters, true)) return;

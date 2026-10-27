@@ -5,6 +5,7 @@ const form = document.querySelector("#tracking-form");
 const feedback = document.querySelector("#entry-status");
 const historyStatus = document.querySelector("#history-status");
 const retryHistory = document.querySelector("#retry-history");
+const refreshHistory = document.querySelector("#refresh-history");
 const dateInput = document.querySelector("#record-date");
 const recordId = document.querySelector("#record-id");
 const cancel = document.querySelector("#cancel-edit");
@@ -171,6 +172,9 @@ function rowFor(record) {
 
 async function loadHistory(requestedPage = page, requestRevision = ++historyRevision, filters = displayedFilters || activeFilters) {
   const requestedFilters = { ...filters };
+  const restoreRefresh = captureFocus(refreshHistory);
+  refreshHistory.disabled = true;
+  refreshHistory.setAttribute("aria-busy", "true");
   const restoreRetry = captureFocus(retryHistory);
   retryHistory.hidden = true;
   retryHistory.disabled = true;
@@ -217,6 +221,9 @@ async function loadHistory(requestedPage = page, requestRevision = ++historyRevi
   } finally {
     if (requestRevision === historyRevision) {
     retryHistory.disabled = false;
+    refreshHistory.disabled = false;
+    refreshHistory.setAttribute("aria-busy", "false");
+    restoreRefresh();
     previous.disabled = page <= 1;
     next.disabled = page >= lastPage;
     const fallback = [previous, next, document.querySelector("#history-title")].find(
@@ -229,6 +236,9 @@ async function loadHistory(requestedPage = page, requestRevision = ++historyRevi
   }
 }
 retryHistory.addEventListener("click", () => loadHistory(retryPage, ++historyRevision, retryFilters));
+refreshHistory.addEventListener("click", () => {
+  if (!refreshHistory.disabled) loadHistory();
+});
 exportButton.addEventListener("click", async () => {
   if (exportButton.disabled || !displayedFilters) return;
   const restoreFocus = captureFocus(exportButton);
