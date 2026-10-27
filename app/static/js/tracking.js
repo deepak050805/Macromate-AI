@@ -22,6 +22,8 @@ let historyRevision = 0;
 let retryPage = 1;
 let createAttempt = null;
 let submittedDraft = null;
+let savePending = false;
+let navigationGuardActive = false;
 dateInput.value = todayUtc();
 function draftSnapshot() {
   const numeric = (input) => [
@@ -36,6 +38,19 @@ function draftSnapshot() {
   ]);
 }
 let pristineDraft = draftSnapshot();
+function beforeUnload(event) {
+  event.preventDefault();
+  event.returnValue = "";
+}
+function updateNavigationGuard() {
+  const needed = savePending || draftSnapshot() !== pristineDraft;
+  if (needed === navigationGuardActive) return;
+  navigationGuardActive = needed;
+  if (needed) window.addEventListener("beforeunload", beforeUnload);
+  else window.removeEventListener("beforeunload", beforeUnload);
+}
+form.addEventListener("input", updateNavigationGuard);
+form.addEventListener("change", updateNavigationGuard);
 function mayDiscardDraft() {
   const current = draftSnapshot();
   return current === pristineDraft || current === submittedDraft ||
@@ -60,6 +75,7 @@ function endEditing() {
   document.querySelector("#entry-title").textContent = "Add a progress entry";
   document.querySelector("#save-entry").textContent = "Save entry";
   cancel.hidden = true;
+  updateNavigationGuard();
 }
 function resetForm() {
   form.reset();
@@ -67,6 +83,7 @@ function resetForm() {
   refreshDateLimit();
   endEditing();
   pristineDraft = draftSnapshot();
+  updateNavigationGuard();
 }
 cancel.addEventListener("click", () => {
   if (!mayDiscardDraft()) return;
@@ -102,6 +119,7 @@ function rowFor(record) {
     document.querySelector("#save-entry").textContent = "Update entry";
     cancel.hidden = false;
     pristineDraft = draftSnapshot();
+    updateNavigationGuard();
     form.elements.weight.focus();
   });
   const remove = document.createElement("button");
@@ -260,6 +278,8 @@ form.addEventListener("submit", async (event) => {
   const editing = recordId.value;
   const submitted = Object.fromEntries(new FormData(form));
   submittedDraft = draftSnapshot();
+  savePending = true;
+  updateNavigationGuard();
   try {
     const body = { ...submitted };
     if (!editing) {
@@ -273,6 +293,7 @@ form.addEventListener("submit", async (event) => {
       body,
     });
     validateSavedProgress(result, submitted, editing);
+    savePending = false;
     // A confirmed create is complete even when a newer draft prevents a form reset.
     if (!editing) createAttempt = null;
     const current = Object.fromEntries(new FormData(form));
@@ -283,11 +304,14 @@ form.addEventListener("submit", async (event) => {
     if (!newerDraft) resetForm();
     const message = editing ? "Entry updated." : "Entry saved.";
     status(feedback, message + (newerDraft ? " Your newer draft was kept." : ""));
+    updateNavigationGuard();
     await loadHistory(1);
   } catch (error) {
     status(feedback, error.message, true);
   } finally {
+    savePending = false;
     submittedDraft = null;
+    updateNavigationGuard();
     busy(form, false);
   }
 });

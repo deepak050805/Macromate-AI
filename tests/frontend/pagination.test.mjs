@@ -57,9 +57,13 @@ async function setup(t, view) {
     calories: element("#record-calories"),
   };
   const originalDocument = globalThis.document;
+  const originalWindow = globalThis.window;
+  globalThis.window = { addEventListener() {}, removeEventListener() {} };
   t.after(() => {
     if (originalDocument === undefined) delete globalThis.document;
     else globalThis.document = originalDocument;
+    if (originalWindow === undefined) delete globalThis.window;
+    else globalThis.window = originalWindow;
   });
   globalThis.document = {
     addEventListener() {},
