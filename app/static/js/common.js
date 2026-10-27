@@ -101,6 +101,7 @@ export function busy(form, active) {
 const logout = document.querySelector("#logout");
 if (logout)
   logout.addEventListener("click", async () => {
+    if (logout.disabled) return;
     const restoreFocus = captureFocus(logout);
     logout.disabled = true;
     try {
