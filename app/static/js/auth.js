@@ -91,13 +91,28 @@ if (resend) {
   let pending = false;
   let cooldownEmail = null;
   let cooldownTimer = null;
+  let cooldownUntil = 0;
   const clearCooldown = () => {
     clearTimeout(cooldownTimer);
     cooldownTimer = null;
     cooldownEmail = null;
+    cooldownUntil = 0;
     resend.disabled = pending;
     resend.textContent = "Send a new code";
   };
+  const updateCooldown = () => {
+    clearTimeout(cooldownTimer);
+    const remaining = Math.ceil((cooldownUntil - Date.now()) / 1000);
+    if (remaining <= 0) {
+      clearCooldown();
+      return;
+    }
+    resend.textContent = `Wait ${remaining} ${remaining === 1 ? "second" : "seconds"} before requesting another code`;
+    cooldownTimer = setTimeout(updateCooldown, Math.max(0, Math.min(1000, cooldownUntil - Date.now())));
+  };
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden && cooldownTimer !== null) updateCooldown();
+  });
   email.addEventListener("input", () => {
     if (cooldownEmail !== null && email.value !== cooldownEmail) {
       clearCooldown();
@@ -122,9 +137,9 @@ if (resend) {
       status(feedback, message);
       const seconds = Number(resend.dataset.cooldown);
       cooldownEmail = requestedEmail;
-      resend.textContent = `Wait ${seconds} seconds before requesting another code`;
+      cooldownUntil = Date.now() + seconds * 1000;
+      updateCooldown();
       restoreFocus(form.elements.otp);
-      cooldownTimer = setTimeout(clearCooldown, seconds * 1000);
     } catch (error) {
       if (email.value === requestedEmail) status(feedback, error.message, true);
     } finally {

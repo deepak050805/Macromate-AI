@@ -49,13 +49,13 @@ test("resend state: an email change releases only the old address's cooldown", a
   });
   await email.fill("original@example.test");
   await resend.click();
-  await expect(resend).toHaveText("Wait 60 seconds before requesting another code");
+  await expect(resend).toHaveText(/^Wait \d+ seconds? before requesting another code$/);
   await expect(resend).toBeDisabled();
   await email.fill("newer@example.test");
   await expect(resend).toBeEnabled();
   await expect(page.locator("#verification-form .status")).toBeEmpty();
   await resend.click();
-  await expect(resend).toHaveText("Wait 60 seconds before requesting another code");
+  await expect(resend).toHaveText(/^Wait \d+ seconds? before requesting another code$/);
   await expect(resend).toBeDisabled();
   expect(requestedEmails).toEqual(["original@example.test", "newer@example.test"]);
 });
