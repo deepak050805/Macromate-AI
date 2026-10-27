@@ -144,6 +144,9 @@ nav button {
   padding: 0.4rem 0.8rem;
   min-height: 40px;
 }
+.navigation-toggle {
+  margin-left: auto;
+}
 main {
   max-width: 1180px;
   margin: auto;
@@ -428,6 +431,20 @@ td button {
   display: none !important;
 }
 @media (max-width: 760px) {
+  .site-nav {
+    flex-basis: 100%;
+    align-items: stretch;
+    gap: 0.4rem;
+  }
+  .site-nav a,
+  .site-nav button {
+    width: 100%;
+    min-height: 44px;
+    padding: 0.6rem 0.8rem;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+  }
   .summary-metrics {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
