@@ -23,6 +23,7 @@ function validateDirectory(data, requestedPage) {
   )) throw new Error("The server returned an unreadable response. Try again.");
 }
 async function load(requestedPage = page, requestRevision = ++directoryRevision) {
+  const requestedFilters = { ...activeFilters };
   const restoreRetry = captureFocus(retryDirectory);
   retryDirectory.hidden = true;
   retryDirectory.disabled = true;
@@ -33,8 +34,8 @@ async function load(requestedPage = page, requestRevision = ++directoryRevision)
   status(feedback, "Loading accounts…");
   try {
     const query = new URLSearchParams({ page: requestedPage });
-    if (activeFilters.q) query.set("q", activeFilters.q);
-    if (activeFilters.verification !== "all") query.set("verification", activeFilters.verification);
+    if (requestedFilters.q) query.set("q", requestedFilters.q);
+    if (requestedFilters.verification !== "all") query.set("verification", requestedFilters.verification);
     const data = await api(`/api/auth/all-users?${query}`);
     if (requestRevision !== directoryRevision) return;
     validateDirectory(data, requestedPage);
@@ -44,6 +45,9 @@ async function load(requestedPage = page, requestRevision = ++directoryRevision)
     }
     page = data.page;
     pages = data.pages;
+    const states = { all: "All verification states", verified: "Verified accounts", pending: "Pending verification" };
+    document.querySelector("#directory-filter-summary").textContent =
+      `${requestedFilters.q ? `Email contains "${requestedFilters.q}"` : "Any email"}; ${states[requestedFilters.verification]}`;
     const rows = data.users.map((user) => {
       const row = document.createElement("tr");
       for (const [index, value] of [
