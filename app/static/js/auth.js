@@ -37,6 +37,16 @@ function successMessage(data) {
   return data.message;
 }
 
+let verificationPending = false;
+let resendPending = false;
+let resendCooldown = false;
+function synchronizeVerificationActions() {
+  if (!resend) return;
+  resend.disabled = verificationPending || resendPending || resendCooldown;
+  const submit = document.querySelector('#verification-form button[type="submit"]');
+  if (submit) submit.disabled = verificationPending || resendPending;
+}
+
 try {
   const pending = sessionStorage.getItem("pending-email");
   if (pending)
@@ -49,8 +59,14 @@ try {
 for (const form of document.querySelectorAll("form[data-auth]")) {
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
+    const verifying = form.id === "verification-form";
+    if (verifying && resendPending) return;
     const feedback = form.querySelector(".status");
     if (!busy(form, true)) return;
+    if (verifying) {
+      verificationPending = true;
+      synchronizeVerificationActions();
+    }
     status(feedback, "Working…");
     const values = Object.fromEntries(new FormData(form));
     const emailDrafts = [...document.querySelectorAll('input[name="email"]')].map((input) => ({
@@ -71,6 +87,10 @@ for (const form of document.querySelectorAll("form[data-auth]")) {
       status(feedback, error.message, true);
     } finally {
       busy(form, false);
+      if (verifying) {
+        verificationPending = false;
+        synchronizeVerificationActions();
+      }
     }
   });
 }
@@ -88,7 +108,6 @@ if (resend) {
   const form = document.querySelector("#verification-form");
   const email = form.querySelector('[name="email"]');
   const feedback = form.querySelector(".status");
-  let pending = false;
   let cooldownEmail = null;
   let cooldownTimer = null;
   let cooldownUntil = 0;
@@ -97,7 +116,8 @@ if (resend) {
     cooldownTimer = null;
     cooldownEmail = null;
     cooldownUntil = 0;
-    resend.disabled = pending;
+    resendCooldown = false;
+    synchronizeVerificationActions();
     resend.textContent = "Send a new code";
   };
   const updateCooldown = () => {
@@ -120,12 +140,12 @@ if (resend) {
     }
   });
   resend.addEventListener("click", async () => {
-    if (pending || cooldownTimer !== null) return;
+    if (verificationPending || resendPending || resendCooldown) return;
     if (!email.reportValidity()) return;
     const requestedEmail = email.value;
     const restoreFocus = captureFocus(resend);
-    pending = true;
-    resend.disabled = true;
+    resendPending = true;
+    synchronizeVerificationActions();
     try {
       const data = await api("/api/auth/send-otp", {
         method: "POST",
@@ -138,14 +158,15 @@ if (resend) {
       const seconds = Number(resend.dataset.cooldown);
       cooldownEmail = requestedEmail;
       cooldownUntil = Date.now() + seconds * 1000;
+      resendCooldown = true;
       updateCooldown();
       restoreFocus(form.elements.otp);
     } catch (error) {
       if (email.value === requestedEmail) status(feedback, error.message, true);
     } finally {
-      pending = false;
+      resendPending = false;
+      synchronizeVerificationActions();
       if (cooldownTimer === null) {
-        resend.disabled = false;
         if (email.value === requestedEmail) restoreFocus();
       }
     }
